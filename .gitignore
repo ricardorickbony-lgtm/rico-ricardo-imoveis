@@ -1,0 +1,17 @@
+﻿# Sistema Operacional
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Logs e Temporarios
+*.log
+npm-debug.log*
+
+# Editores e Ambientes
+.vscode/
+.idea/
+.gemini/
+scratch/
+node_modules/

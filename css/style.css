@@ -1,0 +1,851 @@
+@charset "UTF-8";
+
+/* ==========================================================================
+   Imobiliária Prime - Design System & Folha de Estilos
+   Padrão Ricardo & Severino (Impacto Digital)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  --primary: #1d4ed8;
+  --primary-hover: #1e40af;
+  --secondary: #0f172a;
+  --accent-gold: #d97706;
+  --accent-emerald: #059669;
+  --bg-dark: #070a10;
+  --bg-card: #ffffff;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #f8fafc;
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* Tipografia de Luxo */
+.font-serif-luxury {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Scrollbar personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Utilitário para rolagem horizontal sem scrollbar feia (Mobile) */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+
+/* ==========================================================================
+   Barra Flutuante de Demonstração / Switcher de Templates (Impacto Digital)
+   ========================================================================== */
+.template-switcher-bar {
+  background: #0f172a;
+  border-bottom: 1px solid #1e293b;
+  color: #f8fafc;
+  font-size: 11px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  position: relative;
+  z-index: 60;
+}
+
+.template-pill {
+  padding: 3px 9px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+  border: 1px solid transparent;
+}
+.template-pill:hover {
+  background: #1e293b;
+  color: #ffffff;
+}
+.template-pill.active {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.4);
+}
+.template-pill.admin-pill {
+  background: #059669;
+  color: #ffffff;
+  border-color: #10b981;
+}
+.template-pill.admin-pill:hover {
+  background: #047857;
+}
+
+/* ==========================================================================
+   Hero Video / Background Elements
+   ========================================================================== */
+.hero-video-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-video-element {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 177.78vh;
+  min-width: 100%;
+  height: 56.25vw;
+  min-height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+@media (min-aspect-ratio: 16/9) {
+  .hero-video-element {
+    width: 100%;
+    height: 56.25vw;
+  }
+}
+@media (max-aspect-ratio: 16/9) {
+  .hero-video-element {
+    width: 177.78vh;
+    height: 100%;
+  }
+}
+
+.hero-video-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 60% 40%, rgba(15, 23, 42, 0.50) 0%, rgba(7, 10, 16, 0.90) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ==========================================================================
+   Cards de Imóveis & Vitrine
+   ========================================================================== */
+.property-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  will-change: transform;
+}
+.property-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+}
+
+.property-badge-finalidade {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.badge-venda {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+.badge-aluguel {
+  background: #059669;
+  color: #ffffff;
+}
+.badge-lancamento {
+  background: #7c3aed;
+  color: #ffffff;
+}
+.badge-vendido {
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.45) !important;
+}
+.badge-alugado {
+  background: #4f46e5 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.45) !important;
+}
+.badge-reservado {
+  background: #d97706 !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.45) !important;
+}
+
+/* Carimbo Oficial de Status de Imóvel sobre a Foto */
+.stamp-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  backdrop-filter: blur(1.5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 12;
+  pointer-events: none;
+}
+.stamp-badge-vendido {
+  transform: rotate(-10deg);
+  border: 3.5px solid #f43f5e;
+  background: rgba(225, 29, 72, 0.96);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.15rem;
+  padding: 8px 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(225, 29, 72, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+  animation: pulse-stamp 2s infinite ease-in-out;
+}
+.stamp-badge-alugado {
+  transform: rotate(-10deg);
+  border: 3.5px solid #818cf8;
+  background: rgba(79, 70, 229, 0.96);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.15rem;
+  padding: 8px 24px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(79, 70, 229, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+.stamp-badge-reservado {
+  transform: rotate(-10deg);
+  border: 3.5px solid #fcd34d;
+  background: rgba(217, 119, 6, 0.96);
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.05rem;
+  padding: 8px 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(217, 119, 6, 0.5);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+@keyframes pulse-stamp {
+  0%, 100% { transform: rotate(-10deg) scale(1); }
+  50% { transform: rotate(-10deg) scale(1.03); }
+}
+
+.property-badge-code {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(4px);
+  color: #f8fafc;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+  z-index: 10;
+}
+
+/* Tags de Características dos Imóveis */
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* ==========================================================================
+   Botão Flutuante de WhatsApp Inteligente (Horário Comercial)
+   ========================================================================== */
+.btn-whatsapp-flutuante {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #25d366;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px -5px rgba(37, 211, 102, 0.4), 0 8px 10px -6px rgba(37, 211, 102, 0.2);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-whatsapp-flutuante:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 15px 30px -5px rgba(37, 211, 102, 0.5);
+  color: #ffffff;
+}
+
+.wa-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Animação do Pulso Online */
+.pulse-online {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  animation: pulse-ring 1.5s infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+/* ==========================================================================
+   Modais & Simulador de Financiamento
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(5px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s ease-out;
+}
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background: #ffffff;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  transform: scale(0.95);
+  transition: transform 0.25s ease-out;
+}
+.modal-overlay.active .modal-content {
+  transform: scale(1);
+}
+
+/* Simulador Financeiro */
+.simulador-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+/* ==========================================================================
+   Responsividade Mobile First & Limpeza Visual Ultra Clean (Padrão Pantera / Severino & Ricardo)
+   ========================================================================== */
+@media (max-width: 768px) {
+  /* 1. Oculta a barra de demonstração em celulares para não poluir o site do cliente */
+  .template-switcher-bar {
+    display: none !important;
+  }
+
+  /* 2. Botão Flutuante de WhatsApp Compacto (Círculo 48px sem poluir tela) */
+  .btn-whatsapp-flutuante {
+    bottom: 16px !important;
+    right: 16px !important;
+    width: 48px !important;
+    height: 48px !important;
+    min-width: 48px !important;
+    max-width: 48px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45) !important;
+    z-index: 45 !important;
+  }
+  .btn-whatsapp-flutuante .wa-texto-longo,
+  .btn-whatsapp-flutuante div.wa-texto-longo,
+  .btn-whatsapp-flutuante span.wa-texto-longo {
+    display: none !important;
+  }
+  .btn-whatsapp-flutuante svg {
+    width: 24px !important;
+    height: 24px !important;
+    margin: 0 !important;
+  }
+
+  /* 3. Sofia IA Launcher Compacto (Círculo 44px empilhado elegantemente) */
+  .sofia-ia-widget-container {
+    bottom: 72px !important;
+    right: 16px !important;
+    z-index: 45 !important;
+  }
+  .sofia-ia-launcher-btn {
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    max-width: 44px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0 !important;
+    box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45) !important;
+  }
+  .sofia-ia-launcher-btn .sofia-texto-longo,
+  .sofia-ia-launcher-btn div.sofia-texto-longo {
+    display: none !important;
+  }
+  .sofia-chat-box {
+    bottom: 8px !important;
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    max-width: none !important;
+    height: calc(100vh - 40px) !important;
+    border-radius: 20px !important;
+  }
+
+  /* 4. Banner LGPD compacto */
+  .cookie-consent-banner {
+    bottom: 12px !important;
+    left: 12px !important;
+    width: calc(100% - 24px) !important;
+    padding: 14px 16px !important;
+    border-radius: 16px !important;
+  }
+}
+
+
+/* ==========================================================================
+   Banner de Cookies LGPD & Remarketing (Padrão Ricardo & Severino)
+   ========================================================================== */
+.cookie-consent-banner {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  max-width: 440px;
+  width: calc(100% - 48px);
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #f8fafc;
+  padding: 18px 20px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transform: translateY(120%);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+.cookie-consent-banner.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Lead Scoring Tags */
+.lead-score-quente {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+.lead-score-morno {
+  background: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+}
+.lead-score-frio {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+/* Multi-Portais Cards */
+.portal-card-toggle {
+  transition: all 0.2s ease;
+}
+.portal-card-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   Sofia IA - Consultora Virtual 24h & Chat Flutuante (Padrão WideSys)
+   ========================================================================== */
+.sofia-ia-widget-container {
+  position: fixed;
+  bottom: 84px;
+  right: 24px;
+  z-index: 55;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.sofia-ia-launcher-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #4338ca 0%, #6366f1 50%, #8b5cf6 100%);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.5), 0 8px 10px -6px rgba(99, 102, 241, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 13px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+}
+
+.sofia-ia-launcher-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.65);
+}
+
+.sofia-chat-box {
+  position: fixed;
+  bottom: 95px;
+  right: 24px;
+  width: 390px;
+  max-width: calc(100vw - 32px);
+  height: 560px;
+  max-height: calc(100vh - 120px);
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 60;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sofia-chat-box.active {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sofia-chat-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+  color: #ffffff;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sofia-chat-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #f8fafc;
+}
+
+.sofia-msg {
+  display: flex;
+  gap: 10px;
+  max-width: 88%;
+  animation: fadeInMsg 0.25s ease-out;
+}
+
+@keyframes fadeInMsg {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.sofia-msg.bot {
+  align-self: flex-start;
+}
+
+.sofia-msg.user {
+  align-self: flex-end;
+  flex-direction: row-reverse;
+}
+
+.sofia-msg-bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+.sofia-msg.bot .sofia-msg-bubble {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #e2e8f0;
+  border-top-left-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.sofia-msg.user .sofia-msg-bubble {
+  background: #4f46e5;
+  color: #ffffff;
+  border-top-right-radius: 4px;
+}
+
+.sofia-imovel-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-top: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.sofia-imovel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.sofia-typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  background: #f1f5f9;
+  border-radius: 14px;
+  width: fit-content;
+}
+
+.sofia-typing-indicator span {
+  width: 6px;
+  height: 6px;
+  background: #94a3b8;
+  border-radius: 50%;
+  animation: typingBounce 1.2s infinite ease-in-out;
+}
+
+.sofia-typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.sofia-typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-5px); }
+}
+
+
+/* ==========================================================================
+   Header Flutuante Clean & Luxuoso com Transição de Scroll (Padrão Pantera)
+   ========================================================================== */
+.header-floating-clean {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  z-index: 50;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.header-floating-clean.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+  color: #0f172a;
+}
+
+.header-floating-clean .brand-title {
+  color: #ffffff;
+  transition: color 0.3s ease;
+}
+.header-floating-clean.scrolled .brand-title {
+  color: #0f172a;
+}
+
+.header-floating-clean .brand-subtitle {
+  color: #94a3b8;
+  transition: color 0.3s ease;
+}
+.header-floating-clean.scrolled .brand-subtitle {
+  color: #64748b;
+}
+
+.header-floating-clean .nav-item-clean {
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.header-floating-clean .nav-item-clean:hover {
+  color: #ffffff;
+}
+.header-floating-clean.scrolled .nav-item-clean {
+  color: #334155;
+}
+.header-floating-clean.scrolled .nav-item-clean:hover {
+  color: #2563eb;
+}
+
+/* Cards dos Bairros Mais Nobres */
+.bairro-pill-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  height: 200px;
+  cursor: pointer;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bairro-pill-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.25);
+}
+.bairro-pill-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bairro-pill-card:hover img {
+  transform: scale(1.08);
+}
+.bairro-pill-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.85) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 18px;
+  color: #ffffff;
+}
+
+/* ==========================================================================
+   Estilos de Impressão Oficial (Recibos, Extratos e Laudos de Vistoria)
+   ========================================================================== */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+  #modal-recibo-locacao,
+  #modal-recibo-locacao *,
+  #recibo-locacao-imprimir-conteudo,
+  #recibo-locacao-imprimir-conteudo * {
+    visibility: visible !important;
+  }
+  #modal-recibo-locacao {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #modal-recibo-locacao .modal-content {
+    box-shadow: none !important;
+    border: none !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  #modal-recibo-locacao button,
+  .template-switcher-bar,
+  .btn-whatsapp-flutuante,
+  .sofia-ia-widget-container {
+    display: none !important;
+  }
+}
+
+
+
+

@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Real Estate | High-End & Curadoria de Imóveis Exclusivos</title>
+  <meta name="description" content="Mansões, coberturas duplex e residências de alto luxo com curadoria arquitetônica rigorosa e atendimento concierge privativo.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            luxury: {
+              gold: '#d4af37',
+              dark: '#070a10',
+              card: '#0f172a',
+              border: '#1e293b'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts & Estilos -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body {
+      background-color: #070a10;
+      color: #e2e8f0;
+    }
+    .property-card {
+      background: #0f172a !important;
+      border-color: #1e293b !important;
+    }
+    .property-card:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(212, 175, 55, 0.15) !important;
+      border-color: rgba(212, 175, 55, 0.4) !important;
+    }
+    .property-card h3 {
+      color: #f8fafc !important;
+    }
+    .property-card .feature-badge {
+      background: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+    .property-card span.font-black {
+      color: #f59e0b !important;
+    }
+  </style>
+</head>
+<body class="antialiased flex flex-col min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- BARRA DE DEMONSTRAÇÃO VIP / SWITCHER DE TEMPLATES (IMPACTO DIGITAL)       -->
+  <!-- ========================================================================= -->
+  <aside class="template-switcher-bar hidden md:flex bg-black border-b border-slate-800" aria-label="Seletor de Demonstração para Prospecção">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+      <span class="font-bold text-amber-300">Impacto Digital Showcase:</span>
+      <span class="hidden sm:inline text-slate-400">Modelo Luxo Minimalista (Sotheby's Style):</span>
+    </div>
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <a href="index.html" class="template-pill" title="Modelo Portal Imobiliário Completo">
+        🏢 Portal Prime
+      </a>
+      <a href="template-luxo.html" class="template-pill active !bg-amber-600 !border-amber-500" title="Modelo de Luxo Editorial Minimalista">
+        ✨ Luxo & High-End (Atual)
+      </a>
+      <a href="template-clean.html" class="template-pill" title="Modelo Clean Ágil de Alta Conversão">
+        ⚡ Clean & Ágil
+      </a>
+      <a href="template-lancamentos.html" class="template-pill" title="Modelo Lançamentos & Construtoras">
+        🏗️ Lançamentos
+      </a>
+      <span class="text-slate-600">|</span>
+      <a href="admin.html" class="template-pill admin-pill" title="Acessar o Painel SaaS Administrativo">
+        🔐 Painel SaaS & CRM
+      </a>
+    </div>
+  </aside>
+
+  <!-- ========================================================================= -->
+  <!-- TOPBAR LUXURY COM REDES SOCIAIS E CRECI                                   -->
+  <!-- ========================================================================= -->
+  <div class="bg-black/90 text-slate-400 text-xs py-2 px-4 border-b border-white/10">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      
+      <div class="flex items-center gap-4 text-[11px] tracking-widest uppercase">
+        <span class="text-amber-400 font-bold imob-creci">CRECI 34.890-J</span>
+        <span class="text-slate-600">•</span>
+        <span class="imob-cidade">Santo André - São Paulo</span>
+        <span class="text-slate-600">•</span>
+        <span class="text-slate-300">Private Client Division</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1.5 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
+          <span class="wa-status-dot"></span>
+          <span class="wa-status-text text-[11px] font-semibold text-slate-300">Verificando...</span>
+        </div>
+
+        <div class="flex items-center gap-2 border-l border-white/10 pl-3">
+          <a href="https://instagram.com" target="_blank" class="link-instagram hover:text-amber-400 transition" title="Instagram">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="https://facebook.com" target="_blank" class="link-facebook hover:text-amber-400 transition" title="Facebook">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          </a>
+          <a href="https://youtube.com" target="_blank" class="link-youtube hover:text-amber-400 transition" title="YouTube">
+            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- CABEÇALHO EDITORIAL DE LUXO                                               -->
+  <!-- ========================================================================= -->
+  <header class="bg-black/95 border-b border-white/10 sticky top-0 z-40 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-24">
+        
+        <!-- Logo de Luxo -->
+        <a href="template-luxo.html" class="flex items-center gap-3">
+          <div class="w-11 h-11 border border-amber-500/40 rounded-lg flex items-center justify-center text-amber-400">
+            <span class="font-serif-luxury text-xl font-bold">P</span>
+          </div>
+          <div>
+            <span class="text-xl sm:text-2xl font-serif-luxury tracking-[3px] text-white block leading-none">
+              PRIME <span class="text-amber-400 font-light">CONCEITO</span>
+            </span>
+            <span class="text-[9px] uppercase tracking-[4px] text-slate-400 font-medium block mt-1">High-End Real Estate</span>
+          </div>
+        </a>
+
+        <!-- Menu Editorial -->
+        <nav class="hidden lg:flex items-center gap-10 text-xs uppercase tracking-[2px] font-medium text-slate-300">
+          <a href="#imoveis" class="hover:text-amber-400 transition">Acervo Exclusivo</a>
+          <a href="#imoveis" onclick="document.querySelector('.btn-tab-finalidade[data-finalidade=\'aluguel\']').click()" class="hover:text-amber-400 transition">Locação Premium</a>
+          <a href="#concierge" class="hover:text-amber-400 transition">Private Concierge</a>
+          <a href="#anuncie" class="hover:text-amber-400 transition">Venda Privativa</a>
+        </nav>
+
+        <!-- CTA Concierge WhatsApp -->
+        <div>
+          <a href="https://wa.me/5511914879393" target="_blank" class="link-wa-dinamico border border-amber-500/60 hover:bg-amber-500 hover:text-slate-950 text-amber-400 text-xs font-bold uppercase tracking-widest px-5 py-3 rounded-full transition shadow-lg flex items-center gap-2">
+            <span>Private Broker</span>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- HERO CINEMATOGRÁFICO DE LUXO COM GRADIENTE AMBIENTE                       -->
+  <!-- ========================================================================= -->
+  <section class="relative bg-gradient-to-b from-[#0b0f17] via-[#070a10] to-[#070a10] py-24 sm:py-36 px-4 overflow-hidden text-center min-h-[620px] flex items-center justify-center">
+    
+    <!-- Imagem de Fundo Escurecida de Alta Resolução -->
+    <div class="absolute inset-0 z-0">
+      <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1920&q=80" alt="Mansão Arquitetônica" class="w-full h-full object-cover opacity-25">
+      <div class="hero-video-scrim"></div>
+    </div>
+
+    <!-- Iluminação Dourada Ambiente -->
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-amber-500/10 blur-[130px] rounded-full pointer-events-none z-[2]"></div>
+
+    <div class="relative z-10 max-w-4xl mx-auto space-y-6">
+      
+      <span class="inline-block text-xs font-bold uppercase tracking-[4px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-5 py-1.5 rounded-full">
+        Curadoria de Arquitetura & Alto Padrão
+      </span>
+
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-serif-luxury font-normal tracking-tight text-white leading-tight">
+        A arte de morar no extraordinário.
+      </h1>
+
+      <p class="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
+        Mansões em condomínios fechados, coberturas cinematográficas e residências conceituais com privacidade inegociável e discrição total.
+      </p>
+
+      <div class="pt-4 flex items-center justify-center gap-4">
+        <a href="#imoveis" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition shadow-xl shadow-amber-500/10">
+          Explorar Acervo
+        </a>
+        <a href="#concierge" class="border border-white/20 hover:border-white/50 text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition">
+          Falar com Private Broker
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- FILTROS REFINADOS DE ALTO LUXO                                            -->
+  <!-- ========================================================================= -->
+  <section class="max-w-6xl mx-auto px-4 -mt-10 relative z-20">
+    <div class="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-6 rounded-2xl shadow-2xl">
+      
+      <div class="flex items-center gap-2 border-b border-white/10 pb-4 mb-4 overflow-x-auto">
+        <button data-finalidade="todos" class="btn-tab-finalidade active bg-amber-500 text-slate-950 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg transition">
+          Todos os Exemplares
+        </button>
+        <button data-finalidade="venda" class="btn-tab-finalidade bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg transition">
+          Aquisição (Venda)
+        </button>
+        <button data-finalidade="aluguel" class="btn-tab-finalidade bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg transition">
+          Locação Exclusiva
+        </button>
+        <button data-finalidade="lancamento" class="btn-tab-finalidade bg-white/5 hover:bg-white/10 text-slate-300 font-bold text-xs uppercase tracking-wider px-5 py-2.5 rounded-lg transition">
+          Projetos na Planta
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Tipologia</label>
+          <select id="filtro-tipo" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <option value="">Todas as Tipologias</option>
+            <option value="cobertura">Cobertura</option>
+            <option value="condominio">Casa em Condomínio</option>
+            <option value="apartamento">Apartamento</option>
+            <option value="casa">Sobrado / Mansão</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Localização Nobre</label>
+          <select id="filtro-bairro" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <option value="">Todas as Regiões</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-[10px] uppercase tracking-wider text-slate-400 font-semibold mb-1">Dormitórios / Suítes</label>
+          <select id="filtro-quartos" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-400">
+            <option value="">Qualquer quantidade</option>
+            <option value="3">3+ Suítes</option>
+            <option value="4">4+ Suítes</option>
+            <option value="5">5+ Suítes</option>
+          </select>
+        </div>
+
+        <div class="flex items-end">
+          <a href="#imoveis" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-widest py-3 px-4 rounded-lg transition text-center shadow-lg shadow-amber-500/20">
+            Filtrar Acervo
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- VITRINE LUXURY DE IMÓVEIS                                                 -->
+  <!-- ========================================================================= -->
+  <main id="imoveis" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 w-full flex-grow">
+    
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-6 border-b border-white/10">
+      <div>
+        <span class="text-xs uppercase tracking-[3px] text-amber-400 font-bold block mb-1">Curadoria Rigorosa</span>
+        <h2 class="text-3xl sm:text-4xl font-serif-luxury text-white">Residências Disponíveis</h2>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span id="contador-imoveis" class="text-xs font-mono text-slate-400 bg-white/5 border border-white/10 px-3 py-1.5 rounded-lg">
+          Carregando...
+        </span>
+        <select id="filtro-ordenacao" class="bg-slate-900 border border-white/10 text-xs font-semibold rounded-lg px-3 py-1.5 text-slate-300 focus:outline-none focus:border-amber-400">
+          <option value="destaque">Destaques Primeiro</option>
+          <option value="maior_preco">Maior Valor</option>
+          <option value="menor_preco">Menor Valor</option>
+          <option value="maior_area">Maior Metragem</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Grid Dinâmico -->
+    <div id="grid-imoveis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- SEÇÃO PRIVATE CONCIERGE (ATENDIMENTO DISCRETO)                            -->
+  <!-- ========================================================================= -->
+  <section id="concierge" class="bg-slate-900 border-t border-b border-white/10 py-20 px-4">
+    <div class="max-w-5xl mx-auto text-center space-y-6">
+      <span class="text-xs uppercase tracking-[4px] text-amber-400 font-bold">Atendimento Private Broker</span>
+      <h2 class="text-3xl sm:text-5xl font-serif-luxury text-white">Busca Personalizada & Off-Market</h2>
+      <p class="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto font-light leading-relaxed">
+        Muitas das propriedades mais exclusivas do mercado não são anunciadas publicamente por motivos de privacidade. Entre em contato com nosso Concierge para ter acesso ao portfólio confidencial.
+      </p>
+
+      <div class="pt-4">
+        <a href="https://wa.me/5511914879393?text=Ol%C3%A1!%20Gostaria%20de%20um%20atendimento%20Private%20Broker%20exclusivo%20para%20im%C3%B3veis%20de%20alto%20padr%C3%A3o." target="_blank" class="inline-flex items-center gap-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition shadow-xl shadow-amber-500/20">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+          <span>Conversar com Concierge no WhatsApp</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- RODAPÉ LUXURY                                                             -->
+  <!-- ========================================================================= -->
+  <footer class="bg-black text-slate-500 text-xs py-14 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="text-center md:text-left">
+        <span class="font-serif-luxury text-lg text-white tracking-[2px] block">PRIME CONCEITO</span>
+        <span class="text-[11px] text-amber-500/80 uppercase tracking-widest block mt-0.5 imob-creci">CRECI 34.890-J</span>
+      </div>
+
+      <div class="text-center text-[11px] text-slate-400 flex items-center gap-3 flex-wrap justify-center">
+        <span>© 2026 Prime Real Estate. Todos os direitos reservados.</span>
+        <span>•</span>
+        <button onclick="abrirModalPrivacidade()" class="hover:text-amber-400 underline transition">
+          Privacidade & Cookies (LGPD)
+        </button>
+      </div>
+
+      <div class="text-center md:text-right text-[11px]">
+        Desenvolvido por <a href="https://wa.me/5511970558412" target="_blank" class="text-amber-400 hover:underline font-bold">Impacto Digital</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Botão Flutuante WhatsApp -->
+  <a href="https://wa.me/5511914879393" target="_blank" class="btn-whatsapp-flutuante link-wa-dinamico shadow-2xl">
+    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+    <div class="text-left wa-texto-longo">
+      <div class="text-[10px] uppercase font-bold tracking-wider opacity-90 leading-tight">Private Broker</div>
+      <div class="wa-status-badge flex items-center gap-1.5 leading-tight">
+        <span class="wa-status-dot"></span>
+        <span class="wa-status-text">Online</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Modal Detalhes -->
+  <div id="modal-imovel" class="modal-overlay">
+    <div class="modal-content relative !bg-slate-900 !text-slate-100 border border-white/10">
+      <button id="btn-fechar-modal" class="absolute top-4 right-4 z-20 bg-black/80 hover:bg-black text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <div class="p-6 sm:p-8 space-y-6">
+        <div id="modal-galeria-fotos"></div>
+
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-white/10 pb-5">
+          <div>
+            <span id="modal-imovel-codigo" class="text-xs font-black text-amber-400 bg-amber-400/10 px-2.5 py-0.5 rounded border border-amber-400/30"></span>
+            <h2 id="modal-imovel-titulo" class="text-xl sm:text-2xl font-serif-luxury text-white mt-1"></h2>
+            <p id="modal-imovel-endereco" class="text-xs sm:text-sm text-slate-400 mt-1"></p>
+          </div>
+          <div class="text-left sm:text-right">
+            <span id="modal-imovel-preco" class="text-2xl sm:text-3xl font-black text-amber-400 block"></span>
+            <div class="text-xs text-slate-400 mt-0.5">
+              Cond: <span id="modal-imovel-condominio" class="text-slate-300"></span> • IPTU: <span id="modal-imovel-iptu" class="text-slate-300"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 bg-slate-950 p-4 rounded-xl border border-white/5 text-center">
+          <div><span class="block text-[10px] text-slate-500 uppercase">Área Útil</span><span id="modal-area-util" class="font-bold text-white"></span></div>
+          <div><span class="block text-[10px] text-slate-500 uppercase">Área Total</span><span id="modal-area-total" class="font-bold text-white"></span></div>
+          <div><span class="block text-[10px] text-slate-500 uppercase">Quartos</span><span id="modal-quartos" class="font-bold text-white"></span></div>
+          <div><span class="block text-[10px] text-slate-500 uppercase">Banheiros</span><span id="modal-banheiros" class="font-bold text-white"></span></div>
+          <div class="col-span-2 sm:col-span-1"><span class="block text-[10px] text-slate-500 uppercase">Vagas</span><span id="modal-vagas" class="font-bold text-white"></span></div>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-amber-400 text-xs uppercase tracking-widest mb-2">Sobre este imóvel</h4>
+          <p id="modal-imovel-descricao" class="text-slate-300 text-xs sm:text-sm leading-relaxed whitespace-pre-line font-light"></p>
+        </div>
+
+        <div>
+          <h4 class="font-bold text-amber-400 text-xs uppercase tracking-widest mb-2">Diferenciais Exclusivos</h4>
+          <ul id="modal-lista-diferenciais" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-300"></ul>
+        </div>
+
+        <div class="pt-4 border-t border-white/10 flex justify-end">
+          <a id="btn-modal-wa-visita" href="#" target="_blank" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase tracking-widest px-8 py-3.5 rounded-full transition shadow-lg">
+            Agendar Visita com Private Broker
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

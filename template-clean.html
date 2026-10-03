@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prime Imóveis | Catálogo Ágil e Oportunidades Selecionadas</title>
+  <meta name="description" content="Busque imóveis para alugar ou comprar com transparência e rapidez.">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-white text-slate-800 antialiased flex flex-col min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- BARRA DE DEMONSTRAÇÃO VIP / SWITCHER DE TEMPLATES (IMPACTO DIGITAL)       -->
+  <!-- ========================================================================= -->
+  <aside class="template-switcher-bar hidden md:flex" aria-label="Seletor de Demonstração para Prospecção">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-blue-400 animate-ping"></span>
+      <span class="font-bold text-slate-200">Impacto Digital Showcase:</span>
+      <span class="hidden sm:inline text-slate-400">Modelo Clean & Ágil:</span>
+    </div>
+    <div class="flex items-center gap-1.5 flex-wrap">
+      <a href="index.html" class="template-pill" title="Modelo Portal Imobiliário Completo">
+        🏢 Portal Prime
+      </a>
+      <a href="template-luxo.html" class="template-pill" title="Modelo de Luxo Editorial Minimalista">
+        ✨ Luxo & High-End
+      </a>
+      <a href="template-clean.html" class="template-pill active" title="Modelo Clean Ágil de Alta Conversão">
+        ⚡ Clean & Ágil (Atual)
+      </a>
+      <a href="template-lancamentos.html" class="template-pill" title="Modelo Lançamentos & Construtoras">
+        🏗️ Lançamentos
+      </a>
+      <span class="text-slate-600">|</span>
+      <a href="admin.html" class="template-pill admin-pill" title="Acessar o Painel SaaS Administrativo">
+        🔐 Painel SaaS & CRM
+      </a>
+    </div>
+  </aside>
+
+  <!-- Cabeçalho Clean -->
+  <header class="border-b border-slate-100 py-4 px-4 sticky top-0 bg-white/95 backdrop-blur z-40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <a href="template-clean.html" class="flex items-center gap-2">
+        <span class="text-xl font-extrabold text-slate-900 tracking-tight imob-nome">PRIME IMÓVEIS</span>
+        <span class="text-[10px] text-blue-600 bg-blue-50 font-bold px-2 py-0.5 rounded border border-blue-200 imob-creci">CRECI 34.890-J</span>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="https://wa.me/5511914879393" target="_blank" class="link-wa-dinamico bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition flex items-center gap-1.5">
+          <span class="wa-status-dot"></span>
+          <span>WhatsApp da Imobiliária</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Minimalista Direto ao Ponto -->
+  <section class="py-12 px-4 border-b border-slate-100 bg-slate-50/50">
+    <div class="max-w-7xl mx-auto">
+      <div class="max-w-2xl mb-8">
+        <span class="text-xs uppercase font-bold text-blue-600 tracking-wider">Busca Direta</span>
+        <h1 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mt-1">
+          Encontre seu próximo imóvel sem burocracia.
+        </h1>
+        <p class="text-slate-500 text-sm mt-2">
+          Imóveis inspecionados com atendimento ágil por WhatsApp e laudo aprovado.
+        </p>
+      </div>
+
+      <!-- Barra de Filtros Direta -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+        <div>
+          <input type="text" id="filtro-termo" placeholder="Digite código, bairro ou rua..." class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800">
+        </div>
+        <div>
+          <select id="filtro-tipo" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800">
+            <option value="">Todos os Tipos</option>
+            <option value="apartamento">Apartamento</option>
+            <option value="cobertura">Cobertura</option>
+            <option value="casa">Casa</option>
+            <option value="condominio">Condomínio</option>
+          </select>
+        </div>
+        <div>
+          <select id="filtro-bairro" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800">
+            <option value="">Todos os Bairros</option>
+          </select>
+        </div>
+        <div>
+          <select id="filtro-quartos" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800">
+            <option value="">Dormitórios</option>
+            <option value="1">1+ Quarto</option>
+            <option value="2">2+ Quartos</option>
+            <option value="3">3+ Quartos</option>
+          </select>
+        </div>
+        <div>
+          <a href="#imoveis" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-2 px-3 rounded-lg transition flex items-center justify-center gap-1">
+            <span>Buscar</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vitrine de Imóveis -->
+  <main id="imoveis" class="max-w-7xl mx-auto px-4 py-12 w-full flex-grow">
+    
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <span id="contador-imoveis" class="text-xs font-bold text-slate-600">
+        Carregando catálogo...
+      </span>
+      <select id="filtro-ordenacao" class="text-xs border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700">
+        <option value="destaque">Destaques</option>
+        <option value="menor_preco">Menor Preço</option>
+        <option value="maior_preco">Maior Preço</option>
+      </select>
+    </div>
+
+    <!-- Grid Dinâmico -->
+    <div id="grid-imoveis" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+  </main>
+
+  <!-- Rodapé Clean -->
+  <footer class="bg-slate-900 text-slate-400 text-xs py-8 px-4 border-t border-slate-800 mt-auto">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex items-center gap-2 flex-wrap justify-center sm:justify-start">
+        <span class="font-bold text-white imob-nome">Prime Imóveis</span> • <span class="imob-creci">CRECI 34.890-J</span>
+        <span>•</span>
+        <button onclick="abrirModalPrivacidade()" class="hover:text-slate-200 underline transition">
+          Privacidade & Cookies (LGPD)
+        </button>
+      </div>
+      <div>
+        Desenvolvido por <a href="https://wa.me/5511970558412" target="_blank" class="text-blue-400 hover:underline font-bold">Impacto Digital</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Botão WhatsApp -->
+  <a href="https://wa.me/5511914879393" target="_blank" class="btn-whatsapp-flutuante link-wa-dinamico shadow-2xl">
+    <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+    <div class="text-left wa-texto-longo">
+      <div class="text-[10px] uppercase font-bold tracking-wider opacity-90 leading-tight">WhatsApp</div>
+      <div class="wa-status-badge flex items-center gap-1.5 leading-tight">
+        <span class="wa-status-dot"></span>
+        <span class="wa-status-text">Online</span>
+      </div>
+    </div>
+  </a>
+
+  <!-- Modal Detalhes -->
+  <div id="modal-imovel" class="modal-overlay">
+    <div class="modal-content relative">
+      <button id="btn-fechar-modal" class="absolute top-4 right-4 z-20 bg-slate-900 text-white w-9 h-9 rounded-full flex items-center justify-center transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+
+      <div class="p-6 sm:p-8 space-y-6">
+        <div id="modal-galeria-fotos"></div>
+        <div class="border-b border-slate-100 pb-4">
+          <span id="modal-imovel-codigo" class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded"></span>
+          <h2 id="modal-imovel-titulo" class="text-xl font-bold text-slate-900 mt-1"></h2>
+          <p id="modal-imovel-endereco" class="text-xs text-slate-500 mt-1"></p>
+          <span id="modal-imovel-preco" class="text-2xl font-black text-slate-900 block mt-2"></span>
+        </div>
+        <p id="modal-imovel-descricao" class="text-slate-600 text-xs sm:text-sm whitespace-pre-line leading-relaxed"></p>
+        <div class="pt-4 border-t border-slate-100 flex justify-end">
+          <a id="btn-modal-wa-visita" href="#" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow">
+            Falar com Corretor no WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/db.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

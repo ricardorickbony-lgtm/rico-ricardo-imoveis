@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Carga xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Imoveis>
+    <Imovel>
+      <CodigoImovel>CS-5520</CodigoImovel>
+      <Status>Ativo</Status>
+      <Situacao>DISPONIVEL</Situacao>
+      <Disponivel>1</Disponivel>
+      <TipoImovel>Casa</TipoImovel>
+      <SubTipoImovel>Sobrado</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Sobrado Triplex com Espaço Gourmet e 3 Suítes no Parque Marajoara]]></Titulo>
+      <Observacao><![CDATA[Excelente sobrado no Parque Marajoara em Santo André. Sala ampla para dois ambientes, cozinha planejada, 3 suítes arejadas com sacada, área gourmet completa com churrasqueira a carvão e 3 vagas de garagem. Localização privilegiada com fácil acesso ao comércio local e principais vias da região.]]></Observacao>
+      <Transacao>Venda</Transacao>
+      <PrecoVenda>890000</PrecoVenda>
+      <PrecoCondominio>0</PrecoCondominio>
+      <PrecoIptu>180</PrecoIptu>
+      <AreaUtil>210</AreaUtil>
+      <AreaTotal>250</AreaTotal>
+      <QtdQuartos>3</QtdQuartos>
+      <QtdSuites>3</QtdSuites>
+      <QtdBanheiros>4</QtdBanheiros>
+      <QtdVagas>3</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Parque Marajoara</Bairro>
+      <Endereco>Rua Rogério Giorgi, 166</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>CS-5520_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+        <Foto>
+          <NomeArquivo>CS-5520_foto_2.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>0</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+    <Imovel>
+      <CodigoImovel>CB-9021</CodigoImovel>
+      <Status>Inativo</Status>
+      <Situacao>VENDIDO</Situacao>
+      <Disponivel>0</Disponivel>
+      <TipoImovel>Cobertura</TipoImovel>
+      <SubTipoImovel>Duplex</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Cobertura Duplex com Vista Panorâmica e Piscina Privativa]]></Titulo>
+      <Observacao><![CDATA[Exclusiva cobertura duplex finamente decorada com projeto assinado por arquiteto renomado. Living com pé direito duplo integrado à varanda gourmet com fechamento em vidro retrátil, piscina privativa aquecida com deck em cumaru, 4 amplas suítes com marcenaria sob medida e suíte master com closet duplo e hidromassagem. Condomínio com infraestrutura completa de resort club e segurança privada 24h.]]></Observacao>
+      <Transacao>Venda</Transacao>
+      <PrecoVenda>3850000</PrecoVenda>
+      <PrecoCondominio>2600</PrecoCondominio>
+      <PrecoIptu>850</PrecoIptu>
+      <AreaUtil>360</AreaUtil>
+      <AreaTotal>440</AreaTotal>
+      <QtdQuartos>4</QtdQuartos>
+      <QtdSuites>4</QtdSuites>
+      <QtdBanheiros>6</QtdBanheiros>
+      <QtdVagas>5</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Jardins / Bairro Jardim</Bairro>
+      <Endereco>Rua das Figueiras, 1100</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>CB-9021_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+        <Foto>
+          <NomeArquivo>CB-9021_foto_2.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>0</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+    <Imovel>
+      <CodigoImovel>AP-4102</CodigoImovel>
+      <Status>Ativo</Status>
+      <Situacao>DISPONIVEL</Situacao>
+      <Disponivel>1</Disponivel>
+      <TipoImovel>Apartamento</TipoImovel>
+      <SubTipoImovel>Padrão</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Apartamento Contemporâneo com Varanda Gourmet Integrada]]></Titulo>
+      <Observacao><![CDATA[Apartamento impecável com planta moderna e conceito aberto. Cozinha americana integrada ao living e à varanda gourmet envidraçada. Piso em porcelanato de grande formato, teto rebaixado com iluminação cênica em LED, suíte master com ar condicionado e armários planejados de altíssima qualidade. Localização privilegiada próxima aos melhores restaurantes, padarias artesanais e colégios da região.]]></Observacao>
+      <Transacao>Venda</Transacao>
+      <PrecoVenda>1190000</PrecoVenda>
+      <PrecoCondominio>980</PrecoCondominio>
+      <PrecoIptu>320</PrecoIptu>
+      <AreaUtil>118</AreaUtil>
+      <AreaTotal>165</AreaTotal>
+      <QtdQuartos>3</QtdQuartos>
+      <QtdSuites>2</QtdSuites>
+      <QtdBanheiros>3</QtdBanheiros>
+      <QtdVagas>2</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Campestre</Bairro>
+      <Endereco>Alameda Campestre, 450</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>AP-4102_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+    <Imovel>
+      <CodigoImovel>CS-8830</CodigoImovel>
+      <Status>Ativo</Status>
+      <Situacao>DISPONIVEL</Situacao>
+      <Disponivel>1</Disponivel>
+      <TipoImovel>Condominio</TipoImovel>
+      <SubTipoImovel>Casa em Condomínio</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Mansão Neoclássica em Condomínio Fechado com Spa e Área Gourmet]]></Titulo>
+      <Observacao><![CDATA[Residência cinematográfica em condomínio de altíssimo padrão com segurança armada 24h. Arquitetura imponente com acabamentos em mármore travertino romano, esquadrias pretas do chão ao teto e ambientes amplos e fluidos. Área externa com paisagismo exuberante, piscina aquecida com prainha, spa com hidromassagem, espaço gourmet com forno de pizza e churrasqueira a gás, além de adega para 400 garrafas.]]></Observacao>
+      <Transacao>Venda</Transacao>
+      <PrecoVenda>4950000</PrecoVenda>
+      <PrecoCondominio>1850</PrecoCondominio>
+      <PrecoIptu>920</PrecoIptu>
+      <AreaUtil>520</AreaUtil>
+      <AreaTotal>680</AreaTotal>
+      <QtdQuartos>5</QtdQuartos>
+      <QtdSuites>5</QtdSuites>
+      <QtdBanheiros>7</QtdBanheiros>
+      <QtdVagas>6</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Vila Assunção / Parque Central</Bairro>
+      <Endereco>Alameda dos Ipês, 88</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>CS-8830_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+    <Imovel>
+      <CodigoImovel>ST-2015</CodigoImovel>
+      <Status>Ativo</Status>
+      <Situacao>DISPONIVEL</Situacao>
+      <Disponivel>1</Disponivel>
+      <TipoImovel>Apartamento</TipoImovel>
+      <SubTipoImovel>Studio</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Studio Design Totalmente Mobiliado e Decorado para Moradia ou Renda]]></Titulo>
+      <Observacao><![CDATA[Studio inteligente planejado para quem busca praticidade, sofisticação e conforto no melhor ponto da cidade. Totalmente mobiliado com cama queen com baú, Smart TV 55", ar condicionado dual inverter, geladeira inox, cooktop de indução, micro-ondas, máquina lava e seca e cortinas blackout. Edifício moderno com rooftop lounge, coworking com cabines acústicas e lavanderia OMO compartilhada.]]></Observacao>
+      <Transacao>Locação</Transacao>
+      <PrecoLocacao>3800</PrecoLocacao>
+      <PrecoCondominio>590</PrecoCondominio>
+      <PrecoIptu>140</PrecoIptu>
+      <AreaUtil>44</AreaUtil>
+      <AreaTotal>62</AreaTotal>
+      <QtdQuartos>1</QtdQuartos>
+      <QtdSuites>1</QtdSuites>
+      <QtdBanheiros>1</QtdBanheiros>
+      <QtdVagas>1</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Jardim Bella Vista</Bairro>
+      <Endereco>Rua das Monções, 320</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>ST-2015_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+    <Imovel>
+      <CodigoImovel>LC-7700</CodigoImovel>
+      <Status>Ativo</Status>
+      <Situacao>DISPONIVEL</Situacao>
+      <Disponivel>1</Disponivel>
+      <TipoImovel>Lancamento</TipoImovel>
+      <SubTipoImovel>Empreendimento na Planta</SubTipoImovel>
+      <CategoriaImovel>Residencial</CategoriaImovel>
+      <Titulo><![CDATA[Residencial Horizon Prime — Lançamento Exclusivo na Planta com Condições Especiais]]></Titulo>
+      <Observacao><![CDATA[O projeto mais aguardado do ano. Torre única em terreno de 4.500m² com lazer de clube privativo. Plantas inteligentes com 2 ou 3 dormitórios, varanda com churrasqueira a carvão e vista livre para o Parque Central. Fluxo de pagamento direto com a construtora durante a obra e financiamento garantido pela Caixa Econômica Federal. Ideal tanto para morar quanto para investimento de alta valorização.]]></Observacao>
+      <Transacao>Venda</Transacao>
+      <PrecoVenda>690000</PrecoVenda>
+      <PrecoCondominio>0</PrecoCondominio>
+      <PrecoIptu>0</PrecoIptu>
+      <AreaUtil>84</AreaUtil>
+      <AreaTotal>120</AreaTotal>
+      <QtdQuartos>3</QtdQuartos>
+      <QtdSuites>1</QtdSuites>
+      <QtdBanheiros>2</QtdBanheiros>
+      <QtdVagas>2</QtdVagas>
+      <Cidade>Santo André - SP</Cidade>
+      <Bairro>Vila Gilda / Parque Central</Bairro>
+      <Endereco>Av. Pereira Barreto, 1800</Endereco>
+      <Fotos>
+        <Foto>
+          <NomeArquivo>LC-7700_foto_1.jpg</NomeArquivo>
+          <URLArquivo>https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&amp;fit=crop&amp;w=1200&amp;q=80</URLArquivo>
+          <Principal>1</Principal>
+        </Foto>
+      </Fotos>
+    </Imovel>
+  </Imoveis>
+</Carga>
