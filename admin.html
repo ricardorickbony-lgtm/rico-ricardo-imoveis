@@ -1247,6 +1247,193 @@
             </form>
           </div>
 
+        <!-- ================================================================= -->
+        <!-- MATRIZ DE PERMISSÕES GRANULARES POR JANELINHAS (PADRÃO INGAIA / KENLO) -->
+        <!-- ================================================================= -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-5">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-black text-slate-900 text-lg flex items-center gap-2">
+                  <span>🎛️ Matriz de Permissões & Janelinhas de Acesso</span>
+                  <span class="text-[10px] font-bold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full uppercase border border-purple-200">Padrão inGaia / Kenlo</span>
+                </h3>
+              </div>
+              <p class="text-xs text-slate-500 mt-1">
+                Configure exatamente o que cada usuário ou perfil pode ver e fazer. O que você desmarcar fica <strong>invisível e inacessível</strong> para ele.
+              </p>
+            </div>
+
+            <!-- Seletor do Perfil para Configurar Janelinhas -->
+            <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+              <span class="text-xs font-bold text-slate-600 pl-2">Configurando:</span>
+              <button type="button" id="tab-perm-corretor" onclick="selecionarPerfilMatriz('corretor')" class="btn-tab-perm px-3 py-1.5 rounded-xl text-xs font-bold transition bg-white text-blue-700 shadow-sm">
+                💼 Corretor
+              </button>
+              <button type="button" id="tab-perm-gerente" onclick="selecionarPerfilMatriz('gerente')" class="btn-tab-perm px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900">
+                👔 Gerente
+              </button>
+              <button type="button" id="tab-perm-diretor" onclick="selecionarPerfilMatriz('diretor')" class="btn-tab-perm px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900">
+                👑 Diretor
+              </button>
+            </div>
+          </div>
+
+          <!-- Grid de 8 Janelinhas / Toggles Interativos -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="grid-janelinhas-permissoes">
+            
+            <!-- Janelinha 1: Telefone do Proprietário -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">📱 Telefone do Proprietário</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-verTelefoneProprietario" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('verTelefoneProprietario', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Se desmarcado, oculta o telefone e o botão de WhatsApp direto do dono do imóvel para evitar que o corretor contorne a imobiliária.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-verTelefoneProprietario">Oculto pelo Gestor</span>
+            </div>
+
+            <!-- Janelinha 2: Dados Bancários / PIX de Repasse -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">🏦 Dados Bancários & PIX</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-verDadosBancariosPix" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('verDadosBancariosPix', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Bloqueia visualização de chaves PIX, valores líquidos de repasse e extratos confidenciais de locação.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-verDadosBancariosPix">Sigilo Bancário</span>
+            </div>
+
+            <!-- Janelinha 3: Exportar Planilhas / CSV -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">📊 Exportar Planilhas e CSV</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-exportarRelatoriosPlanilhas" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('exportarRelatoriosPlanilhas', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Impede que corretores ou estagiários baixem a lista de leads ou carteira de imóveis da imobiliária para computadores pessoais.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-exportarRelatoriosPlanilhas">Download Bloqueado</span>
+            </div>
+
+            <!-- Janelinha 4: Excluir Imóveis e Leads -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">🗑️ Excluir Imóveis / Leads</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-excluirImoveisLeads" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('excluirImoveisLeads', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Remove os botões de lixeira e exclusão de toda a interface, eliminando qualquer risco de sabotagem interna.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-excluirImoveisLeads">Exclusão Desativada</span>
+            </div>
+
+            <!-- Janelinha 5: Ver Faturamento Geral e Receita ADM -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">💰 Ver Faturamento Geral</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-verComissoesFaturamento" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('verComissoesFaturamento', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Oculta os KPIs de faturamento global, VGV negociado da empresa e receitas de taxas de administração imobiliária.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-verComissoesFaturamento">Restrito à Diretoria</span>
+            </div>
+
+            <!-- Janelinha 6: Editar Valores e Dados de Imóveis -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">✏️ Editar Imóveis no Catálogo</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-editarValoresImoveis" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('editarValoresImoveis', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Impede que corretores alterem preços anunciados, descrições ou condições de negociação sem aval da gerência.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-editarValoresImoveis">Somente Leitura</span>
+            </div>
+
+            <!-- Janelinha 7: Configurações de Portais (ZAP, OLX) -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">🌐 Gestão de Feeds de Portais</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-configurarPortais" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('configurarPortais', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Controla quem pode alterar links de integração XML com ZAP, VivaReal, OLX e portais pagos da imobiliária.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-configurarPortais">Acesso Restrito</span>
+            </div>
+
+            <!-- Janelinha 8: Leads de Outros Corretores (Carteira Geral) -->
+            <div class="bg-slate-50 border border-slate-200 p-4 rounded-2xl flex flex-col justify-between space-y-3">
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black text-slate-900">👥 Ver Leads de Outros Corretores</span>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="perm-verLeadsOutrosCorretores" class="sr-only peer" onchange="atualizarPermissaoEmTempoReal('verLeadsOutrosCorretores', this.checked)">
+                    <div class="w-9 h-5 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-500 leading-tight">
+                  Quando desmarcado, cada corretor só enxerga os seus próprios clientes no funil Kanban e não vê os leads dos colegas de equipe.
+                </p>
+              </div>
+              <span class="text-[10px] font-bold text-slate-400 font-mono" id="status-perm-verLeadsOutrosCorretores">Carteira Própria</span>
+            </div>
+
+          </div>
+
+          <!-- Ações da Matriz -->
+          <div class="flex items-center justify-between flex-wrap gap-3 pt-4 border-t border-slate-200">
+            <div class="text-xs text-slate-500 flex items-center gap-1.5">
+              <span>💡</span> <strong>Dica do Gestor:</strong> As janelinhas aplicam efeito imediato. Ao mudar o perfil no topo, a tela reage instantaneamente.
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" onclick="restaurarPadraoPerfilMatriz()" class="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-xl transition">
+                Restaurar Padrão inGaia
+              </button>
+              <button type="button" onclick="salvarMatrizPermissoes()" class="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 px-5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
+                <span>✓</span> Salvar Janelinhas de Permissão
+              </button>
+            </div>
+          </div>
         </div>
 
         <!-- Trilha de Auditoria em Tempo Real (Audit Trail) -->

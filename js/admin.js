@@ -287,6 +287,15 @@ function configurarNavegacaoAbas() {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.tab;
 
+      if (targetId === 'aba-portais' && !DB.usuarioTemPermissao('configurarPortais')) {
+        alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A gestão de feeds e portais é restrita à Diretoria/Gerência.');
+        return;
+      }
+      if (targetId === 'aba-backup' && !DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+        alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): O painel de Backup e Reset de dados é restrito à Diretoria.');
+        return;
+      }
+
       // Atualiza botões
       document.querySelectorAll('.tab-admin-nav').forEach(b => {
         b.classList.remove('bg-blue-600', 'text-white', 'shadow-sm');
@@ -451,12 +460,16 @@ function renderizarTabelaImoveis() {
             <button onclick="gerarCopySocialImovel('${im.id}')" class="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Gerar Copy para Redes Sociais e WhatsApp com IA">
               ✨
             </button>
-            <button onclick="editarImovel('${im.id}')" class="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar Imóvel">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-            </button>
-            <button onclick="excluirImovel('${im.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Imóvel">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
+            ${DB.usuarioTemPermissao('editarValoresImoveis') ? `
+              <button onclick="editarImovel('${im.id}')" class="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar Imóvel">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              </button>
+            ` : ''}
+            ${DB.usuarioTemPermissao('excluirImoveisLeads') ? `
+              <button onclick="excluirImovel('${im.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Imóvel">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            ` : ''}
           </div>
         </td>
       </tr>
@@ -489,6 +502,10 @@ function alterarStatusImovelRapido(id, novoStatus) {
 }
 
 function excluirImovel(id) {
+  if (!DB.usuarioTemPermissao('excluirImoveisLeads')) {
+    alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A exclusão de imóveis está desabilitada para o seu perfil de usuário.');
+    return;
+  }
   const imovel = DB.getImoveis().find(im => im.id === id);
   const titulo = imovel ? `${imovel.codigo} - ${imovel.titulo}` : id;
   if (confirm(`Mover "${titulo}" para a Lixeira Segura?\n\nO item ficará protegido por 30 dias com restauração em 1 clique na Central de Segurança & LGPD.`)) {
@@ -510,6 +527,10 @@ function configurarFormularioImovel() {
   const btnFechar = document.getElementById('btn-fechar-modal-cadastro');
 
   btnNovo?.addEventListener('click', () => {
+    if (!DB.usuarioTemPermissao('editarValoresImoveis')) {
+      alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): O cadastro de novos imóveis requer nível de Gerência ou Diretoria.');
+      return;
+    }
     imovelEmEdicaoId = null;
     form.reset();
     document.getElementById('modal-cadastro-titulo').textContent = 'Cadastrar Novo Imóvel';
@@ -630,6 +651,10 @@ function configurarFormularioImovel() {
 }
 
 function editarImovel(id) {
+  if (!DB.usuarioTemPermissao('editarValoresImoveis')) {
+    alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): Apenas a Gerência e Diretoria podem editar os valores e dados cadastrais dos imóveis.');
+    return;
+  }
   const im = DB.getImovelPorId(id);
   if (!im) return;
 
@@ -717,13 +742,16 @@ function renderizarTabelaLeads() {
   const container = document.getElementById('tabela-leads-corpo');
   if (!container) return;
 
-  const leads = DB.getLeads();
+  let leads = DB.getLeads();
+  if (!DB.usuarioTemPermissao('verLeadsOutrosCorretores')) {
+    leads = leads.filter(l => !l.corretor || l.corretor === 'Plantão' || l.corretor.includes('Corretor') || l.corretor === 'Carlos Prado');
+  }
 
   if (leads.length === 0) {
     container.innerHTML = `
       <tr>
         <td colspan="6" class="py-12 text-center text-slate-400 text-sm">
-          Nenhum lead registrado no sistema até o momento.
+          Nenhum lead encontrado para este perfil de acesso.
         </td>
       </tr>
     `;
@@ -778,9 +806,11 @@ function renderizarTabelaLeads() {
             <a href="https://wa.me/${numeroLimpo}?text=${encodeURIComponent(`Olá ${l.nome}, tudo bem? Aqui é ${l.corretor || 'da equipe'} da ${DB.getConfig().nome}. Recebemos seu interesse no imóvel ${l.imovelTitulo || 'anunciado'}. Como posso ajudar você hoje?`)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition shadow-sm flex items-center gap-1">
               <span>WhatsApp</span>
             </a>
-            <button onclick="excluirLead('${l.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition" title="Excluir Lead">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            </button>
+            ${DB.usuarioTemPermissao('excluirImoveisLeads') ? `
+              <button onclick="excluirLead('${l.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition" title="Excluir Lead">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+              </button>
+            ` : ''}
           </div>
         </td>
       </tr>
@@ -822,6 +852,10 @@ function alterarStatusLeadRapido(id, novoStatus) {
 }
 
 function excluirLead(id) {
+  if (!DB.usuarioTemPermissao('excluirImoveisLeads')) {
+    alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A exclusão de leads está desabilitada para o seu perfil de usuário.');
+    return;
+  }
   const lead = DB.getLeads().find(l => l.id === id);
   const nome = lead ? lead.nome : id;
   if (confirm(`Mover o lead "${nome}" para a Lixeira Segura?\n\nO contato será preservado por 30 dias e pode ser restaurado a qualquer momento na Central de Segurança & LGPD.`)) {
@@ -838,7 +872,10 @@ function excluirLead(id) {
  * 7.1 Renderização do Pipeline Kanban de Vendas
  */
 function renderizarPipelineKanban() {
-  const leads = DB.getLeads();
+  let leads = DB.getLeads();
+  if (!DB.usuarioTemPermissao('verLeadsOutrosCorretores')) {
+    leads = leads.filter(l => !l.corretor || l.corretor === 'Plantão' || l.corretor.includes('Corretor') || l.corretor === 'Carlos Prado');
+  }
   const metricas = DB.calcularMetricasPipeline();
 
   // Atualiza Indicadores Superiores
@@ -847,7 +884,8 @@ function renderizarPipelineKanban() {
   const kpiTempo = document.getElementById('kpi-pipeline-tempo');
   const kpiRoleta = document.getElementById('kpi-roleta-status');
 
-  if (kpiVgv) kpiVgv.textContent = `R$ ${(metricas.valorEmNegociacao / 1000000).toFixed(2)}M`;
+  const podeVerFaturamento = DB.usuarioTemPermissao('verComissoesFaturamento');
+  if (kpiVgv) kpiVgv.textContent = podeVerFaturamento ? `R$ ${(metricas.valorEmNegociacao / 1000000).toFixed(2)}M` : '••••••••••';
   if (kpiConv) kpiConv.textContent = `${metricas.taxaConversao}%`;
   if (kpiTempo) kpiTempo.textContent = `${metricas.tempoMedioDias} dias`;
   if (kpiRoleta) kpiRoleta.textContent = `${DB.getCorretores().filter(c => c.ativo).length} Corretores`;
@@ -1208,6 +1246,10 @@ function configurarFormularioConfiguracoes() {
 function configurarExportacaoImportacao() {
   // Exportar Leads para CSV
   document.getElementById('btn-exportar-leads-csv')?.addEventListener('click', () => {
+    if (!DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+      alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): O download da carteira de leads em planilha está desabilitado para o seu perfil de usuário.');
+      return;
+    }
     const leads = DB.getLeads();
     if (leads.length === 0) {
       alert('Nenhum lead para exportar.');
@@ -1238,6 +1280,10 @@ function configurarExportacaoImportacao() {
 
   // Exportar Backup Completo JSON
   document.getElementById('btn-exportar-backup')?.addEventListener('click', () => {
+    if (!DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+      alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): O download do backup geral do banco de dados está desabilitado para o seu perfil de usuário.');
+      return;
+    }
     const backup = {
       imoveis: DB.getImoveis(),
       config: DB.getConfig(),
@@ -1444,6 +1490,10 @@ function configurarGestaoLocacao() {
 
   // Exportar DIMOB
   document.getElementById('btn-exportar-dimob')?.addEventListener('click', () => {
+    if (!DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+      alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A exportação do arquivo da DIMOB (Receita Federal) é restrita à Diretoria.');
+      return;
+    }
     const dimobTxt = DB.exportarDimob(2026);
     const blob = new Blob([dimobTxt], { type: 'text/plain;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -1468,12 +1518,16 @@ function renderizarGestaoLocacao() {
   const elReceita = document.getElementById('loc-receita-adm');
   const elAdimp = document.getElementById('loc-adimplencia');
 
+  const podeVerComissoes = DB.usuarioTemPermissao('verComissoesFaturamento');
+  const podeVerPix = DB.usuarioTemPermissao('verDadosBancariosPix');
+  const podeVerTelefone = DB.usuarioTemPermissao('verTelefoneProprietario');
+
   if (elTotal) elTotal.textContent = `R$ ${metricas.totalAlugueis.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
   if (elRepasses) {
-    elRepasses.textContent = isCorretor ? '••••••••••' : `R$ ${metricas.totalRepasses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    elRepasses.textContent = podeVerComissoes ? `R$ ${metricas.totalRepasses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '••••••••••';
   }
   if (elReceita) {
-    elReceita.textContent = isCorretor ? '••••••••••' : `R$ ${metricas.taxaAdmTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    elReceita.textContent = podeVerComissoes ? `R$ ${metricas.taxaAdmTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}` : '••••••••••';
   }
   if (elAdimp) elAdimp.textContent = `${metricas.taxaAdimplencia}%`;
 
@@ -1496,22 +1550,30 @@ function renderizarGestaoLocacao() {
       ? 'bg-emerald-100 text-emerald-800'
       : (c.statusMes === 'Atrasado' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800');
 
-    // Mascaramento LGPD por perfil RBAC
+    // Mascaramento por Janelinhas de Permissão inGaia / Kenlo
     let propDoc = c.proprietarioDocumento || '';
     let propNome = c.proprietarioNome || '';
     let inqDoc = c.inquilinoDocumento || '';
     let repasseHtml = `R$ ${c.valorRepasseLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
     let taxaAdmHtml = `Taxa ADM: R$ ${c.taxaAdmValor.toLocaleString('pt-BR')} (${c.taxaAdmPercentual}%)`;
 
-    if (isCorretor) {
-      propDoc = '•••.•••.•••-•• (LGPD)';
-      propNome = propNome.split(' ')[0] + ' (Sob Proteção)';
-      inqDoc = '•••.•••.•••-•• (LGPD)';
-      repasseHtml = '<span class="text-slate-400 font-mono text-[11px]">(Acesso Restrito)</span>';
-      taxaAdmHtml = '<span class="text-slate-400 font-mono text-[10px]">(Restrito)</span>';
-    } else if (isGerente) {
-      if (propDoc.length >= 11) propDoc = propDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
-      if (inqDoc.length >= 11) inqDoc = inqDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
+    if (!podeVerComissoes) {
+      repasseHtml = '<span class="text-slate-400 font-mono text-[11px]">🔒 (Sigilo inGaia)</span>';
+      taxaAdmHtml = '<span class="text-slate-400 font-mono text-[10px]">🔒 (Restrito)</span>';
+    }
+
+    if (!podeVerPix) {
+      propDoc = '•••.•••.•••-•• (Sigilo Bancário)';
+    } else if (isGerente && propDoc.length >= 11) {
+      propDoc = propDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
+    }
+
+    if (!podeVerTelefone) {
+      propNome = propNome.split(' ')[0] + ' 🔒 (Tel. Oculto inGaia)';
+    }
+
+    if (inqDoc.length >= 11 && (isCorretor || isGerente)) {
+      inqDoc = inqDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
     }
 
     return `
@@ -1616,9 +1678,8 @@ function abrirReciboInquilino(contratoId) {
 }
 
 function abrirExtratoProprietario(contratoId) {
-  const perfil = DB.getPerfilAtivo();
-  if (perfil === 'corretor') {
-    alert('🔒 Acesso Restrito pela LGPD: O extrato bancário de repasse ao proprietário é confidencial e acessível apenas aos perfis Gerência e Diretoria.');
+  if (!DB.usuarioTemPermissao('verDadosBancariosPix')) {
+    alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A visualização do extrato financeiro e da chave PIX do locador está desabilitada para o seu perfil de acesso.');
     return;
   }
 
@@ -1940,10 +2001,181 @@ function carregarSofiaConfigNoPainel() {
 /**
  * 16. Central de Segurança, Governança, RBAC & LGPD
  */
+let perfilSelecionadoMatriz = 'corretor';
+
+const TEXTOS_STATUS_PERMISSOES = {
+  verTelefoneProprietario: {
+    ativo: 'Telefone Visível',
+    inativo: 'Oculto para Corretor'
+  },
+  verDadosBancariosPix: {
+    ativo: 'Chaves PIX Liberadas',
+    inativo: 'Sigilo Bancário Ativo'
+  },
+  exportarRelatoriosPlanilhas: {
+    ativo: 'Exportação Liberada',
+    inativo: 'Download Bloqueado'
+  },
+  excluirImoveisLeads: {
+    ativo: 'Exclusão Permitida',
+    inativo: 'Exclusão Desativada'
+  },
+  verComissoesFaturamento: {
+    ativo: 'Faturamento Visível',
+    inativo: 'Restrito à Diretoria'
+  },
+  editarValoresImoveis: {
+    ativo: 'Edição Permitida',
+    inativo: 'Somente Leitura'
+  },
+  configurarPortais: {
+    ativo: 'Acesso Total aos Feeds',
+    inativo: 'Acesso Restrito'
+  },
+  verLeadsOutrosCorretores: {
+    ativo: 'Carteira Global Compartilhada',
+    inativo: 'Apenas Própria Carteira'
+  }
+};
+
 function configurarAbaSeguranca() {
   window.addEventListener('imob_audit_log_atualizado', () => {
     renderizarTrilhaAuditoria();
   });
+  window.addEventListener('imob_permissoes_atualizadas', (e) => {
+    if (e.detail?.perfil === perfilSelecionadoMatriz) {
+      carregarJanelinhasPermissao(perfilSelecionadoMatriz);
+    }
+  });
+}
+
+function selecionarPerfilMatriz(perfil) {
+  perfilSelecionadoMatriz = perfil;
+
+  ['corretor', 'gerente', 'diretor'].forEach(p => {
+    const btn = document.getElementById(`tab-perm-${p}`);
+    if (btn) {
+      if (p === perfil) {
+        btn.className = 'btn-tab-perm px-3 py-1.5 rounded-xl text-xs font-bold transition bg-white text-blue-700 shadow-sm';
+      } else {
+        btn.className = 'btn-tab-perm px-3 py-1.5 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900';
+      }
+    }
+  });
+
+  carregarJanelinhasPermissao(perfil);
+}
+
+function carregarJanelinhasPermissao(perfil) {
+  const p = perfil || perfilSelecionadoMatriz || 'corretor';
+  const permissoes = DB.getPermissoes(p);
+  const isDiretor = (p === 'diretor');
+
+  const chaves = [
+    'verTelefoneProprietario',
+    'verDadosBancariosPix',
+    'exportarRelatoriosPlanilhas',
+    'excluirImoveisLeads',
+    'verComissoesFaturamento',
+    'editarValoresImoveis',
+    'configurarPortais',
+    'verLeadsOutrosCorretores'
+  ];
+
+  chaves.forEach(chave => {
+    const input = document.getElementById(`perm-${chave}`);
+    const statusEl = document.getElementById(`status-perm-${chave}`);
+    const valor = isDiretor ? true : !!permissoes[chave];
+
+    if (input) {
+      input.checked = valor;
+      input.disabled = isDiretor;
+    }
+
+    if (statusEl) {
+      const cfg = TEXTOS_STATUS_PERMISSOES[chave];
+      if (isDiretor) {
+        statusEl.textContent = 'Acesso Master Total';
+        statusEl.className = 'text-[10px] font-bold text-amber-600 font-mono';
+      } else if (valor) {
+        statusEl.textContent = cfg ? cfg.ativo : 'Liberado';
+        statusEl.className = 'text-[10px] font-bold text-emerald-600 font-mono';
+      } else {
+        statusEl.textContent = cfg ? cfg.inativo : 'Restrito';
+        statusEl.className = 'text-[10px] font-bold text-slate-400 font-mono';
+      }
+    }
+  });
+}
+
+function atualizarPermissaoEmTempoReal(chave, valor) {
+  if (perfilSelecionadoMatriz === 'diretor') return;
+
+  const statusEl = document.getElementById(`status-perm-${chave}`);
+  const cfg = TEXTOS_STATUS_PERMISSOES[chave];
+
+  if (statusEl) {
+    if (valor) {
+      statusEl.textContent = cfg ? cfg.ativo : 'Liberado';
+      statusEl.className = 'text-[10px] font-bold text-emerald-600 font-mono';
+    } else {
+      statusEl.textContent = cfg ? cfg.inativo : 'Restrito';
+      statusEl.className = 'text-[10px] font-bold text-slate-400 font-mono';
+    }
+  }
+
+  // Atualiza no banco local
+  const permissoesAtuais = { ...DB.getPermissoes(perfilSelecionadoMatriz) };
+  permissoesAtuais[chave] = valor;
+  DB.salvarPermissoes(perfilSelecionadoMatriz, permissoesAtuais);
+
+  // Se estiver ajustando o perfil que está ativo agora, aplica em tempo real na interface
+  if (perfilSelecionadoMatriz === DB.getPerfilAtivo()) {
+    aplicarPermissoesNaInterface();
+  }
+}
+
+function salvarMatrizPermissoes() {
+  if (perfilSelecionadoMatriz === 'diretor') {
+    alert('👑 O perfil de Diretor possui governança máster permanente e privilégios irrestritos.');
+    return;
+  }
+
+  const novasPermissoes = {
+    verTelefoneProprietario: document.getElementById('perm-verTelefoneProprietario')?.checked || false,
+    verDadosBancariosPix: document.getElementById('perm-verDadosBancariosPix')?.checked || false,
+    exportarRelatoriosPlanilhas: document.getElementById('perm-exportarRelatoriosPlanilhas')?.checked || false,
+    excluirImoveisLeads: document.getElementById('perm-excluirImoveisLeads')?.checked || false,
+    verComissoesFaturamento: document.getElementById('perm-verComissoesFaturamento')?.checked || false,
+    editarValoresImoveis: document.getElementById('perm-editarValoresImoveis')?.checked || false,
+    configurarPortais: document.getElementById('perm-configurarPortais')?.checked || false,
+    verLeadsOutrosCorretores: document.getElementById('perm-verLeadsOutrosCorretores')?.checked || false
+  };
+
+  DB.salvarPermissoes(perfilSelecionadoMatriz, novasPermissoes);
+  carregarJanelinhasPermissao(perfilSelecionadoMatriz);
+
+  if (perfilSelecionadoMatriz === DB.getPerfilAtivo()) {
+    aplicarPermissoesNaInterface();
+  }
+
+  mostrarToastFeedback(`✓ Janelinhas salvas para o perfil "${perfilSelecionadoMatriz.toUpperCase()}"!`, '🎛️');
+}
+
+function restaurarPadraoPerfilMatriz() {
+  if (perfilSelecionadoMatriz === 'diretor') {
+    mostrarToastFeedback('Perfil Diretor já está no padrão master total.', '👑');
+    return;
+  }
+
+  if (confirm(`Deseja restaurar as janelinhas de permissão de fábrica (Padrão inGaia / Kenlo) para o perfil "${perfilSelecionadoMatriz.toUpperCase()}"?`)) {
+    DB.restaurarPermissoesPadrao(perfilSelecionadoMatriz);
+    carregarJanelinhasPermissao(perfilSelecionadoMatriz);
+    if (perfilSelecionadoMatriz === DB.getPerfilAtivo()) {
+      aplicarPermissoesNaInterface();
+    }
+    mostrarToastFeedback(`Padrão inGaia restaurado para "${perfilSelecionadoMatriz.toUpperCase()}".`, '↺');
+  }
 }
 
 function trocarPerfilSeguranca(novoPerfil) {
@@ -1974,13 +2206,81 @@ function aplicarPerfilSeguranca(perfil) {
     btnAtivo.classList.remove('text-slate-600', 'hover:text-slate-900');
   }
 
-  // Re-renderiza abas com dados sensíveis
+  // Sincroniza a aba da matriz de permissões com o perfil ativo
+  selecionarPerfilMatriz(p);
+
+  // Aplica as permissões na interface
+  aplicarPermissoesNaInterface();
+}
+
+function aplicarPermissoesNaInterface() {
+  const podeExportar = DB.usuarioTemPermissao('exportarRelatoriosPlanilhas');
+  const podePortais = DB.usuarioTemPermissao('configurarPortais');
+  const podeEditarImoveis = DB.usuarioTemPermissao('editarValoresImoveis');
+
+  // 1. Botão Novo Imóvel
+  const btnNovoImovel = document.getElementById('btn-abrir-modal-novo-imovel');
+  if (btnNovoImovel) {
+    btnNovoImovel.style.display = podeEditarImoveis ? 'inline-flex' : 'none';
+  }
+
+  // 2. Botões de exportação (Leads CSV, DIMOB, Backup, Auditoria)
+  const btnExpLeads = document.getElementById('btn-exportar-leads-csv');
+  if (btnExpLeads) {
+    btnExpLeads.style.display = podeExportar ? 'inline-flex' : 'none';
+  }
+  const btnExpDimob = document.getElementById('btn-exportar-dimob');
+  if (btnExpDimob) {
+    btnExpDimob.style.display = podeExportar ? 'inline-flex' : 'none';
+  }
+  const btnExpBackup = document.getElementById('btn-exportar-backup');
+  if (btnExpBackup) {
+    btnExpBackup.disabled = !podeExportar;
+    btnExpBackup.title = podeExportar ? 'Exportar backup completo' : 'Exportação bloqueada pelo Administrador (inGaia)';
+    btnExpBackup.classList.toggle('opacity-50', !podeExportar);
+    btnExpBackup.classList.toggle('cursor-not-allowed', !podeExportar);
+  }
+  const btnExpAudit = document.querySelector('button[onclick="exportarAuditLogCSV()"]');
+  if (btnExpAudit) {
+    btnExpAudit.style.display = podeExportar ? 'inline-flex' : 'none';
+  }
+
+  // 3. Abas com restrição de acesso
+  const navPortais = document.querySelector('button[data-tab="aba-portais"]');
+  if (navPortais) {
+    if (!podePortais) {
+      navPortais.classList.add('opacity-40');
+      navPortais.title = 'Acesso restrito à Diretoria e TI (Padrão inGaia)';
+    } else {
+      navPortais.classList.remove('opacity-40');
+      navPortais.title = '';
+    }
+  }
+
+  const navBackup = document.querySelector('button[data-tab="aba-backup"]');
+  if (navBackup) {
+    if (!podeExportar) {
+      navBackup.classList.add('opacity-40');
+      navBackup.title = 'Acesso restrito à Diretoria (Padrão inGaia)';
+    } else {
+      navBackup.classList.remove('opacity-40');
+      navBackup.title = '';
+    }
+  }
+
+  // 4. Re-renderiza tabelas e pipelines para refletir as permissões instantaneamente
+  renderizarTabelaImoveis();
+  renderizarPipelineKanban();
+  renderizarTabelaLeads();
   renderizarGestaoLocacao();
 }
 
 function renderizarAbaSeguranca() {
   const lixeira = DB.getLixeira();
   const logs = DB.getAuditLog();
+
+  // Carrega as janelinhas de permissão do perfil selecionado
+  carregarJanelinhasPermissao(perfilSelecionadoMatriz);
 
   // Badges superiores
   const badgeLixeira = document.getElementById('badge-lixeira-count');
@@ -2147,6 +2447,10 @@ function renderizarTrilhaAuditoria() {
 }
 
 function exportarAuditLogCSV() {
+  if (!DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+    alert('🔒 Acesso Restrito pelo Administrador (Padrão inGaia / Kenlo): A exportação de logs de auditoria está desabilitada para o seu perfil de usuário.');
+    return;
+  }
   const logs = DB.getAuditLog();
   if (logs.length === 0) {
     alert('Nenhum registro de auditoria disponível para exportação.');
@@ -2296,5 +2600,13 @@ window.renderizarTrilhaAuditoria = renderizarTrilhaAuditoria;
 window.exportarAuditLogCSV = exportarAuditLogCSV;
 window.avaliarForcaSenha = avaliarForcaSenha;
 window.salvarNovaSenhaSegura = salvarNovaSenhaSegura;
+
+// Funções da Matriz de Permissões inGaia / Kenlo
+window.selecionarPerfilMatriz = selecionarPerfilMatriz;
+window.carregarJanelinhasPermissao = carregarJanelinhasPermissao;
+window.atualizarPermissaoEmTempoReal = atualizarPermissaoEmTempoReal;
+window.salvarMatrizPermissoes = salvarMatrizPermissoes;
+window.restaurarPadraoPerfilMatriz = restaurarPadraoPerfilMatriz;
+window.aplicarPermissoesNaInterface = aplicarPermissoesNaInterface;
 
 

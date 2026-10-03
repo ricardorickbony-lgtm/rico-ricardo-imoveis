@@ -15,6 +15,41 @@ const STORAGE_SOFIA_KEY = 'ricoricardo_sofia_config_v2';
 const STORAGE_LIXEIRA_KEY = 'ricoricardo_lixeira_v1';
 const STORAGE_AUDITORIA_KEY = 'ricoricardo_audit_log_v1';
 const STORAGE_PERFIL_KEY = 'ricoricardo_perfil_ativo_v1';
+const STORAGE_PERMISSOES_KEY = 'ricoricardo_permissoes_v1';
+
+// Matriz de Permissões Granulares (Padrão inGaia / Kenlo Imob)
+const PERMISSOES_PADRAO_INGAIA = {
+  diretor: {
+    verTelefoneProprietario: true,
+    verDadosBancariosPix: true,
+    exportarRelatoriosPlanilhas: true,
+    excluirImoveisLeads: true,
+    verComissoesFaturamento: true,
+    editarValoresImoveis: true,
+    configurarPortais: true,
+    verLeadsOutrosCorretores: true
+  },
+  gerente: {
+    verTelefoneProprietario: true,
+    verDadosBancariosPix: false,
+    exportarRelatoriosPlanilhas: true,
+    excluirImoveisLeads: true,
+    verComissoesFaturamento: true,
+    editarValoresImoveis: true,
+    configurarPortais: false,
+    verLeadsOutrosCorretores: true
+  },
+  corretor: {
+    verTelefoneProprietario: false, // inGaia: Corretor não vê telefone direto do dono
+    verDadosBancariosPix: false, // inGaia: Sigilo bancário de repasses
+    exportarRelatoriosPlanilhas: false, // inGaia: Bloqueado contra vazamento de carteira
+    excluirImoveisLeads: false, // inGaia: Bloqueado contra sabotagem
+    verComissoesFaturamento: false, // inGaia: Não vê faturamento geral da imobiliária
+    editarValoresImoveis: false, // inGaia: Apenas propõe, não altera preço no ar
+    configurarPortais: false,
+    verLeadsOutrosCorretores: false // inGaia: Cada corretor foca na sua carteira
+  }
+};
 
 // Configurações Oficiais da Rico Ricardo Imóveis
 const CONFIG_IMOB_PADRAO = {
@@ -1589,6 +1624,68 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       );
       window.dispatchEvent(new CustomEvent('imob_perfil_alterado', { detail: { perfil } }));
     } catch (e) {}
+  },
+
+  // Matriz de Permissões Granulares por Janelinhas (Estilo inGaia / Kenlo)
+  getPermissoes(perfil) {
+    const p = perfil || this.getPerfilAtivo() || 'diretor';
+    try {
+      const data = localStorage.getItem(STORAGE_PERMISSOES_KEY);
+      const todas = data ? JSON.parse(data) : PERMISSOES_PADRAO_INGAIA;
+      return todas[p] || PERMISSOES_PADRAO_INGAIA[p] || PERMISSOES_PADRAO_INGAIA.corretor;
+    } catch (e) {
+      return PERMISSOES_PADRAO_INGAIA[p] || PERMISSOES_PADRAO_INGAIA.corretor;
+    }
+  },
+
+  getTodasPermissoes() {
+    try {
+      const data = localStorage.getItem(STORAGE_PERMISSOES_KEY);
+      return data ? JSON.parse(data) : PERMISSOES_PADRAO_INGAIA;
+    } catch (e) {
+      return PERMISSOES_PADRAO_INGAIA;
+    }
+  },
+
+  salvarPermissoes(perfil, novasPermissoes) {
+    const todas = this.getTodasPermissoes();
+    todas[perfil] = { ...todas[perfil], ...novasPermissoes };
+    try {
+      localStorage.setItem(STORAGE_PERMISSOES_KEY, JSON.stringify(todas));
+      this.registrarLogAuditoria(
+        'Matriz de Permissões Atualizada',
+        'Segurança',
+        `Janelas de privilégios do perfil "${perfil.toUpperCase()}" foram ajustadas pelo Administrador (Padrão inGaia/Kenlo).`,
+        this.getPerfilAtivo()
+      );
+      window.dispatchEvent(new CustomEvent('imob_permissoes_atualizadas', { detail: { perfil } }));
+    } catch (e) {}
+  },
+
+  restaurarPermissoesPadrao(perfil) {
+    const todas = this.getTodasPermissoes();
+    if (perfil) {
+      todas[perfil] = { ...PERMISSOES_PADRAO_INGAIA[perfil] };
+    } else {
+      localStorage.removeItem(STORAGE_PERMISSOES_KEY);
+    }
+    try {
+      localStorage.setItem(STORAGE_PERMISSOES_KEY, JSON.stringify(todas));
+      this.registrarLogAuditoria(
+        'Permissões Restauradas',
+        'Segurança',
+        `Janelas de fábrica do perfil "${perfil ? perfil.toUpperCase() : 'TODOS'}" restauradas com sucesso.`,
+        this.getPerfilAtivo()
+      );
+      window.dispatchEvent(new CustomEvent('imob_permissoes_atualizadas', { detail: { perfil } }));
+    } catch (e) {}
+  },
+
+  usuarioTemPermissao(chave) {
+    const perfil = this.getPerfilAtivo();
+    if (perfil === 'diretor') return true; // Diretor Master sempre tem acesso total
+    const permissoes = this.getPermissoes(perfil);
+    return !!permissoes[chave];
   },
 
   // 2. Lixeira Segura & Proteção Anti-Exclusão Acidental (Soft Delete 30 Dias)
