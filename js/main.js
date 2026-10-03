@@ -484,11 +484,11 @@ function configurarEventosFiltros() {
   document.querySelectorAll('.btn-tab-finalidade').forEach(btn => {
     btn.addEventListener('click', (e) => {
       document.querySelectorAll('.btn-tab-finalidade').forEach(b => {
-        b.classList.remove('active', 'bg-blue-600', 'text-white', 'shadow-md');
-        b.classList.add('bg-white', 'text-slate-700');
+        b.classList.remove('active', 'bg-slate-950', 'text-[#FFE600]', 'shadow-md');
+        b.classList.add('bg-slate-100', 'text-slate-700');
       });
-      btn.classList.add('active', 'bg-blue-600', 'text-white', 'shadow-md');
-      btn.classList.remove('bg-white', 'text-slate-700');
+      btn.classList.add('active', 'bg-slate-950', 'text-[#FFE600]', 'shadow-md');
+      btn.classList.remove('bg-slate-100', 'text-slate-700');
 
       filtroFinalidadeAtual = btn.dataset.finalidade || 'todos';
       aplicarFiltrosEstatisticas();
@@ -516,13 +516,13 @@ function limparFiltros() {
   if (selectStatus) selectStatus.value = 'todos';
   filtroFinalidadeAtual = 'todos';
   document.querySelectorAll('.btn-tab-finalidade').forEach(b => {
-    b.classList.remove('active', 'bg-blue-600', 'text-white');
-    b.classList.add('bg-white', 'text-slate-700');
+    b.classList.remove('active', 'bg-slate-950', 'text-[#FFE600]');
+    b.classList.add('bg-slate-100', 'text-slate-700');
   });
   const btnTodos = document.querySelector('.btn-tab-finalidade[data-finalidade="todos"]');
   if (btnTodos) {
-    btnTodos.classList.add('active', 'bg-blue-600', 'text-white');
-    btnTodos.classList.remove('bg-white', 'text-slate-700');
+    btnTodos.classList.add('active', 'bg-slate-950', 'text-[#FFE600]');
+    btnTodos.classList.remove('bg-slate-100', 'text-slate-700');
   }
   aplicarFiltrosEstatisticas();
 }
