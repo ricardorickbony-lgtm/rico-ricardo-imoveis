@@ -11,7 +11,7 @@ const STORAGE_SENHA_KEY = 'ricoricardo_senha_admin';
 const STORAGE_CONTRATOS_KEY = 'ricoricardo_contratos_locacao_v1';
 const STORAGE_VISTORIAS_KEY = 'ricoricardo_vistorias_v1';
 const STORAGE_CORRETORES_KEY = 'ricoricardo_corretores_v1';
-const STORAGE_SOFIA_KEY = 'ricoricardo_sofia_config_v1';
+const STORAGE_SOFIA_KEY = 'ricoricardo_sofia_config_v2';
 
 // Configurações Oficiais da Rico Ricardo Imóveis
 const CONFIG_IMOB_PADRAO = {
@@ -647,8 +647,8 @@ const CONFIG_SOFIA_PADRAO = {
   nome: 'Sofia IA',
   cargo: 'Consultora Imobiliária Virtual 24h',
   tomVoz: 'Sofisticado, acolhedor e focado em qualificação rápida',
-  mensagemBoasVindas: 'Olá! Sou a Sofia, consultora inteligente da Prime Imóveis. Conte comigo para encontrar a cobertura, apartamento ou casa dos seus sonhos. O que você procura hoje: Comprar ou Alugar?',
-  whatsappDestino: '5511970558412'
+  mensagemBoasVindas: 'Olá! Sou a Sofia, consultora inteligente da Rico Ricardo Imóveis. Conte comigo para encontrar a cobertura, apartamento ou casa dos seus sonhos em Santo André e região. O que você procura hoje: Comprar ou Alugar?',
+  whatsappDestino: '5511914879393'
 };
 
 // Leads Iniciais para o CRM com Pipeline Kanban (5 Etapas)
@@ -1422,8 +1422,18 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
   // =========================================================================
   getSofiaConfig() {
     try {
+      // Limpa cache antigo v1 se existir
+      localStorage.removeItem('ricoricardo_sofia_config_v1');
       const data = localStorage.getItem(STORAGE_SOFIA_KEY);
-      if (data) return { ...CONFIG_SOFIA_PADRAO, ...JSON.parse(data) };
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (parsed.mensagemBoasVindas && parsed.mensagemBoasVindas.includes('Prime Im')) {
+          parsed.mensagemBoasVindas = CONFIG_SOFIA_PADRAO.mensagemBoasVindas;
+          parsed.whatsappDestino = CONFIG_SOFIA_PADRAO.whatsappDestino;
+          this.salvarSofiaConfig(parsed);
+        }
+        return { ...CONFIG_SOFIA_PADRAO, ...parsed };
+      }
     } catch (e) {}
     return { ...CONFIG_SOFIA_PADRAO };
   },

@@ -666,10 +666,12 @@ body {
 
 .sofia-msg.bot .sofia-msg-bubble {
   background: #ffffff;
-  color: #1e293b;
-  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid #cbd5e1;
   border-top-left-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .sofia-msg.user .sofia-msg-bubble {

@@ -1037,7 +1037,7 @@ function configurarModalPrivacidade() {
           <p class="text-xs text-slate-500">Última atualização: Outubro de 2026</p>
         </div>
         <div class="text-xs text-slate-600 space-y-3 max-h-[60vh] overflow-y-auto pr-2 leading-relaxed">
-          <p>Esta Política de Privacidade descreve como a <strong>Prime Imóveis & Conceito</strong> coleta, utiliza, armazena e protege os dados pessoais dos usuários de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD).</p>
+          <p>Esta Política de Privacidade descreve como a <strong>Rico Ricardo Imóveis</strong> coleta, utiliza, armazena e protege os dados pessoais dos usuários de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 - LGPD).</p>
           <h4 class="font-bold text-slate-800 text-sm">1. Coleta e Finalidade dos Dados</h4>
           <p>Coletamos dados fornecidos voluntariamente por você ao enviar mensagens, propostas, simulações de financiamento ou agendamentos de visita pelo site ou WhatsApp oficial (como Nome completo, WhatsApp/Telefone e perfil do imóvel de interesse). Esses dados são utilizados exclusivamente para o atendimento imobiliário solicitado.</p>
           <h4 class="font-bold text-slate-800 text-sm">2. Cookies e Tecnologias de Remarketing</h4>
@@ -1164,8 +1164,8 @@ function configurarWidgetSofiaIA() {
       </form>
 
       <div class="px-3 py-1.5 bg-slate-50 border-t border-slate-100 text-[10px] text-slate-400 flex items-center justify-between">
-        <span>Impacto Digital • Sofia IA</span>
-        <a href="https://wa.me/${sofiaConfig.whatsappDestino || '5511970558412'}" target="_blank" class="text-indigo-600 hover:underline font-bold">Atendimento Humano WhatsApp</a>
+        <span>Rico Ricardo Imóveis • Sofia IA</span>
+        <a href="https://wa.me/${sofiaConfig.whatsappDestino || '5511914879393'}" target="_blank" class="text-indigo-600 hover:underline font-bold">Atendimento Humano WhatsApp</a>
       </div>
     `;
     document.body.appendChild(chatBox);
@@ -1259,9 +1259,9 @@ function configurarWidgetSofiaIA() {
           <div>${escapeHtml(resultado.respostaTexto)}</div>
           ${cardsHtml}
           <div class="mt-2 pt-2 border-t border-slate-100 flex justify-end">
-            <a href="${resultado.waLink}" target="_blank" class="inline-flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] px-3 py-1.5 rounded-lg transition shadow-sm">
+            <a href="${resultado.waLink}" target="_blank" class="inline-flex items-center gap-1.5 bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold text-[11px] px-3 py-1.5 rounded-lg transition shadow-sm">
               <span>Continuar no WhatsApp</span>
-              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+              <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
             </a>
           </div>
         </div>
