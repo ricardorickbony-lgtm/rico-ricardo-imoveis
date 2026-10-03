@@ -376,16 +376,16 @@ function renderizarGridImoveis() {
     }
 
     const tagsHtml = (im.tags || []).slice(0, 2).map(tag => `
-      <span class="inline-block bg-slate-100 text-slate-600 text-[10px] font-semibold px-2 py-0.5 rounded">
+      <span class="inline-block bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md">
         ${tag}
       </span>
     `).join('');
 
     return `
-      <div class="property-card bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-sm flex flex-col justify-between group ${isVendido ? 'ring-1 ring-rose-200' : ''}">
+      <div class="property-card bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between group ${isVendido ? 'ring-2 ring-rose-300' : ''}">
         <div>
           <!-- Imagem e Badges -->
-          <div class="relative h-56 sm:h-60 overflow-hidden bg-slate-900 cursor-pointer ${isVendido ? 'grayscale-[20%]' : ''}" onclick="abrirModalImovel('${im.id}')">
+          <div class="relative h-60 sm:h-64 overflow-hidden bg-slate-900 cursor-pointer ${isVendido ? 'grayscale-[20%]' : ''}" onclick="abrirModalImovel('${im.id}')">
             <img 
               src="${im.fotoPrincipal || im.fotos[0]}" 
               alt="${im.titulo}" 
@@ -395,68 +395,68 @@ function renderizarGridImoveis() {
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none"></div>
             ${stampHtml}
             ${badgeFinalidade}
-            <span class="property-badge-code">${im.codigo}</span>
+            <span class="property-badge-code font-mono">${im.codigo}</span>
             ${badgeDestaqueHtml}
           </div>
 
           <!-- Conteúdo -->
-          <div class="p-5 space-y-3">
-            <div class="flex items-center gap-1.5 flex-wrap">
+          <div class="p-5 sm:p-6 space-y-3">
+            <div class="flex items-center gap-2 flex-wrap">
               ${tagsHtml}
             </div>
 
             <div class="cursor-pointer" onclick="abrirModalImovel('${im.id}')">
-              <h3 class="font-bold text-slate-900 text-base leading-snug line-clamp-2 group-hover:text-blue-600 transition">
+              <h3 class="font-bold text-slate-900 text-lg leading-snug line-clamp-2 group-hover:text-blue-600 transition">
                 ${im.titulo}
               </h3>
-              <p class="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <p class="text-sm text-slate-500 mt-1.5 flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 ${im.bairro}, ${im.cidade}
               </p>
             </div>
 
-            <!-- Atributos do Imóvel (m², quartos, vagas) -->
-            <div class="grid grid-cols-3 gap-2 pt-3 border-t border-slate-100 text-slate-700 text-xs">
-              <div class="flex items-center gap-1.5" title="Área Útil">
+            <!-- Atributos do Imóvel (m², quartos, vagas) com fontes legíveis -->
+            <div class="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-slate-700 text-sm">
+              <div class="flex items-center gap-1.5" title="Área Privativa">
                 <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
-                <span class="font-bold">${im.areaUtil} m²</span>
+                <span class="font-semibold">${im.areaUtil} m²</span>
               </div>
-              <div class="flex items-center gap-1.5" title="Dormitórios / Suítes">
+              <div class="flex items-center gap-1.5" title="Dormitórios">
                 <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                <span class="font-bold">${im.quartos} qtos</span>
+                <span class="font-semibold">${im.quartos} qtos</span>
               </div>
-              <div class="flex items-center gap-1.5" title="Vagas de Garagem">
+              <div class="flex items-center gap-1.5" title="Vagas">
                 <svg class="w-4 h-4 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                <span class="font-bold">${im.vagas} vagas</span>
+                <span class="font-semibold">${im.vagas} vagas</span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Rodapé do Card com Preço e Ações -->
-        <div class="p-5 pt-0">
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div class="p-5 sm:p-6 pt-0">
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between gap-3">
             <div>
-              <span class="text-lg font-black text-slate-900 leading-none">
+              <span class="text-xl sm:text-2xl font-black text-slate-900 leading-none block">
                 ${precoFormatado}
               </span>
               ${statusPrecoBadge}
-              ${(im.condominio || 0) > 0 ? `<span class="block text-[10px] text-slate-400 mt-0.5">Cond. R$ ${(im.condominio || 0).toLocaleString('pt-BR')}</span>` : ''}
+              ${(im.condominio || 0) > 0 ? `<span class="block text-xs text-slate-400 mt-1">Condomínio: R$ ${(im.condominio || 0).toLocaleString('pt-BR')}</span>` : ''}
             </div>
 
-            <div class="flex items-center gap-1.5">
+            <div class="flex items-center gap-2">
               <button 
                 onclick="abrirModalImovel('${im.id}')" 
-                class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm"
+                class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm px-4 py-2.5 rounded-xl transition shadow-sm"
                 title="Ver Fotos e Detalhes do Imóvel">
-                Detalhes
+                Ver Imóvel
               </button>
               <a 
                 href="https://wa.me/${DB.getConfig().whatsapp}?text=${encodeURIComponent(waMsg)}"
                 target="_blank"
-                class="${waBtnClasses} p-2 rounded-xl transition shadow-sm flex items-center justify-center"
+                class="${waBtnClasses} p-2.5 rounded-xl transition shadow-sm flex items-center justify-center"
                 title="${waTitle}">
-                <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
+                <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
               </a>
             </div>
           </div>
@@ -532,17 +532,25 @@ function limparFiltros() {
  */
 let imovelModalAtual = null;
 
+function fecharModalImovel() {
+  const modal = document.getElementById('modal-imovel');
+  if (modal) modal.classList.remove('active');
+}
+window.fecharModalImovel = fecharModalImovel;
+
 function configurarModal() {
   const modal = document.getElementById('modal-imovel');
   const btnFechar = document.getElementById('btn-fechar-modal');
   if (!modal) return;
 
-  btnFechar?.addEventListener('click', () => {
-    modal.classList.remove('active');
-  });
+  btnFechar?.addEventListener('click', fecharModalImovel);
 
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.classList.remove('active');
+    if (e.target === modal) fecharModalImovel();
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharModalImovel();
   });
 }
 
