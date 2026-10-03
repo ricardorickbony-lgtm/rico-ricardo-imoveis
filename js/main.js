@@ -96,7 +96,7 @@ function atualizarDadosInstitucionais() {
 }
 
 /**
- * 2. Botão Inteligente de WhatsApp com Status em Tempo Real
+ * 2. Botão Inteligente de WhatsApp com Status em Tempo Real (Sincronizado com Ficha do Google)
  */
 function configurarHorarioWhatsApp() {
   const config = DB.getConfig();
@@ -104,33 +104,102 @@ function configurarHorarioWhatsApp() {
   const diaSemana = agora.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
   const horaDecimal = agora.getHours() + (agora.getMinutes() / 60);
 
+  // Ficha do Google / Expediente Oficial da Imobiliária:
+  // Segunda a Sexta: 08:30 às 18:30
+  // Sábado: 09:00 às 14:00
+  // Domingo / Feriados: Fora de Horário (Plantão Digital)
+  const horaInicioSemana = (config && config.horaInicioSemana) ? config.horaInicioSemana : 8.5;  // 08:30
+  const horaFimSemana = (config && config.horaFimSemana) ? config.horaFimSemana : 18.5;       // 18:30
+  const horaInicioSabado = (config && config.horaInicioSabado) ? config.horaInicioSabado : 9.0;  // 09:00
+  const horaFimSabado = (config && config.horaFimSabado) ? config.horaFimSabado : 14.0;       // 14:00
+
   let estaOnline = false;
-  let statusTexto = 'Plantão de Atendimento';
+  let statusTitulo = 'Estamos Online';
+  let statusSub = 'Atendimento Imediato';
+  let tooltipStatus = '🟢 Aberto Agora • Google';
+  let msgWa = 'Olá! Estou no site da Rico Ricardo Imóveis e gostaria de falar com um corretor agora.';
 
   if (diaSemana >= 1 && diaSemana <= 5) {
     // Segunda a Sexta
-    if (horaDecimal >= config.horaInicioSemana && horaDecimal < config.horaFimSemana) {
+    if (horaDecimal >= horaInicioSemana && horaDecimal < horaFimSemana) {
       estaOnline = true;
-      statusTexto = 'Estamos online agora';
+      statusTitulo = 'Estamos Online';
+      statusSub = 'Atendimento Imediato';
+      tooltipStatus = '🟢 Aberto Agora (Seg-Sex 08:30 - 18:30)';
+      msgWa = 'Olá! Estou no site da Rico Ricardo Imóveis e gostaria de atendimento imediato.';
     } else {
-      statusTexto = 'Plantão de Vendas';
+      estaOnline = false;
+      statusTitulo = 'Fora do Horário';
+      statusSub = 'Deixe sua mensagem';
+      tooltipStatus = '🟡 Fechado no Momento (Abre às 08:30)';
+      msgWa = 'Olá! Vi o site fora do horário de expediente e gostaria de deixar uma mensagem para retorno.';
     }
   } else if (diaSemana === 6) {
     // Sábado
-    if (horaDecimal >= config.horaInicioSabado && horaDecimal < config.horaFimSabado) {
+    if (horaDecimal >= horaInicioSabado && horaDecimal < horaFimSabado) {
       estaOnline = true;
-      statusTexto = 'Estamos online agora';
+      statusTitulo = 'Estamos Online';
+      statusSub = 'Plantão de Sábado';
+      tooltipStatus = '🟢 Aberto Agora (Sáb 09:00 - 14:00)';
+      msgWa = 'Olá! Estou no site da Rico Ricardo Imóveis e gostaria de falar com um corretor de plantão neste sábado.';
     } else {
-      statusTexto = 'Plantão de Vendas';
+      estaOnline = false;
+      statusTitulo = 'Fora do Horário';
+      statusSub = 'Deixe sua mensagem';
+      tooltipStatus = '🟡 Fechado no Momento (Abre Segunda às 08:30)';
+      msgWa = 'Olá! Visitei o site no fim de semana fora do horário e gostaria de deixar uma mensagem para contato.';
     }
   } else {
-    // Domingo / Feriado
-    statusTexto = 'Plantão de Vendas';
+    // Domingo
+    estaOnline = false;
+    statusTitulo = 'Fora do Horário';
+    statusSub = 'Plantão • Deixe recado';
+    tooltipStatus = '🟡 Fechado no Domingo (Abre Segunda às 08:30)';
+    msgWa = 'Olá! Visitei o site no domingo e gostaria de receber o contato de um corretor na segunda-feira.';
   }
 
-  // Atualiza indicadores visuais nos botões
+  // Atualiza Widget Flutuante Principal
+  const btnContainer = document.getElementById('btn-whatsapp-flutuante');
+  const titleEl = document.getElementById('wa-btn-status-title');
+  const subEl = document.getElementById('wa-btn-status-sub');
+  const pingEl = document.getElementById('wa-btn-ping');
+  const dotEl = document.getElementById('wa-btn-dot');
+  const tooltipStatusEl = document.getElementById('wa-tooltip-status');
+  const tooltipDotEl = document.getElementById('wa-tooltip-dot');
+
+  const waNumber = (config && config.whatsapp) ? config.whatsapp : '5511914879393';
+  const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(msgWa)}`;
+
+  if (btnContainer) {
+    btnContainer.href = waUrl;
+    if (estaOnline) {
+      btnContainer.className = 'btn-wa-status-container bg-[#25D366] hover:bg-[#20BA5A] text-white pl-3.5 pr-4 sm:pr-5 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-3 border-2 border-white/20 shadow-emerald-950/40';
+      if (titleEl) titleEl.textContent = statusTitulo;
+      if (subEl) {
+        subEl.textContent = statusSub;
+        subEl.className = 'text-[10px] sm:text-[11px] font-semibold text-emerald-100 opacity-95';
+      }
+      if (pingEl) pingEl.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-200 opacity-75';
+      if (dotEl) dotEl.className = 'relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-400 border-2 border-white';
+      if (tooltipDotEl) tooltipDotEl.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+      if (tooltipStatusEl) tooltipStatusEl.textContent = tooltipStatus;
+    } else {
+      btnContainer.className = 'btn-wa-status-container bg-slate-900 hover:bg-slate-800 text-white pl-3.5 pr-4 sm:pr-5 py-3 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 flex items-center gap-3 border-2 border-emerald-500/40 shadow-slate-950/60';
+      if (titleEl) titleEl.textContent = statusTitulo;
+      if (subEl) {
+        subEl.textContent = statusSub;
+        subEl.className = 'text-[10px] sm:text-[11px] font-semibold text-amber-300 opacity-95';
+      }
+      if (pingEl) pingEl.className = 'hidden';
+      if (dotEl) dotEl.className = 'relative inline-flex rounded-full h-3.5 w-3.5 bg-amber-400 border-2 border-white';
+      if (tooltipDotEl) tooltipDotEl.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+      if (tooltipStatusEl) tooltipStatusEl.textContent = tooltipStatus;
+    }
+  }
+
+  // Atualiza indicadores visuais gerais e botões com status
   document.querySelectorAll('.wa-status-text').forEach(el => {
-    el.textContent = statusTexto;
+    el.textContent = estaOnline ? 'Estamos online agora' : 'Plantão de Atendimento';
   });
 
   document.querySelectorAll('.wa-status-dot').forEach(el => {
@@ -141,8 +210,7 @@ function configurarHorarioWhatsApp() {
     }
   });
 
-  // Atualiza links de WhatsApp para o número oficial
-  const waUrl = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent('Olá! Gostaria de informações sobre os imóveis disponíveis na ' + config.nome + '.')}`;
+  // Atualiza links dinâmicos gerais
   document.querySelectorAll('.link-wa-dinamico').forEach(el => {
     el.href = waUrl;
   });
