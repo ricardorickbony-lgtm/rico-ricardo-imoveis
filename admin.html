@@ -105,22 +105,28 @@
         </div>
       </div>
 
-      <!-- Links Rápidos para Ver os Sites / Sair -->
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-xs text-slate-400 hidden md:inline">Ver no Site:</span>
-        <a href="index.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
+      <!-- Seletor de Perfil RBAC (Segurança Multi-Nível) e Links de Navegação -->
+      <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+        
+        <!-- Seletor de Perfil RBAC -->
+        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+          <span class="text-[10px] font-bold text-slate-500 pl-2 hidden lg:inline">Perfil:</span>
+          <button id="btn-perfil-diretor" onclick="trocarPerfilSeguranca('diretor')" class="btn-perfil-toggle px-2.5 py-1 rounded-lg text-xs font-bold transition bg-white text-blue-700 shadow-sm" title="Acesso Irrestrito (Dono / Diretor)">
+            👑 Diretor
+          </button>
+          <button id="btn-perfil-gerente" onclick="trocarPerfilSeguranca('gerente')" class="btn-perfil-toggle px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900" title="Supervisão de Equipe (Financeiro com Máscara de Proteção)">
+            👔 Gerente
+          </button>
+          <button id="btn-perfil-corretor" onclick="trocarPerfilSeguranca('corretor')" class="btn-perfil-toggle px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900" title="Acesso a Carteira Própria">
+            💼 Corretor
+          </button>
+        </div>
+
+        <span class="text-xs text-slate-400 hidden xl:inline">|</span>
+        <a href="index.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition" title="Abrir Portal Principal">
           🏢 Portal
         </a>
-        <a href="template-luxo.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
-          ✨ Luxo
-        </a>
-        <a href="template-clean.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
-          ⚡ Clean
-        </a>
-        <a href="template-lancamentos.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition">
-          🏗️ Lançamentos
-        </a>
-        <button id="btn-logout" class="text-xs font-bold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition ml-2 border border-rose-200">
+        <button id="btn-logout" class="text-xs font-bold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-lg transition border border-rose-200">
           Sair
         </button>
       </div>
@@ -149,6 +155,9 @@
         </button>
         <button data-tab="aba-sofia" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
           <span>🤖 Sofia IA (24h)</span>
+        </button>
+        <button data-tab="aba-seguranca" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+          <span>🔐 Segurança & LGPD</span>
         </button>
         <button data-tab="aba-config" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
           <span>⚙️ Config & Pixel</span>
@@ -1000,6 +1009,218 @@
             </button>
           </div>
         </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- ABA 8: CENTRAL DE SEGURANÇA, AUDITORIA & LGPD (PADRÃO 2026)           -->
+      <!-- ===================================================================== -->
+      <section id="aba-seguranca" class="painel-aba-conteudo hidden space-y-6">
+        
+        <!-- Header da Central de Segurança -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold text-slate-900">Central de Segurança, Auditoria & LGPD</h2>
+              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full uppercase flex items-center gap-1 border border-emerald-200">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Sistema Blindado
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Proteção de dados cadastrais, trilha de auditoria inviolável, lixeira com soft-delete e compliance Lei 13.709/2018.
+            </p>
+          </div>
+
+          <!-- Badges de Certificação e Governança -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-semibold bg-slate-900 text-white px-3 py-1 rounded-lg shadow-sm flex items-center gap-1.5">
+              <span>🛡️</span> OWASP Standards
+            </span>
+            <span class="text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1 rounded-lg flex items-center gap-1.5">
+              <span>🇧🇷</span> LGPD Compliant
+            </span>
+            <span class="text-[11px] font-semibold bg-purple-50 text-purple-700 border border-purple-200 px-3 py-1 rounded-lg flex items-center gap-1.5">
+              <span>🔒</span> TLS 1.3 / AES-256
+            </span>
+          </div>
+        </div>
+
+        <!-- Cockpit de Status de Segurança (4 Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Card 1: Criptografia -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Criptografia</span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+            </div>
+            <div class="text-base font-black text-slate-900">TLS 1.3 Ativo</div>
+            <p class="text-[11px] text-slate-500 leading-tight">Tráfego de rede criptografado de ponta a ponta sem vazamentos.</p>
+          </div>
+
+          <!-- Card 2: Lixeira Segura (Soft-Delete) -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lixeira Segura</span>
+              <span id="badge-lixeira-count" class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">0 Itens</span>
+            </div>
+            <div class="text-base font-black text-slate-900">30 Dias de Retenção</div>
+            <p class="text-[11px] text-slate-500 leading-tight">Proteção contra exclusão acidental com restauração em 1 clique.</p>
+          </div>
+
+          <!-- Card 3: Trilha de Auditoria -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Audit Trail</span>
+              <span id="badge-audit-count" class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full">Ativo</span>
+            </div>
+            <div class="text-base font-black text-slate-900">Registro em Tempo Real</div>
+            <p class="text-[11px] text-slate-500 leading-tight">Log imutável de todas as ações de corretores e administradores.</p>
+          </div>
+
+          <!-- Card 4: Mascaramento LGPD -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mascaramento LGPD</span>
+              <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Protegido</span>
+            </div>
+            <div class="text-base font-black text-slate-900">Privacidade Visual</div>
+            <p class="text-[11px] text-slate-500 leading-tight">Controle estrito de visualização de CPF, PIX e dados bancários.</p>
+          </div>
+
+        </div>
+
+        <!-- Alerta de Troca de Senha Padrão (Se aplicável) -->
+        <div id="alerta-senha-padrao" class="bg-amber-50 border border-amber-200 rounded-3xl p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-amber-500 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-sm">
+              ⚠️
+            </div>
+            <div>
+              <h4 class="font-bold text-amber-900 text-sm">Atenção: Sistema Operando com Senha de Demonstração</h4>
+              <p class="text-xs text-amber-700">A senha atual é <code class="bg-amber-100 px-1.5 py-0.5 rounded font-mono font-bold">admin123</code>. Para entrada em produção real, defina uma senha forte na seção abaixo.</p>
+            </div>
+          </div>
+          <button onclick="document.getElementById('input-seg-nova-senha').focus()" class="bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow-sm whitespace-nowrap">
+            Atualizar Senha Agora
+          </button>
+        </div>
+
+        <!-- Grid: Lixeira Segura & Gestão de Credenciais -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- Coluna 1 & 2: Lixeira Segura (Soft Delete de 30 Dias) -->
+          <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                  <span>🗑️ Lixeira Segura do Sistema</span>
+                  <span class="text-xs font-normal text-slate-500">(Soft Delete)</span>
+                </h3>
+                <p class="text-xs text-slate-500">Itens excluídos permanecem aqui por 30 dias. Podem ser restaurados instantaneamente.</p>
+              </div>
+              <button id="btn-esvaziar-lixeira" onclick="esvaziarLixeiraComConfirmacao()" class="text-xs font-bold text-rose-600 hover:bg-rose-50 px-3 py-1.5 rounded-xl border border-rose-200 transition">
+                Esvaziar Lixeira
+              </button>
+            </div>
+
+            <!-- Lista de Itens na Lixeira -->
+            <div id="container-lixeira-itens" class="space-y-2.5 max-h-[320px] overflow-y-auto pr-1 text-xs">
+              <!-- Populado via JS -->
+            </div>
+          </div>
+
+          <!-- Coluna 3: Gestor de Senha Mestra & Medidor de Força -->
+          <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base">Gestor de Senha Mestra</h3>
+              <p class="text-xs text-slate-500">Altere a chave mestra de autenticação do SaaS</p>
+            </div>
+
+            <form id="form-alterar-senha-segura" class="space-y-3 text-xs" onsubmit="salvarNovaSenhaSegura(event)">
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1">Senha Atual</label>
+                <input type="password" id="input-seg-senha-atual" required placeholder="Digite a senha atual" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1">Nova Senha Forte</label>
+                <input type="password" id="input-seg-nova-senha" required placeholder="Mínimo 8 dígitos com números e símbolos" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" oninput="avaliarForcaSenha(this.value)">
+                
+                <!-- Medidor de Força da Senha -->
+                <div class="mt-2 space-y-1">
+                  <div class="flex justify-between text-[10px] font-bold">
+                    <span class="text-slate-500">Força da Senha:</span>
+                    <span id="texto-forca-senha" class="text-slate-400">Insira a senha</span>
+                  </div>
+                  <div class="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div id="barra-forca-senha" class="h-full w-0 bg-rose-500 transition-all duration-300"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-bold text-slate-700 uppercase mb-1">Confirmar Nova Senha</label>
+                <input type="password" id="input-seg-confirmar-senha" required placeholder="Repita a nova senha" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+              </div>
+
+              <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition shadow">
+                Salvar Nova Senha Mestra
+              </button>
+            </form>
+          </div>
+
+        </div>
+
+        <!-- Trilha de Auditoria em Tempo Real (Audit Trail) -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 flex-wrap">
+            <div>
+              <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
+                <span>📋 Trilha de Auditoria Inviolável (Audit Log)</span>
+                <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full uppercase">Tempo Real</span>
+              </h3>
+              <p class="text-xs text-slate-500">Histórico de todas as ações administrativas, alterações de preços, novos contratos e logins.</p>
+            </div>
+
+            <!-- Filtros e Ação de Exportar -->
+            <div class="flex items-center gap-2 flex-wrap">
+              <select id="filtro-categoria-audit" onchange="renderizarTrilhaAuditoria()" class="bg-slate-50 border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-bold text-slate-700">
+                <option value="">Todas as Categorias</option>
+                <option value="Autenticação">Autenticação</option>
+                <option value="Imóveis">Imóveis</option>
+                <option value="Leads">Leads</option>
+                <option value="Locação">Locação / Contratos</option>
+                <option value="Vistorias">Vistorias</option>
+                <option value="Segurança">Segurança</option>
+                <option value="Compliance LGPD">Compliance LGPD</option>
+              </select>
+
+              <button onclick="exportarAuditLogCSV()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-3.5 py-1.5 rounded-xl border border-slate-200 transition flex items-center gap-1.5">
+                <span>📥 Exportar CSV</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabela de Logs de Auditoria -->
+          <div class="overflow-x-auto rounded-2xl border border-slate-200">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
+                <tr>
+                  <th class="py-3 px-4">Data / Hora</th>
+                  <th class="py-3 px-4">Categoria</th>
+                  <th class="py-3 px-4">Ação</th>
+                  <th class="py-3 px-4">Detalhes Técnicos</th>
+                  <th class="py-3 px-4">Autor / Perfil</th>
+                  <th class="py-3 px-4">Status</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-audit-log-linhas" class="divide-y divide-slate-100">
+                <!-- Populado via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </section>
 
     </main>

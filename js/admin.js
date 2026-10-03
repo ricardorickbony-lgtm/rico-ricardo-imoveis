@@ -83,6 +83,7 @@ function initAdminSaaS() {
   configurarGestaoLocacao();
   configurarVistoriasDigitais();
   configurarSofiaIA();
+  configurarAbaSeguranca();
   configurarModaisGlobais();
 }
 
@@ -107,6 +108,7 @@ function exibirTelaLogin() {
 function exibirPainelPrincipal() {
   document.getElementById('secao-login').classList.add('hidden');
   document.getElementById('painel-admin-conteudo').classList.remove('hidden');
+  aplicarPerfilSeguranca(DB.getPerfilAtivo());
   carregarMetricasDashboard();
   renderizarTabelaImoveis();
   renderizarPipelineKanban();
@@ -118,6 +120,7 @@ function exibirPainelPrincipal() {
   carregarSofiaConfigNoPainel();
   carregarFormularioConfig();
   atualizarStatusPortaisNaTela();
+  renderizarAbaSeguranca();
 }
 
 function configurarEventosLogin() {
@@ -133,6 +136,7 @@ function configurarEventosLogin() {
       sessionStorage.setItem('imob_admin_logado', 'true');
       sessaoAutenticada = true;
       erroLogin?.classList.add('hidden');
+      DB.registrarLogAuditoria('Login Administrativo Efetuado', 'Autenticação', `Acesso autorizado ao painel SaaS com perfil ${DB.getPerfilAtivo().toUpperCase()}`, DB.getPerfilAtivo());
       exibirPainelPrincipal();
     } else {
       erroLogin?.classList.remove('hidden');
@@ -142,6 +146,7 @@ function configurarEventosLogin() {
   });
 
   document.getElementById('btn-logout')?.addEventListener('click', () => {
+    DB.registrarLogAuditoria('Logout de Sessão', 'Autenticação', 'Sessão administrativa encerrada pelo usuário.', DB.getPerfilAtivo());
     sessionStorage.removeItem('imob_admin_logado');
     location.reload();
   });
@@ -181,6 +186,7 @@ function configurarNavegacaoAbas() {
       if (targetId === 'aba-sofia') carregarSofiaConfigNoPainel();
       if (targetId === 'aba-dashboard') carregarMetricasDashboard();
       if (targetId === 'aba-portais') atualizarStatusPortaisNaTela();
+      if (targetId === 'aba-seguranca') renderizarAbaSeguranca();
     });
   });
 }
@@ -337,6 +343,13 @@ function alterarStatusImovelRapido(id, novoStatus) {
   renderizarTabelaImoveis();
   renderizarTabelaPortaisSincronizacao();
 
+  DB.registrarLogAuditoria(
+    'Alteração de Status',
+    'Imóveis',
+    `Imóvel ${im?.codigo || id} alterado para "${novoStatus.toUpperCase()}". Sincronização multi-portais aplicada.`,
+    DB.getPerfilAtivo()
+  );
+
   if (novoStatus === 'vendido') {
     mostrarToastFeedback(`🎉 Imóvel ${im?.codigo || ''} marcado como VENDIDO! O site exibe o selo VENDIDO e os portais (ZAP, VivaReal) foram despublicados automaticamente.`, '🏆');
   } else if (novoStatus === 'alugado') {
@@ -349,10 +362,14 @@ function alterarStatusImovelRapido(id, novoStatus) {
 }
 
 function excluirImovel(id) {
-  if (confirm('Tem certeza que deseja excluir este imóvel do catálogo?')) {
-    DB.removerImovel(id);
+  const imovel = DB.getImoveis().find(im => im.id === id);
+  const titulo = imovel ? `${imovel.codigo} - ${imovel.titulo}` : id;
+  if (confirm(`Mover "${titulo}" para a Lixeira Segura?\n\nO item ficará protegido por 30 dias com restauração em 1 clique na Central de Segurança & LGPD.`)) {
+    DB.moverParaLixeira('imovel', id, 'Exclusão solicitada pelo usuário no catálogo', DB.getPerfilAtivo());
     renderizarTabelaImoveis();
     carregarMetricasDashboard();
+    renderizarAbaSeguranca();
+    mostrarToastFeedback('✓ Imóvel movido para a Lixeira Segura (recuperável por 30 dias)', '🗑️');
   }
 }
 
@@ -461,8 +478,22 @@ function configurarFormularioImovel() {
 
     if (imovelEmEdicaoId) {
       DB.atualizarImovel(imovelEmEdicaoId, dadosImovel);
+      DB.registrarLogAuditoria(
+        'Edição de Imóvel',
+        'Imóveis',
+        `Imóvel ${dadosImovel.codigo} - ${dadosImovel.titulo} atualizado no catálogo (Preço: R$ ${(dadosImovel.preco || dadosImovel.precoAluguel || 0).toLocaleString('pt-BR')})`,
+        DB.getPerfilAtivo()
+      );
+      mostrarToastFeedback(`✓ Imóvel ${dadosImovel.codigo} atualizado com sucesso!`);
     } else {
       DB.adicionarImovel(dadosImovel);
+      DB.registrarLogAuditoria(
+        'Cadastro de Imóvel',
+        'Imóveis',
+        `Novo imóvel ${dadosImovel.codigo} - ${dadosImovel.titulo} cadastrado no catálogo`,
+        DB.getPerfilAtivo()
+      );
+      mostrarToastFeedback(`✓ Imóvel ${dadosImovel.codigo} cadastrado com sucesso!`);
     }
 
     modal.classList.remove('active');
@@ -632,12 +663,26 @@ function renderizarTabelaLeads() {
 
 function alterarEtapaLeadRapido(id, novaEtapa) {
   DB.moverEtapaLead(id, novaEtapa);
+  const lead = DB.getLeads().find(l => l.id === id);
+  DB.registrarLogAuditoria(
+    'Funil de Vendas',
+    'Leads',
+    `Lead "${lead?.nome || id}" movido para etapa "${novaEtapa.toUpperCase()}"`,
+    DB.getPerfilAtivo()
+  );
   renderizarPipelineKanban();
   carregarMetricasDashboard();
 }
 
 function avancarEtapaLeadRapido(id) {
   DB.avancarEtapaLead(id);
+  const lead = DB.getLeads().find(l => l.id === id);
+  DB.registrarLogAuditoria(
+    'Funil de Vendas',
+    'Leads',
+    `Lead "${lead?.nome || id}" avançou no funil Kanban`,
+    DB.getPerfilAtivo()
+  );
   renderizarPipelineKanban();
   renderizarTabelaLeads();
   carregarMetricasDashboard();
@@ -650,11 +695,15 @@ function alterarStatusLeadRapido(id, novoStatus) {
 }
 
 function excluirLead(id) {
-  if (confirm('Deseja excluir este lead?')) {
-    DB.removerLead(id);
+  const lead = DB.getLeads().find(l => l.id === id);
+  const nome = lead ? lead.nome : id;
+  if (confirm(`Mover o lead "${nome}" para a Lixeira Segura?\n\nO contato será preservado por 30 dias e pode ser restaurado a qualquer momento na Central de Segurança & LGPD.`)) {
+    DB.moverParaLixeira('lead', id, 'Exclusão solicitada pelo usuário no CRM', DB.getPerfilAtivo());
     renderizarPipelineKanban();
     renderizarTabelaLeads();
     carregarMetricasDashboard();
+    renderizarAbaSeguranca();
+    mostrarToastFeedback('✓ Lead movido para a Lixeira Segura', '🗑️');
   }
 }
 
@@ -1283,6 +1332,9 @@ function configurarGestaoLocacao() {
 function renderizarGestaoLocacao() {
   const metricas = DB.calcularMetricasLocacao();
   const contratos = DB.getContratosLocacao();
+  const perfil = DB.getPerfilAtivo();
+  const isCorretor = perfil === 'corretor';
+  const isGerente = perfil === 'gerente';
 
   const elTotal = document.getElementById('loc-total-alugueis');
   const elRepasses = document.getElementById('loc-total-repasses');
@@ -1290,8 +1342,12 @@ function renderizarGestaoLocacao() {
   const elAdimp = document.getElementById('loc-adimplencia');
 
   if (elTotal) elTotal.textContent = `R$ ${metricas.totalAlugueis.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-  if (elRepasses) elRepasses.textContent = `R$ ${metricas.totalRepasses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
-  if (elReceita) elReceita.textContent = `R$ ${metricas.taxaAdmTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  if (elRepasses) {
+    elRepasses.textContent = isCorretor ? '••••••••••' : `R$ ${metricas.totalRepasses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  }
+  if (elReceita) {
+    elReceita.textContent = isCorretor ? '••••••••••' : `R$ ${metricas.taxaAdmTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  }
   if (elAdimp) elAdimp.textContent = `${metricas.taxaAdimplencia}%`;
 
   const container = document.getElementById('tabela-contratos-corpo');
@@ -1313,6 +1369,24 @@ function renderizarGestaoLocacao() {
       ? 'bg-emerald-100 text-emerald-800'
       : (c.statusMes === 'Atrasado' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800');
 
+    // Mascaramento LGPD por perfil RBAC
+    let propDoc = c.proprietarioDocumento || '';
+    let propNome = c.proprietarioNome || '';
+    let inqDoc = c.inquilinoDocumento || '';
+    let repasseHtml = `R$ ${c.valorRepasseLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+    let taxaAdmHtml = `Taxa ADM: R$ ${c.taxaAdmValor.toLocaleString('pt-BR')} (${c.taxaAdmPercentual}%)`;
+
+    if (isCorretor) {
+      propDoc = '•••.•••.•••-•• (LGPD)';
+      propNome = propNome.split(' ')[0] + ' (Sob Proteção)';
+      inqDoc = '•••.•••.•••-•• (LGPD)';
+      repasseHtml = '<span class="text-slate-400 font-mono text-[11px]">(Acesso Restrito)</span>';
+      taxaAdmHtml = '<span class="text-slate-400 font-mono text-[10px]">(Restrito)</span>';
+    } else if (isGerente) {
+      if (propDoc.length >= 11) propDoc = propDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
+      if (inqDoc.length >= 11) inqDoc = inqDoc.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
+    }
+
     return `
       <tr class="hover:bg-slate-50/80 transition border-b border-slate-100">
         <td class="py-3 px-4">
@@ -1321,18 +1395,18 @@ function renderizarGestaoLocacao() {
         </td>
         <td class="py-3 px-4">
           <div class="font-bold text-slate-900 text-xs">${c.inquilinoNome}</div>
-          <div class="text-[10px] text-slate-400 font-mono">${c.inquilinoDocumento}</div>
+          <div class="text-[10px] text-slate-400 font-mono">${inqDoc}</div>
         </td>
         <td class="py-3 px-4">
-          <div class="font-bold text-slate-900 text-xs">${c.proprietarioNome}</div>
-          <div class="text-[10px] text-slate-400 font-mono">${c.proprietarioDocumento}</div>
+          <div class="font-bold text-slate-900 text-xs">${propNome}</div>
+          <div class="text-[10px] text-slate-400 font-mono">${propDoc}</div>
         </td>
         <td class="py-3 px-4">
           <div class="font-black text-slate-900 text-xs">R$ ${c.valorAluguel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</div>
-          <div class="text-[10px] text-blue-600 font-bold">Taxa ADM: R$ ${c.taxaAdmValor.toLocaleString('pt-BR')} (${c.taxaAdmPercentual}%)</div>
+          <div class="text-[10px] text-blue-600 font-bold">${taxaAdmHtml}</div>
         </td>
         <td class="py-3 px-4 font-black text-emerald-600 text-xs">
-          R$ ${c.valorRepasseLiquido.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+          ${repasseHtml}
         </td>
         <td class="py-3 px-4">
           <div class="text-[11px] text-slate-500 font-semibold mb-1">Dia ${c.diaVencimento}</div>
@@ -1359,6 +1433,12 @@ function renderizarGestaoLocacao() {
 
 function alterarStatusContratoRapido(id, novoStatus) {
   DB.atualizarStatusContrato(id, novoStatus);
+  DB.registrarLogAuditoria(
+    'Status de Contrato',
+    'Locação',
+    `Contrato ${id} atualizado para status "${novoStatus}".`,
+    DB.getPerfilAtivo()
+  );
   renderizarGestaoLocacao();
 }
 
@@ -1409,12 +1489,33 @@ function abrirReciboInquilino(contratoId) {
 }
 
 function abrirExtratoProprietario(contratoId) {
+  const perfil = DB.getPerfilAtivo();
+  if (perfil === 'corretor') {
+    alert('🔒 Acesso Restrito pela LGPD: O extrato bancário de repasse ao proprietário é confidencial e acessível apenas aos perfis Gerência e Diretoria.');
+    return;
+  }
+
   const contrato = DB.getContratosLocacao().find(c => c.id === contratoId);
   if (!contrato) return;
 
   const config = DB.getConfig();
   const container = document.getElementById('recibo-locacao-imprimir-conteudo');
   if (!container) return;
+
+  let propDocExibido = contrato.proprietarioDocumento;
+  let pixExibido = contrato.proprietarioPix || 'Cadastrada no banco';
+
+  if (perfil === 'gerente') {
+    if (propDocExibido && propDocExibido.length >= 11) {
+      propDocExibido = propDocExibido.replace(/^(\d{3})\.?(\d{3})\.?(\d{3})-?(\d{2})$/, '$1.•••.•••-$4');
+    }
+    if (pixExibido.includes('@')) {
+      const parts = pixExibido.split('@');
+      pixExibido = parts[0].substring(0, 3) + '••••@' + parts[1];
+    } else if (pixExibido.length > 6) {
+      pixExibido = pixExibido.substring(0, 3) + '••••' + pixExibido.slice(-2);
+    }
+  }
 
   container.innerHTML = `
     <div class="p-6 bg-white border border-slate-200 rounded-2xl space-y-4 text-slate-800">
@@ -1429,10 +1530,10 @@ function abrirExtratoProprietario(contratoId) {
       </div>
 
       <div class="text-xs space-y-1">
-        <p><strong>Proprietário (Locador):</strong> ${contrato.proprietarioNome} (CPF: ${contrato.proprietarioDocumento})</p>
+        <p><strong>Proprietário (Locador):</strong> ${contrato.proprietarioNome} (CPF: ${propDocExibido})</p>
         <p><strong>Inquilino:</strong> ${contrato.inquilinoNome}</p>
         <p><strong>Imóvel:</strong> ${contrato.imovelTitulo} (${contrato.imovelCodigo})</p>
-        <p><strong>Chave PIX para Transferência:</strong> <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded font-bold">${contrato.proprietarioPix || 'Cadastrada no banco'}</span></p>
+        <p><strong>Chave PIX para Transferência:</strong> <span class="font-mono bg-slate-100 px-1.5 py-0.5 rounded font-bold">${pixExibido}</span></p>
       </div>
 
       <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs space-y-2">
@@ -1500,6 +1601,13 @@ function configurarVistoriasDigitais() {
       chavesEntregues: chaves || 'Chaves entregues conforme contrato',
       observacoes: obs || 'Imóvel em perfeitas condições de uso.'
     });
+
+    DB.registrarLogAuditoria(
+      'Laudo de Vistoria Digital',
+      'Vistorias',
+      `Laudo de vistoria (${tipo}) emitido para imóvel ${imovelCodigo} por ${vistoriador}.`,
+      DB.getPerfilAtivo()
+    );
 
     document.getElementById('modal-nova-vistoria')?.classList.remove('active');
     document.getElementById('form-salvar-vistoria')?.reset();
@@ -1702,6 +1810,330 @@ function carregarSofiaConfigNoPainel() {
   if (inputSaudacao) inputSaudacao.value = config.mensagemBoasVindas || '';
 }
 
+/**
+ * 16. Central de Segurança, Governança, RBAC & LGPD
+ */
+function configurarAbaSeguranca() {
+  window.addEventListener('imob_audit_log_atualizado', () => {
+    renderizarTrilhaAuditoria();
+  });
+}
+
+function trocarPerfilSeguranca(novoPerfil) {
+  DB.salvarPerfilAtivo(novoPerfil);
+  DB.registrarLogAuditoria(
+    'Alternância de Perfil RBAC',
+    'Segurança',
+    `Perfil ativo alternado para "${novoPerfil.toUpperCase()}". Permissões de visualização e edição ajustadas.`,
+    novoPerfil
+  );
+  aplicarPerfilSeguranca(novoPerfil);
+  const icones = { diretor: '👑', gerente: '👔', corretor: '💼' };
+  mostrarToastFeedback(`Perfil ativo: ${novoPerfil.toUpperCase()} (Nível de Acesso Aplicado)`, icones[novoPerfil] || '🔐');
+}
+
+function aplicarPerfilSeguranca(perfil) {
+  const p = perfil || DB.getPerfilAtivo() || 'diretor';
+
+  // Atualiza botões visuais no cabeçalho
+  document.querySelectorAll('.btn-perfil-toggle').forEach(btn => {
+    btn.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+    btn.classList.add('text-slate-600', 'hover:text-slate-900');
+  });
+
+  const btnAtivo = document.getElementById(`btn-perfil-${p}`);
+  if (btnAtivo) {
+    btnAtivo.classList.add('bg-white', 'text-blue-700', 'shadow-sm');
+    btnAtivo.classList.remove('text-slate-600', 'hover:text-slate-900');
+  }
+
+  // Re-renderiza abas com dados sensíveis
+  renderizarGestaoLocacao();
+}
+
+function renderizarAbaSeguranca() {
+  const lixeira = DB.getLixeira();
+  const logs = DB.getAuditLog();
+
+  // Badges superiores
+  const badgeLixeira = document.getElementById('badge-lixeira-count');
+  if (badgeLixeira) badgeLixeira.textContent = `${lixeira.length} ${lixeira.length === 1 ? 'Item' : 'Itens'}`;
+
+  const badgeAudit = document.getElementById('badge-audit-count');
+  if (badgeAudit) badgeAudit.textContent = `${logs.length} Eventos`;
+
+  // Banner de alerta para troca de senha padrão
+  const alertaSenha = document.getElementById('alerta-senha-padrao');
+  if (alertaSenha) {
+    if (DB.validarSenhaAdmin('admin123')) {
+      alertaSenha.classList.remove('hidden');
+    } else {
+      alertaSenha.classList.add('hidden');
+    }
+  }
+
+  renderizarLixeira();
+  renderizarTrilhaAuditoria();
+}
+
+function renderizarLixeira() {
+  const container = document.getElementById('container-lixeira-itens');
+  if (!container) return;
+
+  const lixeira = DB.getLixeira();
+
+  if (lixeira.length === 0) {
+    container.innerHTML = `
+      <div class="py-10 text-center text-slate-400 bg-slate-50 border border-dashed border-slate-200 rounded-2xl">
+        <span class="text-3xl block mb-2">🛡️</span>
+        <p class="font-bold text-slate-700 text-sm">Lixeira Segura Vazia</p>
+        <p class="text-xs text-slate-400 mt-1">Todos os imóveis e oportunidades estão ativos e protegidos no sistema.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = lixeira.map(item => {
+    const isImovel = item.tipo === 'imovel';
+    const icone = isImovel ? '🏢' : '👤';
+    const tipoLabel = isImovel ? 'Imóvel' : 'Lead';
+
+    return `
+      <div class="flex items-center justify-between p-3.5 bg-slate-50 hover:bg-slate-100 rounded-2xl border border-slate-200 transition gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-base shrink-0 shadow-sm">
+            ${icone}
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-bold text-slate-900 truncate">${item.tituloOuNome}</span>
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">${tipoLabel}</span>
+              <span class="text-[10px] font-mono text-slate-500">${item.codigoOuInfo}</span>
+            </div>
+            <p class="text-[11px] text-slate-500 mt-0.5 truncate">
+              Excluído em ${item.dataExclusao} por <strong class="text-slate-700">${item.autor}</strong> • Retenção até ${new Date(item.expiraEm).toLocaleDateString('pt-BR')}
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="restaurarItemLixeira('${item.id}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3 py-1.5 rounded-xl transition shadow-sm flex items-center gap-1" title="Restaurar item imediatamente">
+            <span>↺</span>
+            <span>Restaurar</span>
+          </button>
+          <button onclick="excluirPermanenteItemLixeira('${item.id}')" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg transition" title="Destruição permanente definitiva (LGPD Expurgar)">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function restaurarItemLixeira(id) {
+  const sucesso = DB.restaurarDaLixeira(id);
+  if (sucesso) {
+    renderizarAbaSeguranca();
+    renderizarTabelaImoveis();
+    renderizarPipelineKanban();
+    renderizarTabelaLeads();
+    carregarMetricasDashboard();
+    mostrarToastFeedback('✓ Item restaurado com sucesso para o catálogo/CRM!', '↺');
+  }
+}
+
+function excluirPermanenteItemLixeira(id) {
+  if (confirm('⚠️ DESTRUIÇÃO PERMANENTE (LGPD Expurgar):\n\nEsta ação apagará definitivamente este registro do banco de dados local. Não será possível recuperá-lo.\n\nDeseja prosseguir com a exclusão definitiva?')) {
+    DB.excluirPermanenteLixeira(id);
+    renderizarAbaSeguranca();
+    mostrarToastFeedback('Item expurgado definitivamente conforme protocolo LGPD.', '🛡️');
+  }
+}
+
+function esvaziarLixeiraComConfirmacao() {
+  const total = DB.getLixeira().length;
+  if (total === 0) {
+    alert('A lixeira segura já está vazia.');
+    return;
+  }
+
+  if (confirm(`⚠️ Atenção: Deseja esvaziar a lixeira e expurgar definitivamente todos os ${total} itens?\n\nEsta operação é irreversível.`)) {
+    DB.esvaziarLixeira();
+    renderizarAbaSeguranca();
+    mostrarToastFeedback('Lixeira segura esvaziada com sucesso.', '🗑️');
+  }
+}
+
+function renderizarTrilhaAuditoria() {
+  const container = document.getElementById('tabela-audit-log-linhas');
+  if (!container) return;
+
+  const filtroCat = document.getElementById('filtro-categoria-audit')?.value || '';
+  let logs = DB.getAuditLog();
+
+  if (filtroCat) {
+    logs = logs.filter(l => l.categoria === filtroCat);
+  }
+
+  if (logs.length === 0) {
+    container.innerHTML = `
+      <tr>
+        <td colspan="6" class="py-8 text-center text-slate-400 text-xs">
+          Nenhum registro de auditoria encontrado para o filtro selecionado.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  container.innerHTML = logs.map(l => {
+    let catClass = 'bg-slate-100 text-slate-700';
+    if (l.categoria === 'Autenticação') catClass = 'bg-blue-100 text-blue-800';
+    if (l.categoria === 'Imóveis') catClass = 'bg-emerald-100 text-emerald-800';
+    if (l.categoria === 'Leads') catClass = 'bg-purple-100 text-purple-800';
+    if (l.categoria === 'Locação') catClass = 'bg-amber-100 text-amber-800';
+    if (l.categoria === 'Vistorias') catClass = 'bg-cyan-100 text-cyan-800';
+    if (l.categoria === 'Segurança') catClass = 'bg-rose-100 text-rose-800';
+    if (l.categoria === 'Compliance LGPD') catClass = 'bg-indigo-100 text-indigo-800';
+
+    return `
+      <tr class="hover:bg-slate-50/80 transition text-xs border-b border-slate-100">
+        <td class="py-3 px-4 font-mono text-[11px] text-slate-500 whitespace-nowrap">${l.dataHora}</td>
+        <td class="py-3 px-4">
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${catClass}">${l.categoria}</span>
+        </td>
+        <td class="py-3 px-4 font-bold text-slate-900">${l.acao}</td>
+        <td class="py-3 px-4 text-slate-600 max-w-xs truncate" title="${l.detalhe}">${l.detalhe}</td>
+        <td class="py-3 px-4">
+          <span class="text-[11px] font-bold text-slate-700 uppercase bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+            ${l.autor}
+          </span>
+        </td>
+        <td class="py-3 px-4">
+          <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+            ✓ ${l.status || 'OK'}
+          </span>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function exportarAuditLogCSV() {
+  const logs = DB.getAuditLog();
+  if (logs.length === 0) {
+    alert('Nenhum registro de auditoria disponível para exportação.');
+    return;
+  }
+
+  const cabecalho = ['ID', 'Data_Hora', 'Categoria', 'Acao', 'Detalhes', 'Autor_Perfil', 'IP_Origem', 'Status'];
+  const linhas = logs.map(l => [
+    `"${l.id || ''}"`,
+    `"${l.dataHora || ''}"`,
+    `"${l.categoria || ''}"`,
+    `"${(l.acao || '').replace(/"/g, '""')}"`,
+    `"${(l.detalhe || '').replace(/"/g, '""')}"`,
+    `"${l.autor || ''}"`,
+    `"${l.ip || ''}"`,
+    `"${l.status || ''}"`
+  ].join(';'));
+
+  const csvContent = '\uFEFF' + [cabecalho.join(';'), ...linhas].join('\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `auditoria_crm_ricoricardo_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+
+  DB.registrarLogAuditoria(
+    'Exportação de Auditoria',
+    'Compliance LGPD',
+    `Exportação de ${logs.length} registros de auditoria em CSV para conformidade legal.`,
+    DB.getPerfilAtivo()
+  );
+  renderizarTrilhaAuditoria();
+  mostrarToastFeedback('Relatório de auditoria CSV baixado com sucesso!', '📥');
+}
+
+function avaliarForcaSenha(senha) {
+  const barra = document.getElementById('barra-forca-senha');
+  const texto = document.getElementById('texto-forca-senha');
+  if (!barra || !texto) return;
+
+  if (!senha) {
+    barra.style.width = '0%';
+    barra.className = 'h-full w-0 bg-rose-500 transition-all duration-300';
+    texto.textContent = 'Insira a senha';
+    texto.className = 'text-slate-400 font-bold';
+    return;
+  }
+
+  let pontuacao = 0;
+  if (senha.length >= 6) pontuacao += 20;
+  if (senha.length >= 8) pontuacao += 20;
+  if (senha.length >= 12) pontuacao += 15;
+  if (/[A-Z]/.test(senha)) pontuacao += 15;
+  if (/[0-9]/.test(senha)) pontuacao += 15;
+  if (/[^A-Za-z0-9]/.test(senha)) pontuacao += 15;
+
+  barra.style.width = `${Math.min(pontuacao, 100)}%`;
+
+  if (pontuacao < 40) {
+    barra.className = 'h-full bg-rose-500 transition-all duration-300';
+    texto.textContent = 'Fraca';
+    texto.className = 'text-rose-600 font-bold';
+  } else if (pontuacao < 70) {
+    barra.className = 'h-full bg-amber-500 transition-all duration-300';
+    texto.textContent = 'Média';
+    texto.className = 'text-amber-600 font-bold';
+  } else if (pontuacao < 90) {
+    barra.className = 'h-full bg-blue-500 transition-all duration-300';
+    texto.textContent = 'Forte';
+    texto.className = 'text-blue-600 font-bold';
+  } else {
+    barra.className = 'h-full bg-emerald-500 transition-all duration-300';
+    texto.textContent = 'Excelente (Blindada) 🛡️';
+    texto.className = 'text-emerald-600 font-bold';
+  }
+}
+
+function salvarNovaSenhaSegura(e) {
+  e.preventDefault();
+  const senhaAtual = document.getElementById('input-seg-senha-atual')?.value.trim();
+  const novaSenha = document.getElementById('input-seg-nova-senha')?.value.trim();
+  const confirmarSenha = document.getElementById('input-seg-confirmar-senha')?.value.trim();
+
+  if (!DB.validarSenhaAdmin(senhaAtual)) {
+    alert('A senha atual fornecida está incorreta.');
+    document.getElementById('input-seg-senha-atual')?.focus();
+    return;
+  }
+
+  if (novaSenha.length < 6) {
+    alert('A nova senha deve possuir pelo menos 6 caracteres.');
+    return;
+  }
+
+  if (novaSenha !== confirmarSenha) {
+    alert('A confirmação não coincide com a nova senha digitada.');
+    return;
+  }
+
+  DB.salvarSenhaAdmin(novaSenha);
+  DB.registrarLogAuditoria(
+    'Alteração de Senha Mestra',
+    'Segurança',
+    'Senha mestra de autenticação do SaaS alterada com sucesso.',
+    DB.getPerfilAtivo()
+  );
+
+  document.getElementById('form-alterar-senha-segura')?.reset();
+  avaliarForcaSenha('');
+  renderizarAbaSeguranca();
+  mostrarToastFeedback('Nova Senha Mestra cadastrada com sucesso! Sistema blindado.', '🔒');
+}
+
 window.alterarStatusImovelRapido = alterarStatusImovelRapido;
 window.editarImovel = editarImovel;
 window.excluirImovel = excluirImovel;
@@ -1723,4 +2155,19 @@ window.comprimirImagem = comprimirImagem;
 window.sanitizarNumero = sanitizarNumero;
 window.renderizarTabelaPortaisSincronizacao = renderizarTabelaPortaisSincronizacao;
 window.mostrarToastFeedback = mostrarToastFeedback;
+
+// Funções da Central de Segurança & LGPD
+window.configurarAbaSeguranca = configurarAbaSeguranca;
+window.trocarPerfilSeguranca = trocarPerfilSeguranca;
+window.aplicarPerfilSeguranca = aplicarPerfilSeguranca;
+window.renderizarAbaSeguranca = renderizarAbaSeguranca;
+window.renderizarLixeira = renderizarLixeira;
+window.restaurarItemLixeira = restaurarItemLixeira;
+window.excluirPermanenteItemLixeira = excluirPermanenteItemLixeira;
+window.esvaziarLixeiraComConfirmacao = esvaziarLixeiraComConfirmacao;
+window.renderizarTrilhaAuditoria = renderizarTrilhaAuditoria;
+window.exportarAuditLogCSV = exportarAuditLogCSV;
+window.avaliarForcaSenha = avaliarForcaSenha;
+window.salvarNovaSenhaSegura = salvarNovaSenhaSegura;
+
 
