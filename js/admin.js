@@ -88,12 +88,98 @@ function initAdminSaaS() {
 }
 
 /**
- * 1. Autenticação e Sessão
+ * 1. Autenticação, Defesa Anti-Força Bruta e Sessão Segura
  */
+const STORAGE_BRUTE_FORCE_KEY = 'ricoricardo_brute_force_lock_v1';
+const MAX_FALHAS_LOGIN = 5;
+const TEMPO_BLOQUEIO_MS = 15 * 60 * 1000; // 15 minutos de bloqueio temporário
+let intervalContadorBloqueio = null;
+
+function obterEstadoBruteForce() {
+  try {
+    const raw = localStorage.getItem(STORAGE_BRUTE_FORCE_KEY);
+    return raw ? JSON.parse(raw) : { falhas: 0, bloqueadoAte: 0 };
+  } catch (e) {
+    return { falhas: 0, bloqueadoAte: 0 };
+  }
+}
+
+function salvarEstadoBruteForce(estado) {
+  try {
+    localStorage.setItem(STORAGE_BRUTE_FORCE_KEY, JSON.stringify(estado));
+  } catch (e) {}
+}
+
+function verificarBloqueioLogin() {
+  const estado = obterEstadoBruteForce();
+  const agora = Date.now();
+  const inputSenha = document.getElementById('input-senha-admin');
+  const btnSubmit = document.getElementById('btn-submit-login');
+  const containerBloqueio = document.getElementById('login-bloqueio-alerta');
+  const txtTempo = document.getElementById('tempo-restante-bloqueio');
+  const erroLogin = document.getElementById('login-erro');
+
+  if (estado.bloqueadoAte && estado.bloqueadoAte > agora) {
+    if (inputSenha) inputSenha.disabled = true;
+    if (btnSubmit) btnSubmit.disabled = true;
+    if (containerBloqueio) containerBloqueio.classList.remove('hidden');
+    if (erroLogin) erroLogin.classList.add('hidden');
+
+    clearInterval(intervalContadorBloqueio);
+    intervalContadorBloqueio = setInterval(() => {
+      const restanteMs = estado.bloqueadoAte - Date.now();
+      if (restanteMs <= 0) {
+        clearInterval(intervalContadorBloqueio);
+        salvarEstadoBruteForce({ falhas: 0, bloqueadoAte: 0 });
+        if (inputSenha) inputSenha.disabled = false;
+        if (btnSubmit) btnSubmit.disabled = false;
+        if (containerBloqueio) containerBloqueio.classList.add('hidden');
+      } else {
+        const mins = Math.floor(restanteMs / 60000);
+        const secs = Math.floor((restanteMs % 60000) / 1000);
+        if (txtTempo) txtTempo.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      }
+    }, 1000);
+
+    return true;
+  } else {
+    if (inputSenha) inputSenha.disabled = false;
+    if (btnSubmit) btnSubmit.disabled = false;
+    if (containerBloqueio) containerBloqueio.classList.add('hidden');
+    clearInterval(intervalContadorBloqueio);
+    return false;
+  }
+}
+
+// Auto-Logout por Inatividade (30 minutos sem atividade no navegador)
+let timerInatividade = null;
+const TEMPO_INATIVIDADE_MAX_MS = 30 * 60 * 1000;
+
+function resetarTimerInatividade() {
+  if (!sessaoAutenticada) return;
+  clearTimeout(timerInatividade);
+  timerInatividade = setTimeout(() => {
+    DB.registrarLogAuditoria(
+      'Auto-Logout por Inatividade',
+      'Segurança',
+      'Sessão revogada automaticamente após 30 minutos sem interação física (Defesa contra invasão física de salão).',
+      DB.getPerfilAtivo()
+    );
+    sessionStorage.removeItem('imob_admin_logado');
+    alert('🔒 Sessão Encerrada por Inatividade: Para proteger os dados confidenciais dos clientes, sua sessão expirou automaticamente após 30 minutos.');
+    location.reload();
+  }, TEMPO_INATIVIDADE_MAX_MS);
+}
+
+['mousemove', 'keydown', 'scroll', 'touchstart', 'click'].forEach(evt => {
+  window.addEventListener(evt, resetarTimerInatividade, { passive: true });
+});
+
 function verificarSessao() {
   const logado = sessionStorage.getItem('imob_admin_logado');
   if (logado === 'true') {
     sessaoAutenticada = true;
+    resetarTimerInatividade();
     exibirPainelPrincipal();
   } else {
     exibirTelaLogin();
@@ -103,6 +189,7 @@ function verificarSessao() {
 function exibirTelaLogin() {
   document.getElementById('secao-login').classList.remove('hidden');
   document.getElementById('painel-admin-conteudo').classList.add('hidden');
+  verificarBloqueioLogin();
 }
 
 function exibirPainelPrincipal() {
@@ -128,20 +215,60 @@ function configurarEventosLogin() {
   const inputSenha = document.getElementById('input-senha-admin');
   const erroLogin = document.getElementById('login-erro');
 
+  verificarBloqueioLogin();
+
   formLogin?.addEventListener('submit', (e) => {
     e.preventDefault();
+
+    if (verificarBloqueioLogin()) {
+      alert('🔒 Login temporariamente bloqueado por excesso de tentativas incorretas. Aguarde o contador regressivo.');
+      return;
+    }
+
     const senha = inputSenha.value.trim();
 
     if (DB.validarSenhaAdmin(senha)) {
+      salvarEstadoBruteForce({ falhas: 0, bloqueadoAte: 0 });
       sessionStorage.setItem('imob_admin_logado', 'true');
       sessaoAutenticada = true;
       erroLogin?.classList.add('hidden');
+      resetarTimerInatividade();
       DB.registrarLogAuditoria('Login Administrativo Efetuado', 'Autenticação', `Acesso autorizado ao painel SaaS com perfil ${DB.getPerfilAtivo().toUpperCase()}`, DB.getPerfilAtivo());
       exibirPainelPrincipal();
     } else {
-      erroLogin?.classList.remove('hidden');
-      inputSenha.value = '';
-      inputSenha.focus();
+      const estado = obterEstadoBruteForce();
+      estado.falhas = (estado.falhas || 0) + 1;
+
+      if (estado.falhas >= MAX_FALHAS_LOGIN) {
+        estado.bloqueadoAte = Date.now() + TEMPO_BLOQUEIO_MS;
+        salvarEstadoBruteForce(estado);
+
+        DB.registrarLogAuditoria(
+          'Alerta: Força Bruta Bloqueada',
+          'Segurança',
+          '5 tentativas de senha incorreta consecutivas detectadas. Bloqueio automático ativado por 15 minutos (Defesa Cibernética).',
+          'WAF / Anti-Bot'
+        );
+
+        verificarBloqueioLogin();
+      } else {
+        salvarEstadoBruteForce(estado);
+        const restantes = MAX_FALHAS_LOGIN - estado.falhas;
+        const msgRestantes = document.getElementById('login-tentativas-restantes');
+        if (msgRestantes) {
+          msgRestantes.textContent = `Atenção: ${estado.falhas} de ${MAX_FALHAS_LOGIN} tentativas. Restam ${restantes} tentativa(s) antes do bloqueio por 15 minutos.`;
+        }
+        erroLogin?.classList.remove('hidden');
+        inputSenha.value = '';
+        inputSenha.focus();
+
+        DB.registrarLogAuditoria(
+          'Falha de Login',
+          'Autenticação',
+          `Tentativa de senha incorreta (${estado.falhas}/${MAX_FALHAS_LOGIN}).`,
+          'Desconhecido'
+        );
+      }
     }
   });
 

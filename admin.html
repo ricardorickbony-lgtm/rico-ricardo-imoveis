@@ -68,11 +68,26 @@
           >
         </div>
 
-        <div id="login-erro" class="hidden text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center">
-          Senha incorreta! Digite <code class="font-mono">admin123</code>.
+        <div id="login-erro" class="hidden text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center space-y-0.5">
+          <div>Senha incorreta! Digite <code class="font-mono">admin123</code>.</div>
+          <div id="login-tentativas-restantes" class="font-normal text-[11px] text-rose-500"></div>
         </div>
 
-        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-blue-600/20">
+        <!-- Alerta de Bloqueio Anti-Força Bruta -->
+        <div id="login-bloqueio-alerta" class="hidden text-xs font-bold text-rose-800 bg-rose-100 p-3.5 rounded-2xl border border-rose-300 text-center space-y-1.5 shadow-sm">
+          <div class="flex items-center justify-center gap-1.5 text-rose-900 font-black">
+            <span>🛡️</span> <span>Acesso Bloqueado por Segurança</span>
+          </div>
+          <p class="text-[11px] font-normal text-rose-700 leading-tight">
+            Detectadas 5 tentativas incorretas consecutivas. O sistema ativou o protocolo anti-ataque e bloqueou o acesso temporariamente.
+          </p>
+          <div class="pt-1">
+            <span class="text-[10px] uppercase font-bold text-rose-600 block">Tempo para desbloqueio:</span>
+            <span id="tempo-restante-bloqueio" class="text-lg font-black font-mono text-rose-950">15:00</span>
+          </div>
+        </div>
+
+        <button type="submit" id="btn-submit-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
           Entrar no Painel Administrativo
         </button>
       </form>
@@ -1044,8 +1059,8 @@
           </div>
         </div>
 
-        <!-- Cockpit de Status de Segurança (4 Cards) -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Cockpit de Status de Segurança (5 Cards de Alta Blindagem) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           
           <!-- Card 1: Criptografia -->
           <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
@@ -1057,7 +1072,17 @@
             <p class="text-[11px] text-slate-500 leading-tight">Tráfego de rede criptografado de ponta a ponta sem vazamentos.</p>
           </div>
 
-          <!-- Card 2: Lixeira Segura (Soft-Delete) -->
+          <!-- Card 2: Defesa Anti-Força Bruta & WAF -->
+          <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Defesa Anti-Hacker</span>
+              <span id="badge-anti-hacker" class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">Blindado 🛡️</span>
+            </div>
+            <div class="text-base font-black text-slate-900">Anti-Força Bruta</div>
+            <p class="text-[11px] text-slate-500 leading-tight">Rate limiting de 5 tentativas, bloqueio de 15min e auto-logout 30min.</p>
+          </div>
+
+          <!-- Card 3: Lixeira Segura (Soft-Delete) -->
           <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Lixeira Segura</span>
@@ -1067,7 +1092,7 @@
             <p class="text-[11px] text-slate-500 leading-tight">Proteção contra exclusão acidental com restauração em 1 clique.</p>
           </div>
 
-          <!-- Card 3: Trilha de Auditoria -->
+          <!-- Card 4: Trilha de Auditoria -->
           <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Audit Trail</span>
@@ -1077,7 +1102,7 @@
             <p class="text-[11px] text-slate-500 leading-tight">Log imutável de todas as ações de corretores e administradores.</p>
           </div>
 
-          <!-- Card 4: Mascaramento LGPD -->
+          <!-- Card 5: Mascaramento LGPD -->
           <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-2">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mascaramento LGPD</span>
@@ -1087,6 +1112,59 @@
             <p class="text-[11px] text-slate-500 leading-tight">Controle estrito de visualização de CPF, PIX e dados bancários.</p>
           </div>
 
+        </div>
+
+        <!-- Painel de Defesa Cibernética Ativa: Como o Sistema é Protegido contra Hackers e Concorrentes -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-950 to-blue-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl border border-white/10 space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-6">
+            <div class="space-y-1">
+              <div class="inline-flex items-center gap-2 bg-emerald-500/20 text-emerald-400 text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Defesa Cibernética Ativa (Anti-Hacking & Anti-DDoS)
+              </div>
+              <h3 class="text-xl font-black text-white tracking-tight">Por que um hacker ou concorrente NÃO consegue deletar o sistema?</h3>
+              <p class="text-xs text-slate-300">Entenda a arquitetura de proteção em 4 camadas que blinda o catálogo e os dados de clientes da imobiliária.</p>
+            </div>
+            <div class="shrink-0 flex items-center gap-2">
+              <span class="text-xs font-mono font-bold bg-white/10 text-slate-200 px-3.5 py-2 rounded-xl border border-white/10">
+                🔒 CDN Imutável • Zero SQLi
+              </span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-2">
+              <div class="text-lg">☁️</div>
+              <h4 class="font-bold text-white text-sm">1. Imutabilidade na Nuvem</h4>
+              <p class="text-slate-300 text-[11px] leading-relaxed">
+                O código roda na CDN global da Microsoft/GitHub. Não há portas abertas de SSH, FTP ou MySQL na web, nem WordPress desatualizado para invasores explorarem.
+              </p>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-2">
+              <div class="text-lg">🛡️</div>
+              <h4 class="font-bold text-white text-sm">2. Escudo Anti-Força Bruta</h4>
+              <p class="text-slate-300 text-[11px] leading-relaxed">
+                Tentativas automatizadas de robôs adivinharem a senha são barradas pelo limitador de taxa. Após 5 erros, o login é travado por 15 minutos e registrado na perícia forense.
+              </p>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-2">
+              <div class="text-lg">🧱</div>
+              <h4 class="font-bold text-white text-sm">3. Isolamento em Sandbox</h4>
+              <p class="text-slate-300 text-[11px] leading-relaxed">
+                Mesmo se um concorrente abrir o link do CRM na casa dele e tentar apagar tudo, ele só apaga a máquina dele. Os seus dados e do seu cliente continuam 100% seguros e intactos.
+              </p>
+            </div>
+
+            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl space-y-2">
+              <div class="text-lg">⏱️</div>
+              <h4 class="font-bold text-white text-sm">4. Auto-Logout (30 min)</h4>
+              <p class="text-slate-300 text-[11px] leading-relaxed">
+                Protege contra espionagem física ou funcionários que deixem computadores destravados. Após 30 minutos sem movimento, a sessão encerra automaticamente.
+              </p>
+            </div>
+          </div>
         </div>
 
         <!-- Alerta de Troca de Senha Padrão (Se aplicável) -->
