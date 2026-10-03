@@ -168,15 +168,21 @@
   <!-- ========================================================================= -->
   <section class="relative min-h-[580px] lg:min-h-[640px] flex items-center justify-center py-16 sm:py-24 px-4 overflow-hidden bg-slate-900">
     
-    <!-- Fotografia de Fundo de Alta Resolução de Imóvel Moderno -->
-    <div class="absolute inset-0 z-0">
-      <img 
-        src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1920&q=85" 
-        alt="Rico Ricardo Imóveis Santo André" 
-        class="w-full h-full object-cover object-center"
+    <!-- Vídeo Hero de Mansão de Luxo em Alta Resolução (Padrão Oficial Imobiliário Ricardo & Severino) -->
+    <div class="absolute inset-0 z-0 overflow-hidden">
+      <video 
+        autoplay 
+        muted 
+        loop 
+        playsinline 
+        preload="auto"
+        poster="assets/images/mansao-video-poster.jpg" 
+        class="w-full h-full object-cover object-center pointer-events-none"
       >
-      <!-- Gradiente Suave de Proteção (Sem deixar preto sufocante) -->
-      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/50 to-slate-900/60"></div>
+        <source src="assets/videos/mansao-luxo.mp4" type="video/mp4">
+      </video>
+      <!-- Gradiente Suave e Elegante de Proteção e Contraste Sem Sufocar a Imagem -->
+      <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/45 to-slate-950/65 pointer-events-none"></div>
     </div>
 
     <!-- Conteúdo Centralizado do Hero -->
