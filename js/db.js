@@ -17,8 +17,8 @@ const STORAGE_AUDITORIA_KEY = 'ricoricardo_audit_log_v1';
 const STORAGE_PERFIL_KEY = 'ricoricardo_perfil_ativo_v1';
 const STORAGE_PERMISSOES_KEY = 'ricoricardo_permissoes_v1';
 
-// Matriz de Permissões Granulares (Padrão inGaia / Kenlo Imob)
-const PERMISSOES_PADRAO_INGAIA = {
+// Matriz de Permissões Granulares & Governança Corporativa (RBAC Enterprise)
+const PERMISSOES_PADRAO_ENTERPRISE = {
   diretor: {
     verTelefoneProprietario: true,
     verDadosBancariosPix: true,
@@ -40,14 +40,14 @@ const PERMISSOES_PADRAO_INGAIA = {
     verLeadsOutrosCorretores: true
   },
   corretor: {
-    verTelefoneProprietario: false, // inGaia: Corretor não vê telefone direto do dono
-    verDadosBancariosPix: false, // inGaia: Sigilo bancário de repasses
-    exportarRelatoriosPlanilhas: false, // inGaia: Bloqueado contra vazamento de carteira
-    excluirImoveisLeads: false, // inGaia: Bloqueado contra sabotagem
-    verComissoesFaturamento: false, // inGaia: Não vê faturamento geral da imobiliária
-    editarValoresImoveis: false, // inGaia: Apenas propõe, não altera preço no ar
+    verTelefoneProprietario: false, // Corretor foca no atendimento sem contato direto do captador
+    verDadosBancariosPix: false, // Sigilo financeiro restrito à gestão e diretoria
+    exportarRelatoriosPlanilhas: false, // Bloqueio contra extração ou vazamento de carteira
+    excluirImoveisLeads: false, // Bloqueio contra exclusão acidental ou perda de dados
+    verComissoesFaturamento: false, // Sigilo da receita global da imobiliária
+    editarValoresImoveis: false, // Apenas gestores alteram tabela de preços no ar
     configurarPortais: false,
-    verLeadsOutrosCorretores: false // inGaia: Cada corretor foca na sua carteira
+    verLeadsOutrosCorretores: false // Cada corretor atende exclusivamente sua própria carteira
   }
 };
 
@@ -1626,24 +1626,24 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } catch (e) {}
   },
 
-  // Matriz de Permissões Granulares por Janelinhas (Estilo inGaia / Kenlo)
+  // Matriz de Permissões Granulares & Governança Corporativa (RBAC)
   getPermissoes(perfil) {
     const p = perfil || this.getPerfilAtivo() || 'diretor';
     try {
       const data = localStorage.getItem(STORAGE_PERMISSOES_KEY);
-      const todas = data ? JSON.parse(data) : PERMISSOES_PADRAO_INGAIA;
-      return todas[p] || PERMISSOES_PADRAO_INGAIA[p] || PERMISSOES_PADRAO_INGAIA.corretor;
+      const todas = data ? JSON.parse(data) : PERMISSOES_PADRAO_ENTERPRISE;
+      return todas[p] || PERMISSOES_PADRAO_ENTERPRISE[p] || PERMISSOES_PADRAO_ENTERPRISE.corretor;
     } catch (e) {
-      return PERMISSOES_PADRAO_INGAIA[p] || PERMISSOES_PADRAO_INGAIA.corretor;
+      return PERMISSOES_PADRAO_ENTERPRISE[p] || PERMISSOES_PADRAO_ENTERPRISE.corretor;
     }
   },
 
   getTodasPermissoes() {
     try {
       const data = localStorage.getItem(STORAGE_PERMISSOES_KEY);
-      return data ? JSON.parse(data) : PERMISSOES_PADRAO_INGAIA;
+      return data ? JSON.parse(data) : PERMISSOES_PADRAO_ENTERPRISE;
     } catch (e) {
-      return PERMISSOES_PADRAO_INGAIA;
+      return PERMISSOES_PADRAO_ENTERPRISE;
     }
   },
 
@@ -1655,7 +1655,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       this.registrarLogAuditoria(
         'Matriz de Permissões Atualizada',
         'Segurança',
-        `Janelas de privilégios do perfil "${perfil.toUpperCase()}" foram ajustadas pelo Administrador (Padrão inGaia/Kenlo).`,
+        `Políticas de acesso do perfil "${perfil.toUpperCase()}" foram ajustadas pelo Administrador.`,
         this.getPerfilAtivo()
       );
       window.dispatchEvent(new CustomEvent('imob_permissoes_atualizadas', { detail: { perfil } }));
@@ -1665,7 +1665,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
   restaurarPermissoesPadrao(perfil) {
     const todas = this.getTodasPermissoes();
     if (perfil) {
-      todas[perfil] = { ...PERMISSOES_PADRAO_INGAIA[perfil] };
+      todas[perfil] = { ...PERMISSOES_PADRAO_ENTERPRISE[perfil] };
     } else {
       localStorage.removeItem(STORAGE_PERMISSOES_KEY);
     }
@@ -1674,7 +1674,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       this.registrarLogAuditoria(
         'Permissões Restauradas',
         'Segurança',
-        `Janelas de fábrica do perfil "${perfil ? perfil.toUpperCase() : 'TODOS'}" restauradas com sucesso.`,
+        `Níveis recomendados de governança do perfil "${perfil ? perfil.toUpperCase() : 'TODOS'}" restaurados com sucesso.`,
         this.getPerfilAtivo()
       );
       window.dispatchEvent(new CustomEvent('imob_permissoes_atualizadas', { detail: { perfil } }));
