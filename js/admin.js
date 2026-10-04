@@ -203,6 +203,7 @@ function exibirPainelPrincipal() {
   renderizarRoletaCorretores();
   renderizarGestaoLocacao();
   renderizarVistoriasDigitais();
+  renderizarTermosVisita();
   renderizarTabelaPortaisSincronizacao();
   carregarSofiaConfigNoPainel();
   carregarFormularioConfig();
@@ -318,7 +319,10 @@ function configurarNavegacaoAbas() {
         renderizarRoletaCorretores();
       }
       if (targetId === 'aba-locacao') renderizarGestaoLocacao();
-      if (targetId === 'aba-vistorias') renderizarVistoriasDigitais();
+      if (targetId === 'aba-vistorias') {
+        renderizarTermosVisita();
+        renderizarVistoriasDigitais();
+      }
       if (targetId === 'aba-sofia') carregarSofiaConfigNoPainel();
       if (targetId === 'aba-dashboard') carregarMetricasDashboard();
       if (targetId === 'aba-portais') atualizarStatusPortaisNaTela();
@@ -457,6 +461,12 @@ function renderizarTabelaImoveis() {
         </td>
         <td class="py-3 px-4 text-right">
           <div class="flex items-center justify-end gap-1.5">
+            <button onclick="abrirModalSimuladorFinanciamento('${im.id}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
+              🏦
+            </button>
+            <button onclick="abrirModalTermoVisita('${im.id}')" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Emitir Termo de Reconhecimento de Visita com Assinatura Digital">
+              📝
+            </button>
             <button onclick="gerarCopySocialImovel('${im.id}')" class="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Gerar Copy para Redes Sociais e WhatsApp com IA">
               ✨
             </button>
@@ -800,6 +810,12 @@ function renderizarTabelaLeads() {
         </td>
         <td class="py-3 px-4 text-right">
           <div class="flex items-center justify-end gap-1.5 flex-wrap">
+            <button onclick="abrirModalSimuladorParaLead('${l.id}')" class="bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-2 py-1.5 rounded-lg transition" title="Simular Financiamento Habitacional para este Lead">
+              🏦 Caixa
+            </button>
+            <button onclick="abrirModalTermoVisitaParaLead('${l.id}')" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-800 text-xs font-bold px-2 py-1.5 rounded-lg transition" title="Emitir Termo de Reconhecimento de Visita">
+              📝 Visita
+            </button>
             <button onclick="abrirModalMatching('${l.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-2.5 py-1.5 rounded-lg transition" title="Cruzamento Inteligente de Imóveis (Matching)">
               🎯 Matching
             </button>
@@ -949,6 +965,12 @@ function renderizarPipelineKanban() {
               <a href="https://wa.me/${numeroLimpo}?text=${encodeURIComponent(`Olá ${l.nome}! Aqui é ${l.corretor || 'da equipe'} da ${DB.getConfig().nome}. Vi seu interesse no imóvel ${l.imovelTitulo || ''}. Vamos agendar uma visita?`)}" target="_blank" class="p-1.5 bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white rounded-lg transition" title="Falar no WhatsApp">
                 <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91C2.13 13.66 2.59 15.36 3.45 16.86L2.05 22L7.3 20.62C8.75 21.41 10.38 21.83 12.04 21.83C17.5 21.83 21.95 17.38 21.95 11.92C21.95 9.27 20.92 6.78 19.05 4.91C17.18 3.03 14.69 2 12.04 2M12.05 3.67C14.25 3.67 16.31 4.53 17.87 6.09C19.42 7.65 20.28 9.72 20.28 11.92C20.28 16.46 16.58 20.15 12.04 20.15C10.56 20.15 9.11 19.76 7.85 19L7.55 18.83L4.43 19.65L5.26 16.61L5.06 16.29C4.24 14.99 3.81 13.47 3.81 11.91C3.81 7.37 7.5 3.67 12.05 3.67Z"/></svg>
               </a>
+              <button onclick="abrirModalSimuladorParaLead('${l.id}')" class="p-1.5 bg-amber-50 hover:bg-amber-600 text-amber-700 hover:text-white rounded-lg text-[10px] font-bold transition" title="Simular Financiamento Habitacional">
+                🏦
+              </button>
+              <button onclick="abrirModalTermoVisitaParaLead('${l.id}')" class="p-1.5 bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white rounded-lg text-[10px] font-bold transition" title="Emitir Termo de Visita Eletrônico">
+                📝
+              </button>
               <button onclick="abrirModalMatching('${l.id}')" class="p-1.5 bg-purple-50 hover:bg-purple-600 text-purple-700 hover:text-white rounded-lg text-[10px] font-bold transition" title="Cruzamento com Catálogo (Matching)">
                 🎯
               </button>
@@ -2608,5 +2630,713 @@ window.atualizarPermissaoEmTempoReal = atualizarPermissaoEmTempoReal;
 window.salvarMatrizPermissoes = salvarMatrizPermissoes;
 window.restaurarPadraoPerfilMatriz = restaurarPadraoPerfilMatriz;
 window.aplicarPermissoesNaInterface = aplicarPermissoesNaInterface;
+
+// =============================================================================
+// SUB-ABA DE VISTORIAS & TERMOS DE VISITA PRESENCIAL (ART. 722 CC)
+// =============================================================================
+function alternarSubAbaVistorias(aba) {
+  const btnTermos = document.getElementById('btn-subaba-termos');
+  const btnVistorias = document.getElementById('btn-subaba-vistorias');
+  const painelTermos = document.getElementById('painel-sub-termos-visita');
+  const painelVistorias = document.getElementById('painel-sub-vistorias');
+
+  if (aba === 'termos') {
+    btnTermos?.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+    btnTermos?.classList.remove('text-slate-600', 'hover:bg-slate-100');
+    btnVistorias?.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+    btnVistorias?.classList.add('text-slate-600', 'hover:bg-slate-100');
+    painelTermos?.classList.remove('hidden');
+    painelVistorias?.classList.add('hidden');
+    renderizarTermosVisita();
+  } else {
+    btnVistorias?.classList.add('bg-indigo-600', 'text-white', 'shadow-sm');
+    btnVistorias?.classList.remove('text-slate-600', 'hover:bg-slate-100');
+    btnTermos?.classList.remove('bg-indigo-600', 'text-white', 'shadow-sm');
+    btnTermos?.classList.add('text-slate-600', 'hover:bg-slate-100');
+    painelVistorias?.classList.remove('hidden');
+    painelTermos?.classList.add('hidden');
+    renderizarVistoriasDigitais();
+  }
+}
+
+function renderizarTermosVisita() {
+  const container = document.getElementById('grid-termos-visita-lista');
+  const badge = document.getElementById('badge-cont-termos');
+  const badgeVist = document.getElementById('badge-cont-vistorias');
+  if (badgeVist) badgeVist.textContent = DB.getVistorias().length;
+
+  const termos = DB.getTermosVisita();
+  if (badge) badge.textContent = termos.length;
+  if (!container) return;
+
+  if (termos.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
+        <span class="text-3xl block mb-2">📝</span>
+        <h4 class="font-bold text-slate-700 text-sm">Nenhum termo de visita emitido ainda</h4>
+        <p class="text-xs text-slate-400 mt-1">Gere o primeiro termo para proteger sua comissão e ter a assinatura do cliente na tela.</p>
+        <button onclick="abrirModalTermoVisita()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2 rounded-xl transition shadow">
+          + Novo Termo de Visita
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = termos.map(t => {
+    const dataFmt = new Date(t.dataHora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    const numeroLimpo = (t.visitanteTelefone || '').replace(/\D/g, '');
+
+    return `
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition space-y-3 flex flex-col justify-between">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-mono text-xs font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+              ${t.codigo}
+            </span>
+            <span class="text-[10px] text-slate-400 font-semibold">${dataFmt}</span>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-slate-900 text-sm leading-tight">${t.visitanteNome}</h4>
+            <div class="text-[11px] text-slate-500 font-mono mt-0.5">CPF: ${t.visitanteCpf || 'Não informado'}</div>
+          </div>
+
+          <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs text-slate-700 space-y-1">
+            <div class="font-semibold text-blue-700 line-clamp-1">${t.imovelCodigo} • ${t.imovelTitulo}</div>
+            <div class="text-[11px] text-slate-500 line-clamp-1">${t.imovelEndereco}</div>
+            <div class="text-[11px] text-slate-800 font-bold">R$ ${(t.imovelValor || 0).toLocaleString('pt-BR')}</div>
+          </div>
+
+          <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+            <span>Corretor: <strong>${t.corretorNome}</strong></span>
+            <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded flex items-center gap-1">
+              <span>✓</span> Assinado
+            </span>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-1.5">
+          <div class="flex items-center gap-1.5">
+            <button onclick="verTermoVisitaDetalhe('${t.id}')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-lg transition" title="Visualizar Termo Completo e Imprimir">
+              Visualizar
+            </button>
+            <a href="https://wa.me/${numeroLimpo}?text=${encodeURIComponent(`Olá ${t.visitanteNome}! Agradecemos sua visita ao imóvel ${t.imovelCodigo} (${t.imovelTitulo}) acompanhada pelo corretor ${t.corretorNome}. Seu Termo de Visita Eletrônico foi registrado com sucesso sob o protocolo ${t.codigo}. Permanecemos à disposição!`)}" target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 shadow-sm" title="Enviar comprovante no WhatsApp do visitante">
+              <span>WhatsApp</span>
+            </a>
+          </div>
+          <button onclick="excluirTermoVisita('${t.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Termo">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// =============================================================================
+// CANVAS DE ASSINATURA DIGITAL TOUCH / MOUSE (CANVAS HTML5)
+// =============================================================================
+let canvasAssinaturaTermo = null;
+let ctxAssinaturaTermo = null;
+let desenhandoAssinatura = false;
+let assinaturaFeita = false;
+
+function inicializarCanvasAssinatura() {
+  canvasAssinaturaTermo = document.getElementById('canvas-assinatura-termo');
+  if (!canvasAssinaturaTermo) return;
+  ctxAssinaturaTermo = canvasAssinaturaTermo.getContext('2d');
+
+  const rect = canvasAssinaturaTermo.getBoundingClientRect();
+  canvasAssinaturaTermo.width = (rect.width || 500) * 2;
+  canvasAssinaturaTermo.height = 300;
+  ctxAssinaturaTermo.scale(2, 2);
+
+  ctxAssinaturaTermo.strokeStyle = '#1e1b4b';
+  ctxAssinaturaTermo.lineWidth = 2.5;
+  ctxAssinaturaTermo.lineCap = 'round';
+  ctxAssinaturaTermo.lineJoin = 'round';
+
+  const getPos = (e) => {
+    const r = canvasAssinaturaTermo.getBoundingClientRect();
+    if (e.touches && e.touches.length > 0) {
+      return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    }
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+
+  const startDraw = (e) => {
+    e.preventDefault();
+    desenhandoAssinatura = true;
+    assinaturaFeita = true;
+    const pos = getPos(e);
+    ctxAssinaturaTermo.beginPath();
+    ctxAssinaturaTermo.moveTo(pos.x, pos.y);
+    document.getElementById('aviso-assine-aqui')?.classList.add('hidden');
+  };
+
+  const draw = (e) => {
+    if (!desenhandoAssinatura) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctxAssinaturaTermo.lineTo(pos.x, pos.y);
+    ctxAssinaturaTermo.stroke();
+  };
+
+  const stopDraw = () => {
+    desenhandoAssinatura = false;
+  };
+
+  canvasAssinaturaTermo.onmousedown = startDraw;
+  canvasAssinaturaTermo.onmousemove = draw;
+  window.addEventListener('mouseup', stopDraw);
+
+  canvasAssinaturaTermo.ontouchstart = startDraw;
+  canvasAssinaturaTermo.ontouchmove = draw;
+  window.addEventListener('touchend', stopDraw);
+}
+
+function limparCanvasAssinaturaTermo() {
+  if (!canvasAssinaturaTermo || !ctxAssinaturaTermo) return;
+  ctxAssinaturaTermo.clearRect(0, 0, canvasAssinaturaTermo.width, canvasAssinaturaTermo.height);
+  assinaturaFeita = false;
+  document.getElementById('aviso-assine-aqui')?.classList.remove('hidden');
+}
+
+// =============================================================================
+// MODAL DE TERMO DE VISITA: ABERTURA, ENVIO E SALVAMENTO
+// =============================================================================
+function abrirModalTermoVisita(imovelId, leadId) {
+  const modal = document.getElementById('modal-termo-visita');
+  if (!modal) return;
+
+  const imoveis = DB.getImoveis();
+  const corretores = DB.getCorretores();
+  const selectImovel = document.getElementById('termo-select-imovel');
+  const selectCorretor = document.getElementById('termo-corretor-nome');
+
+  if (selectImovel) {
+    selectImovel.innerHTML = '<option value="">Selecione o imóvel que está sendo visitado...</option>' + 
+      imoveis.map(im => `
+        <option value="${im.id}" ${im.id === imovelId ? 'selected' : ''}>
+          ${im.codigo} - ${im.titulo} (${im.bairro}) - R$ ${(im.preco || im.precoAluguel || 0).toLocaleString('pt-BR')}
+        </option>
+      `).join('');
+  }
+
+  if (selectCorretor) {
+    const perfil = DB.getPerfilAtivo();
+    const nomeAtivo = perfil === 'diretor' ? 'Ricardo Oliveira' : 'Carlos Prado';
+    selectCorretor.innerHTML = corretores.map(c => `
+      <option value="${c.nome}" ${c.nome.includes(nomeAtivo) ? 'selected' : ''}>${c.nome} (${c.creci || 'CRECI'})</option>
+    `).join('');
+  }
+
+  if (leadId) {
+    const lead = DB.getLeads().find(l => l.id === leadId);
+    if (lead) {
+      const elNome = document.getElementById('termo-visitante-nome');
+      const elTel = document.getElementById('termo-visitante-telefone');
+      const elEmail = document.getElementById('termo-visitante-email');
+      if (elNome) elNome.value = lead.nome || '';
+      if (elTel) elTel.value = lead.whatsapp || lead.telefone || '';
+      if (elEmail) elEmail.value = lead.email || '';
+      if (!imovelId && lead.imovelId && selectImovel) {
+        selectImovel.value = lead.imovelId;
+        imovelId = lead.imovelId;
+      }
+    }
+  }
+
+  if (imovelId) {
+    selecionarImovelNoTermoVisita(imovelId);
+  } else {
+    document.getElementById('termo-imovel-detalhes')?.classList.add('hidden');
+  }
+
+  const qtd = DB.getTermosVisita().length + 1;
+  const codigoPreview = `VIS-${new Date().getFullYear()}-${String(qtd).padStart(3, '0')}`;
+  const elPreview = document.getElementById('termo-visita-codigo-preview');
+  if (elPreview) elPreview.textContent = codigoPreview;
+
+  modal.classList.add('active');
+  setTimeout(() => {
+    inicializarCanvasAssinatura();
+    limparCanvasAssinaturaTermo();
+  }, 200);
+}
+
+function abrirModalTermoVisitaParaLead(leadId) {
+  const lead = DB.getLeads().find(l => l.id === leadId);
+  abrirModalTermoVisita(lead?.imovelId || '', leadId);
+}
+
+function fecharModalTermoVisita() {
+  document.getElementById('modal-termo-visita')?.classList.remove('active');
+}
+
+function selecionarImovelNoTermoVisita(imovelId) {
+  const boxDetalhes = document.getElementById('termo-imovel-detalhes');
+  if (!imovelId) {
+    boxDetalhes?.classList.add('hidden');
+    return;
+  }
+  const im = DB.getImovelPorId(imovelId);
+  if (!im) {
+    boxDetalhes?.classList.add('hidden');
+    return;
+  }
+
+  const elCod = document.getElementById('termo-det-codigo');
+  const elVal = document.getElementById('termo-det-valor');
+  const elEnd = document.getElementById('termo-det-endereco');
+  if (elCod) elCod.textContent = im.codigo;
+  if (elVal) elVal.textContent = `R$ ${(im.preco || im.precoAluguel || 0).toLocaleString('pt-BR')}`;
+  if (elEnd) elEnd.textContent = `${im.endereco || im.titulo}, ${im.bairro} - Santo André / SP`;
+  boxDetalhes?.classList.remove('hidden');
+}
+
+function salvarTermoVisitaSubmit(e) {
+  e.preventDefault();
+  const imovelId = document.getElementById('termo-select-imovel')?.value;
+  const im = DB.getImovelPorId(imovelId);
+  if (!im) {
+    alert('Por favor, selecione o imóvel visitado.');
+    return;
+  }
+
+  const visitanteNome = document.getElementById('termo-visitante-nome')?.value.trim();
+  const visitanteCpf = document.getElementById('termo-visitante-cpf')?.value.trim();
+  const visitanteTelefone = document.getElementById('termo-visitante-telefone')?.value.trim();
+  const visitanteEmail = document.getElementById('termo-visitante-email')?.value.trim();
+  const corretorNome = document.getElementById('termo-corretor-nome')?.value.trim();
+  const acompanhantes = document.getElementById('termo-acompanhantes')?.value.trim();
+
+  let assinaturaDataUrl = '';
+  if (canvasAssinaturaTermo && assinaturaFeita) {
+    assinaturaDataUrl = canvasAssinaturaTermo.toDataURL('image/png');
+  }
+
+  const novoTermo = {
+    imovelId: im.id,
+    imovelCodigo: im.codigo,
+    imovelTitulo: im.titulo,
+    imovelEndereco: `${im.endereco || im.titulo}, ${im.bairro} - Santo André / SP`,
+    imovelValor: im.preco || im.precoAluguel || 0,
+    visitanteNome,
+    visitanteCpf,
+    visitanteTelefone,
+    visitanteEmail,
+    corretorNome,
+    acompanhantes,
+    assinaturaDataUrl,
+    status: 'Realizada'
+  };
+
+  const salvo = DB.adicionarTermoVisita(novoTermo);
+  fecharModalTermoVisita();
+  renderizarTermosVisita();
+  mostrarToastFeedback(`✓ Termo ${salvo.codigo} autenticado e salvo com sucesso!`, '⚖️');
+
+  setTimeout(() => {
+    verTermoVisitaDetalhe(salvo.id);
+  }, 350);
+}
+
+function excluirTermoVisita(id) {
+  if (confirm('Deseja excluir este registro de Termo de Visita?')) {
+    DB.removerTermoVisita(id);
+    renderizarTermosVisita();
+    mostrarToastFeedback('Termo de Visita removido.', '🗑️');
+  }
+}
+
+// =============================================================================
+// VISUALIZAÇÃO & IMPRESSÃO TIMBRADA DO TERMO DE VISITA
+// =============================================================================
+let termoVisitaVisualizandoId = null;
+
+function verTermoVisitaDetalhe(id) {
+  const termo = DB.getTermosVisita().find(t => t.id === id);
+  if (!termo) return;
+  termoVisitaVisualizandoId = id;
+
+  const container = document.getElementById('termo-visita-imprimir-conteudo');
+  const btnWhats = document.getElementById('btn-whats-termo-detalhe');
+  const config = DB.getConfig();
+  const dataFmt = new Date(termo.dataHora).toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' });
+
+  if (container) {
+    container.innerHTML = `
+      <div class="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">${config.nome || 'RICO RICARDO IMÓVEIS'}</h2>
+          <p class="text-xs text-slate-600 font-semibold">${config.creci || 'CRECI 038613-J'} • ${config.endereco || 'Santo André - SP'}</p>
+          <p class="text-xs text-slate-500">Telefone: ${config.telefone || '(11) 4474-5966'} • WhatsApp: ${config.whatsapp || '5511914879393'}</p>
+        </div>
+        <div class="text-right">
+          <span class="inline-block bg-slate-900 text-white font-mono font-bold text-xs px-3 py-1 rounded-lg">
+            ${termo.codigo}
+          </span>
+          <div class="text-[11px] text-slate-500 mt-1">Data: ${dataFmt}</div>
+        </div>
+      </div>
+
+      <div class="text-center py-2 bg-slate-50 border border-slate-200 rounded-xl">
+        <h3 class="text-sm font-black text-slate-900 uppercase tracking-wide">
+          TERMO DE RECONHECIMENTO DE VISITA E INTERMEDIAÇÃO IMOBILIÁRIA
+        </h3>
+        <span class="text-[10px] text-slate-500 uppercase font-semibold">Garantia nos termos dos artigos 722 a 729 da Lei Federal 10.406/2002</span>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-800">
+        <!-- Partes -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+          <h4 class="font-bold text-slate-900 uppercase text-[11px]">1. QUALIFICAÇÃO DO VISITANTE:</h4>
+          <p><strong>Nome Completo:</strong> ${termo.visitanteNome}</p>
+          <p><strong>CPF:</strong> ${termo.visitanteCpf || 'Não informado'} | <strong>WhatsApp / Celular:</strong> ${termo.visitanteTelefone || '-'}</p>
+          <p><strong>E-mail:</strong> ${termo.visitanteEmail || '-'} ${termo.acompanhantes ? `| <strong>Acompanhante(s):</strong> ${termo.acompanhantes}` : ''}</p>
+        </div>
+
+        <!-- Imóvel -->
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-100 space-y-1.5">
+          <h4 class="font-bold text-slate-900 uppercase text-[11px]">2. IMÓVEL APRESENTADO:</h4>
+          <p><strong>Código de Referência:</strong> <span class="font-mono font-bold text-blue-600">${termo.imovelCodigo}</span> — ${termo.imovelTitulo}</p>
+          <p><strong>Endereço:</strong> ${termo.imovelEndereco}</p>
+          <p><strong>Valor Anunciado:</strong> R$ ${(termo.imovelValor || 0).toLocaleString('pt-BR')}</p>
+          <p><strong>Corretor Intermediador:</strong> ${termo.corretorNome}</p>
+        </div>
+
+        <!-- Cláusula Legal -->
+        <div class="p-4 bg-amber-50/70 border border-amber-200 rounded-xl leading-relaxed text-[11px] text-slate-800">
+          <h4 class="font-bold text-amber-950 uppercase text-[11px] mb-1">3. CLÁUSULA DE INTERMEDIAÇÃO & HONORÁRIOS:</h4>
+          <p>
+            O(A) VISITANTE acima identificado(a) declara para os devidos fins de direito que conheceu e visitou o imóvel acima descrito por intermédio exclusivo da imobiliária <strong>${config.nome}</strong>, acompanhado(a) pelo corretor credenciado acima citado.
+          </p>
+          <p class="mt-1.5">
+            O(A) VISITANTE compromete-se a não realizar qualquer negociação direta com o proprietário, familiares ou terceiros, referente ao imóvel aqui vistoriado, sem a assessoria e participação desta imobiliária, reconhecendo expressamente que a aproximação e resultado útil decorrem dos serviços desta imobiliária, cabendo os honorários de corretagem nos termos dos <strong>Artigos 722, 725, 727 e 728 do Código Civil Brasileiro</strong>.
+          </p>
+        </div>
+
+        <!-- Assinaturas -->
+        <div class="pt-4 grid grid-cols-2 gap-8 items-end">
+          <div class="text-center space-y-2">
+            <div class="h-20 flex items-center justify-center border-b border-slate-400">
+              ${termo.assinaturaDataUrl ? `
+                <img src="${termo.assinaturaDataUrl}" alt="Assinatura Visitante" class="max-h-16 max-w-full object-contain">
+              ` : `
+                <span class="text-slate-400 font-mono text-[11px] italic">Assinado Eletronicamente</span>
+              `}
+            </div>
+            <div class="font-bold text-slate-900 text-[11px]">${termo.visitanteNome}</div>
+            <div class="text-[10px] text-slate-500">Visitante (Comprador/Locatário)</div>
+          </div>
+
+          <div class="text-center space-y-2">
+            <div class="h-20 flex items-center justify-center border-b border-slate-400">
+              <span class="font-serif italic text-blue-900 text-sm font-bold">${termo.corretorNome}</span>
+            </div>
+            <div class="font-bold text-slate-900 text-[11px]">${termo.corretorNome}</div>
+            <div class="text-[10px] text-slate-500">Corretor Credenciado • ${config.creci || 'CRECI'}</div>
+          </div>
+        </div>
+
+        <div class="text-center pt-2 text-[10px] text-slate-400 font-mono border-t border-slate-100">
+          Autenticação Digital: SHA256-${btoa(termo.codigo + termo.dataHora).substring(0, 24)} • Rico Ricardo Imóveis
+        </div>
+      </div>
+    `;
+  }
+
+  if (btnWhats) {
+    const num = (termo.visitanteTelefone || '').replace(/\D/g, '');
+    btnWhats.onclick = () => {
+      const msg = encodeURIComponent(`Olá ${termo.visitanteNome}! Segue o comprovante do Termo de Visita Eletrônico ${termo.codigo} ao imóvel ${termo.imovelCodigo} (${termo.imovelTitulo}). Foi um prazer apresentar o imóvel a você! Qualquer dúvida, conte conosco.`);
+      window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+    };
+  }
+
+  document.getElementById('modal-ver-termo-visita')?.classList.add('active');
+}
+
+function imprimirTermoVisitaAtual() {
+  window.print();
+}
+
+// =============================================================================
+// SIMULADOR DE FINANCIAMENTO HABITACIONAL (CAIXA / BANCOS - SAC & PRICE)
+// =============================================================================
+let simImovelAtual = null;
+
+function abrirModalSimuladorFinanciamento(imovelId) {
+  const modal = document.getElementById('modal-simulador-financiamento');
+  if (!modal) return;
+
+  const imoveis = DB.getImoveis().filter(im => im.finalidade !== 'aluguel');
+  const selectImovel = document.getElementById('sim-select-imovel');
+
+  if (selectImovel) {
+    selectImovel.innerHTML = '<option value="">-- Digitação Avulsa (Sem vincular imóvel) --</option>' + 
+      imoveis.map(im => `
+        <option value="${im.id}" ${im.id === imovelId ? 'selected' : ''}>
+          ${im.codigo} - ${im.titulo} (${im.bairro}) - R$ ${(im.preco || 0).toLocaleString('pt-BR')}
+        </option>
+      `).join('');
+  }
+
+  if (imovelId) {
+    selecionarImovelNoSimulador(imovelId);
+  } else {
+    recalcularSimulacao();
+  }
+
+  modal.classList.add('active');
+}
+
+function abrirModalSimuladorParaLead(leadId) {
+  const lead = DB.getLeads().find(l => l.id === leadId);
+  if (lead) {
+    const elNome = document.getElementById('sim-lead-nome');
+    const elTel = document.getElementById('sim-lead-whatsapp');
+    const elVal = document.getElementById('sim-valor-imovel');
+    if (elNome) elNome.value = lead.nome || '';
+    if (elTel) elTel.value = lead.whatsapp || lead.telefone || '';
+    if (lead.valorNegocio && lead.valorNegocio > 50000 && elVal) {
+      elVal.value = lead.valorNegocio;
+    }
+  }
+  abrirModalSimuladorFinanciamento(lead?.imovelId || '');
+}
+
+function fecharModalSimuladorFinanciamento() {
+  document.getElementById('modal-simulador-financiamento')?.classList.remove('active');
+}
+
+function selecionarImovelNoSimulador(imovelId) {
+  const badgeInfo = document.getElementById('sim-badge-imovel-info');
+  if (!imovelId) {
+    simImovelAtual = null;
+    if (badgeInfo) badgeInfo.textContent = '';
+    return;
+  }
+  const im = DB.getImovelPorId(imovelId);
+  if (!im) return;
+
+  simImovelAtual = im;
+  const inputValor = document.getElementById('sim-valor-imovel');
+  if (inputValor) inputValor.value = im.preco || 500000;
+  if (badgeInfo) badgeInfo.textContent = `${im.codigo} • ${im.bairro}`;
+
+  setEntradaPercentual(20);
+}
+
+function setEntradaPercentual(perc) {
+  const valorImovel = parseFloat(document.getElementById('sim-valor-imovel')?.value) || 0;
+  const valorEntrada = Math.round(valorImovel * (perc / 100));
+  const inputEntrada = document.getElementById('sim-valor-entrada');
+  if (inputEntrada) inputEntrada.value = valorEntrada;
+
+  document.querySelectorAll('.btn-sim-perc').forEach(btn => {
+    if (btn.textContent.includes(`${perc}%`)) {
+      btn.className = 'btn-sim-perc active text-[11px] font-bold py-1.5 rounded-lg border border-amber-500 bg-amber-50 text-amber-800 transition';
+    } else {
+      btn.className = 'btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition';
+    }
+  });
+
+  const labelPerc = document.getElementById('sim-label-entrada-perc');
+  if (labelPerc) labelPerc.textContent = `${perc}% (${perc <= 20 ? 'Mínimo Caixa' : 'Personalizado'})`;
+
+  recalcularSimulacao();
+}
+
+function recalcularPorValorEntrada() {
+  const valorImovel = parseFloat(document.getElementById('sim-valor-imovel')?.value) || 0;
+  const valorEntrada = parseFloat(document.getElementById('sim-valor-entrada')?.value) || 0;
+  if (valorImovel <= 0) return;
+
+  const perc = Math.round((valorEntrada / valorImovel) * 100);
+  const labelPerc = document.getElementById('sim-label-entrada-perc');
+  if (labelPerc) labelPerc.textContent = `${perc}% da compra`;
+
+  document.querySelectorAll('.btn-sim-perc').forEach(btn => {
+    btn.className = 'btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition';
+  });
+
+  recalcularSimulacao();
+}
+
+function setTaxaJuros(taxa, labelInfo) {
+  const inputTaxa = document.getElementById('sim-taxa-anual');
+  if (inputTaxa) inputTaxa.value = taxa;
+
+  const labelTaxa = document.getElementById('sim-label-taxa-info');
+  if (labelTaxa) labelTaxa.textContent = labelInfo;
+
+  document.querySelectorAll('.btn-sim-taxa').forEach(btn => {
+    if (btn.textContent.includes(`${taxa}%`)) {
+      btn.className = 'btn-sim-taxa active text-[11px] font-bold py-1.5 rounded-lg border border-amber-500 bg-amber-50 text-amber-800 transition';
+    } else {
+      btn.className = 'btn-sim-taxa text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition';
+    }
+  });
+
+  recalcularSimulacao();
+}
+
+function recalcularSimulacao() {
+  const valorImovel = parseFloat(document.getElementById('sim-valor-imovel')?.value) || 0;
+  const valorEntrada = parseFloat(document.getElementById('sim-valor-entrada')?.value) || 0;
+  const valorFgts = parseFloat(document.getElementById('sim-valor-fgts')?.value) || 0;
+  const prazoMeses = parseInt(document.getElementById('sim-prazo-meses')?.value) || 360;
+  const sistema = document.getElementById('sim-sistema-tabela')?.value || 'SAC';
+  const taxaAnual = parseFloat(document.getElementById('sim-taxa-anual')?.value) || 10.2;
+
+  const totalEntradaComFgts = valorEntrada + valorFgts;
+  const saldoFinanciar = Math.max(0, valorImovel - totalEntradaComFgts);
+  const taxaMensal = (taxaAnual / 100) / 12;
+
+  let parcelaInicial = 0;
+  let parcelaFinal = 0;
+
+  if (saldoFinanciar > 0 && prazoMeses > 0) {
+    if (sistema === 'SAC') {
+      const amortizacaoConstante = saldoFinanciar / prazoMeses;
+      const jurosInicial = saldoFinanciar * taxaMensal;
+      parcelaInicial = amortizacaoConstante + jurosInicial;
+
+      const jurosFinal = amortizacaoConstante * taxaMensal;
+      parcelaFinal = amortizacaoConstante + jurosFinal;
+    } else {
+      parcelaInicial = saldoFinanciar * (taxaMensal * Math.pow(1 + taxaMensal, prazoMeses)) / (Math.pow(1 + taxaMensal, prazoMeses) - 1);
+      parcelaFinal = parcelaInicial;
+    }
+  }
+
+  const rendaMinima = parcelaInicial > 0 ? (parcelaInicial / 0.30) : 0;
+
+  const elParcelaInicial = document.getElementById('sim-res-parcela-inicial');
+  const elParcelaFinal = document.getElementById('sim-res-parcela-final');
+  const elRendaMinima = document.getElementById('sim-res-renda-minima');
+  const elSaldoFinanciado = document.getElementById('sim-res-saldo-financiado');
+  const elTotalEntrada = document.getElementById('sim-res-total-entrada');
+  const elTag = document.getElementById('sim-res-sistema-tag');
+  const boxParcelaFinal = document.getElementById('sim-res-box-parcela-final');
+  const tituloParcela = document.getElementById('sim-res-titulo-parcela');
+
+  if (elParcelaInicial) elParcelaInicial.textContent = `R$ ${parcelaInicial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (elParcelaFinal) elParcelaFinal.textContent = `R$ ${parcelaFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (elRendaMinima) elRendaMinima.textContent = `R$ ${rendaMinima.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (elSaldoFinanciado) elSaldoFinanciado.textContent = `R$ ${saldoFinanciar.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  if (elTotalEntrada) elTotalEntrada.textContent = `R$ ${totalEntradaComFgts.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} ${valorFgts > 0 ? `(inclui R$ ${valorFgts.toLocaleString('pt-BR')} FGTS)` : ''}`;
+
+  if (elTag) elTag.textContent = `${sistema} • ${prazoMeses} meses (${taxaAnual}% a.a.)`;
+
+  if (sistema === 'PRICE') {
+    if (boxParcelaFinal) boxParcelaFinal.classList.add('hidden');
+    if (tituloParcela) tituloParcela.textContent = 'Parcela Mensal Fixa (Price):';
+  } else {
+    if (boxParcelaFinal) boxParcelaFinal.classList.remove('hidden');
+    if (tituloParcela) tituloParcela.textContent = 'Primeira Parcela Estimada (SAC):';
+  }
+}
+
+function gerarTextoSimulacaoFinanciamento() {
+  const valorImovel = parseFloat(document.getElementById('sim-valor-imovel')?.value) || 0;
+  const valorEntrada = parseFloat(document.getElementById('sim-valor-entrada')?.value) || 0;
+  const valorFgts = parseFloat(document.getElementById('sim-valor-fgts')?.value) || 0;
+  const prazoMeses = parseInt(document.getElementById('sim-prazo-meses')?.value) || 360;
+  const sistema = document.getElementById('sim-sistema-tabela')?.value || 'SAC';
+  const taxaAnual = parseFloat(document.getElementById('sim-taxa-anual')?.value) || 10.2;
+  const leadNome = document.getElementById('sim-lead-nome')?.value.trim() || 'Cliente';
+
+  const totalEntrada = valorEntrada + valorFgts;
+  const saldoFinanciar = Math.max(0, valorImovel - totalEntrada);
+  const taxaMensal = (taxaAnual / 100) / 12;
+
+  let parcelaInicial = 0;
+  let parcelaFinal = 0;
+  if (sistema === 'SAC') {
+    const amort = saldoFinanciar / prazoMeses;
+    parcelaInicial = amort + (saldoFinanciar * taxaMensal);
+    parcelaFinal = amort + (amort * taxaMensal);
+  } else {
+    parcelaInicial = saldoFinanciar * (taxaMensal * Math.pow(1 + taxaMensal, prazoMeses)) / (Math.pow(1 + taxaMensal, prazoMeses) - 1);
+    parcelaFinal = parcelaInicial;
+  }
+  const rendaMinima = parcelaInicial / 0.30;
+  const imovelRef = simImovelAtual ? `${simImovelAtual.codigo} (${simImovelAtual.titulo})` : 'Imóvel de Interesse';
+
+  let msg = `Olá, *${leadNome}*! Tudo bem? 🏡\n\n`;
+  msg += `Aqui é da equipe da *${DB.getConfig().nome}*.\n`;
+  msg += `Conforme conversamos, realizei a *Simulação Oficial de Financiamento Habitacional (Caixa / Bancos)* para o imóvel *${imovelRef}*:\n\n`;
+  msg += `📍 *Valor do Imóvel:* R$ ${valorImovel.toLocaleString('pt-BR')}\n`;
+  msg += `💰 *Entrada Necessária:* R$ ${valorEntrada.toLocaleString('pt-BR')}${valorFgts > 0 ? ` (+ R$ ${valorFgts.toLocaleString('pt-BR')} FGTS)` : ''}\n`;
+  msg += `🏦 *Saldo a Financiar:* R$ ${saldoFinanciar.toLocaleString('pt-BR')} (${prazoMeses} meses)\n`;
+  msg += `📊 *Tabela Utilizada:* ${sistema} (${taxaAnual}% a.a.)\n\n`;
+  if (sistema === 'SAC') {
+    msg += `💳 *1ª Parcela Estimada:* R$ ${parcelaInicial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+    msg += `📉 *Última Parcela:* R$ ${parcelaFinal.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+  } else {
+    msg += `💳 *Parcela Mensal Fixa:* R$ ${parcelaInicial.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
+  }
+  msg += `👥 *Renda Familiar Bruta Recomendada:* R$ ${rendaMinima.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n\n`;
+  msg += `Podemos dar andamento na aprovação da sua carta de crédito junto ao nosso correspondente bancário credenciado Caixa (sem custo)?\n\n`;
+  msg += `Fico no seu aguardo! 🤝`;
+
+  return msg;
+}
+
+function enviarSimulacaoWhatsApp() {
+  const whats = (document.getElementById('sim-lead-whatsapp')?.value || '').replace(/\D/g, '');
+  const texto = gerarTextoSimulacaoFinanciamento();
+  if (whats) {
+    window.open(`https://wa.me/55${whats.replace(/^55/, '')}?text=${encodeURIComponent(texto)}`, '_blank');
+  } else {
+    const telefone = prompt('Informe o número de WhatsApp do cliente (com DDD):', '');
+    if (telefone) {
+      const numLimpo = telefone.replace(/\D/g, '');
+      window.open(`https://wa.me/55${numLimpo.replace(/^55/, '')}?text=${encodeURIComponent(texto)}`, '_blank');
+    }
+  }
+}
+
+function copiarTextoSimulacao() {
+  const texto = gerarTextoSimulacaoFinanciamento();
+  navigator.clipboard.writeText(texto).then(() => {
+    mostrarToastFeedback('Resumo da simulação copiado com sucesso!', '📋');
+  }).catch(() => {
+    prompt('Copie o resumo da simulação abaixo:', texto);
+  });
+}
+
+function imprimirSimulacaoFinanciamento() {
+  window.print();
+}
+
+// Window Exports das Novas Ferramentas
+window.alternarSubAbaVistorias = alternarSubAbaVistorias;
+window.renderizarTermosVisita = renderizarTermosVisita;
+window.abrirModalTermoVisita = abrirModalTermoVisita;
+window.abrirModalTermoVisitaParaLead = abrirModalTermoVisitaParaLead;
+window.fecharModalTermoVisita = fecharModalTermoVisita;
+window.selecionarImovelNoTermoVisita = selecionarImovelNoTermoVisita;
+window.limparCanvasAssinaturaTermo = limparCanvasAssinaturaTermo;
+window.salvarTermoVisitaSubmit = salvarTermoVisitaSubmit;
+window.verTermoVisitaDetalhe = verTermoVisitaDetalhe;
+window.excluirTermoVisita = excluirTermoVisita;
+window.imprimirTermoVisitaAtual = imprimirTermoVisitaAtual;
+
+window.abrirModalSimuladorFinanciamento = abrirModalSimuladorFinanciamento;
+window.abrirModalSimuladorParaLead = abrirModalSimuladorParaLead;
+window.fecharModalSimuladorFinanciamento = fecharModalSimuladorFinanciamento;
+window.selecionarImovelNoSimulador = selecionarImovelNoSimulador;
+window.setEntradaPercentual = setEntradaPercentual;
+window.recalcularPorValorEntrada = recalcularPorValorEntrada;
+window.setTaxaJuros = setTaxaJuros;
+window.recalcularSimulacao = recalcularSimulacao;
+window.enviarSimulacaoWhatsApp = enviarSimulacaoWhatsApp;
+window.copiarTextoSimulacao = copiarTextoSimulacao;
+window.imprimirSimulacaoFinanciamento = imprimirSimulacaoFinanciamento;
 
 

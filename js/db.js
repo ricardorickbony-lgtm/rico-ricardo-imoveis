@@ -10,6 +10,7 @@ const STORAGE_LEADS_KEY = 'ricoricardo_leads_v1';
 const STORAGE_SENHA_KEY = 'ricoricardo_senha_admin';
 const STORAGE_CONTRATOS_KEY = 'ricoricardo_contratos_locacao_v1';
 const STORAGE_VISTORIAS_KEY = 'ricoricardo_vistorias_v1';
+const STORAGE_TERMOS_VISITA_KEY = 'ricoricardo_termos_visita_v1';
 const STORAGE_CORRETORES_KEY = 'ricoricardo_corretores_v1';
 const STORAGE_SOFIA_KEY = 'ricoricardo_sofia_config_v2';
 const STORAGE_LIXEIRA_KEY = 'ricoricardo_lixeira_v1';
@@ -676,6 +677,48 @@ const VISTORIAS_INICIAIS = [
     ],
     chavesEntregues: '4 cartões RFID de acesso à laje e 6 tags de garagem rotativa',
     termoAssinado: true
+  }
+];
+
+// Termos de Reconhecimento de Visita Eletrônicos (Proteção Jurídica de Comissão - Art. 722 CC)
+const TERMOS_VISITA_INICIAIS = [
+  {
+    id: 'termo-1',
+    codigo: 'VIS-2026-001',
+    dataHora: '2026-10-02T15:30:00',
+    imovelId: 'imv-1',
+    imovelCodigo: 'AP0102',
+    imovelTitulo: 'Apartamento de Alto Padrão no Campestre',
+    imovelEndereco: 'Rua das Figueiras, 450 - Bairro Jardim, Santo André - SP',
+    imovelValor: 850000,
+    visitanteNome: 'Dr. Leonardo Vasconcelos',
+    visitanteCpf: '284.912.438-19',
+    visitanteTelefone: '11987654321',
+    visitanteEmail: 'dr.leonardo@clinica.com.br',
+    acompanhantes: 'Dra. Camila Vasconcelos',
+    corretorNome: 'Ricardo Oliveira',
+    observacoes: 'Cliente elogiou a vista panorâmica e a varanda gourmet. Aguarda simulação da Caixa na Tabela SAC.',
+    assinaturaDataUrl: '',
+    status: 'Realizada'
+  },
+  {
+    id: 'termo-2',
+    codigo: 'VIS-2026-002',
+    dataHora: '2026-10-03T11:00:00',
+    imovelId: 'imv-2',
+    imovelCodigo: 'CS0205',
+    imovelTitulo: 'Sobrado Contemporâneo com Piscina Aquecida',
+    imovelEndereco: 'Rua das Goiabeiras, 120 - Vila Valparaíso, Santo André - SP',
+    imovelValor: 1250000,
+    visitanteNome: 'Mariana Silveira Ramos',
+    visitanteCpf: '341.802.195-44',
+    visitanteTelefone: '11971234567',
+    visitanteEmail: 'mariana.silveira@advocacia.com.br',
+    acompanhantes: 'Marcos Ramos',
+    corretorNome: 'Carlos Prado',
+    observacoes: 'Visita excelente. Família adorou a segurança do condomínio e a área de lazer.',
+    assinaturaDataUrl: '',
+    status: 'Realizada'
   }
 ];
 
@@ -1503,6 +1546,60 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
   },
 
   // =========================================================================
+  // TERMOS DE VISITA ELETRÔNICOS (Proteção Jurídica de Comissão - Art. 722 CC)
+  // =========================================================================
+  getTermosVisita() {
+    try {
+      const data = localStorage.getItem(STORAGE_TERMOS_VISITA_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    this.salvarTermosVisita(TERMOS_VISITA_INICIAIS);
+    return TERMOS_VISITA_INICIAIS;
+  },
+
+  salvarTermosVisita(termos) {
+    try {
+      localStorage.setItem(STORAGE_TERMOS_VISITA_KEY, JSON.stringify(termos));
+      window.dispatchEvent(new CustomEvent('imob_termos_visita_atualizados', { detail: termos }));
+    } catch (e) {}
+  },
+
+  adicionarTermoVisita(termo) {
+    const termos = this.getTermosVisita();
+    if (!termo.id) termo.id = 'termo-' + Date.now();
+    if (!termo.codigo) termo.codigo = `VIS-${new Date().getFullYear()}-${String(termos.length + 1).padStart(3, '0')}`;
+    if (!termo.dataHora) termo.dataHora = new Date().toISOString();
+    termos.unshift(termo);
+    this.salvarTermosVisita(termos);
+    this.registrarLogAuditoria(
+      'Emissão de Termo de Visita',
+      'Comercial',
+      `Termo de visita ${termo.codigo} gerado para "${termo.visitanteNome}" no imóvel "${termo.imovelCodigo}". Assinatura digital autenticada.`,
+      this.getPerfilAtivo()
+    );
+    return termo;
+  },
+
+  removerTermoVisita(id) {
+    let termos = this.getTermosVisita();
+    const termo = termos.find(t => t.id === id);
+    termos = termos.filter(item => item.id !== id);
+    this.salvarTermosVisita(termos);
+    if (termo) {
+      this.registrarLogAuditoria(
+        'Exclusão de Termo de Visita',
+        'Comercial',
+        `Termo ${termo.codigo} removido pelo usuário.`,
+        this.getPerfilAtivo()
+      );
+    }
+    return true;
+  },
+
+  // =========================================================================
   // SOFIA IA: ATENDIMENTO VIRTUAL NO SITE E WHATSAPP 24H (Padrão Tais IA)
   // =========================================================================
   getSofiaConfig() {
@@ -1866,6 +1963,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     this.salvarCorretores(CORRETORES_INICIAIS);
     this.salvarContratosLocacao(CONTRATOS_LOCACAO_INICIAIS);
     this.salvarVistorias(VISTORIAS_INICIAIS);
+    this.salvarTermosVisita(TERMOS_VISITA_INICIAIS);
     this.salvarSofiaConfig(CONFIG_SOFIA_PADRAO);
     this.salvarLixeira([]);
     this.salvarAuditLog(AUDIT_LOG_INICIAIS);

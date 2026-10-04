@@ -257,6 +257,12 @@
               placeholder="Buscar por código, título ou bairro..." 
               class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 shadow-sm"
             >
+            <button onclick="abrirModalSimuladorFinanciamento()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
+              <span>🏦 Simulador Caixa</span>
+            </button>
+            <button onclick="abrirModalTermoVisita()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
+              <span>📝 Termo de Visita</span>
+            </button>
             <button id="btn-abrir-modal-novo-imovel" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition shadow flex items-center gap-1.5">
               <span>+ Novo Imóvel</span>
             </button>
@@ -531,6 +537,12 @@
                 📋 Tabela
               </button>
             </div>
+            <button onclick="abrirModalSimuladorFinanciamento()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Simular Financiamento Habitacional para Leads">
+              <span>🏦 Simulador Caixa</span>
+            </button>
+            <button onclick="abrirModalTermoVisita()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
+              <span>📝 Termo de Visita</span>
+            </button>
             <button id="btn-novo-lead-manual" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5">
               <span>+ Novo Lead</span>
             </button>
@@ -755,19 +767,61 @@
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-              <span>Vistorias Digitais de Imóveis</span>
-              <span class="text-[10px] font-bold bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full uppercase">Laudo Técnico</span>
+              <span>Vistorias Técnicas & Termos de Visita</span>
+              <span class="text-[10px] font-bold bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full uppercase">Garantia Jurídica</span>
             </h2>
-            <p class="text-xs text-slate-500">Checklist detalhado por cômodo para entrada e saída com garantia jurídica</p>
+            <p class="text-xs text-slate-500">Termos de reconhecimento de visita com assinatura na tela (Art. 722 CC) e laudos detalhados de vistoria</p>
           </div>
 
-          <button id="btn-nova-vistoria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5">
-            <span>+ Nova Vistoria Digital</span>
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <button onclick="abrirModalTermoVisita()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Emitir novo termo com assinatura digital na tela">
+              <span>📝 + Novo Termo de Visita</span>
+            </button>
+            <button id="btn-nova-vistoria" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5">
+              <span>📋 + Nova Vistoria Digital</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Seletor de Sub-Abas -->
+        <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+          <button id="btn-subaba-termos" onclick="alternarSubAbaVistorias('termos')" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-indigo-600 text-white shadow-sm flex items-center gap-2">
+            <span>📝 Termos de Visita Presencial</span>
+            <span id="badge-cont-termos" class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full">0</span>
+          </button>
+          <button id="btn-subaba-vistorias" onclick="alternarSubAbaVistorias('vistorias')" class="px-4 py-2 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900 hover:bg-slate-100 flex items-center gap-2">
+            <span>📋 Laudos de Vistoria (Entrada/Saída)</span>
+            <span id="badge-cont-vistorias" class="bg-slate-200 text-slate-700 text-[10px] px-1.5 py-0.2 rounded-full">0</span>
           </button>
         </div>
 
-        <div id="grid-vistorias-lista" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Populado via JS -->
+        <!-- Sub-Painel 1: Termos de Visita Presencial -->
+        <div id="painel-sub-termos-visita" class="space-y-4">
+          <div class="p-4 bg-indigo-50/70 border border-indigo-200 rounded-2xl flex items-start justify-between gap-4">
+            <div class="flex items-start gap-3">
+              <span class="text-2xl">⚖️</span>
+              <div>
+                <h4 class="text-xs font-bold text-indigo-950">Blindagem de Comissão Imobiliária (Artigos 722 a 729 do Código Civil):</h4>
+                <p class="text-[11px] text-indigo-900/80 mt-0.5 leading-relaxed">
+                  O Termo de Visita assinado eletronicamente pelo comprador ou locatário comprova a intermediação útil da Rico Ricardo Imóveis. Caso o cliente tente negociar diretamente com o proprietário por fora, o documento garante judicialmente o recebimento integral dos <strong>6% de honorários de corretagem</strong>.
+                </p>
+              </div>
+            </div>
+            <button onclick="abrirModalTermoVisita()" class="shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow">
+              Emitir Agora
+            </button>
+          </div>
+
+          <div id="grid-termos-visita-lista" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- Populado via JS -->
+          </div>
+        </div>
+
+        <!-- Sub-Painel 2: Laudos de Vistoria -->
+        <div id="painel-sub-vistorias" class="hidden space-y-4">
+          <div id="grid-vistorias-lista" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Populado via JS -->
+          </div>
         </div>
 
       </section>
@@ -2062,6 +2116,335 @@
       <button onclick="document.getElementById('modal-matching').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
       <div id="modal-matching-conteudo">
         <!-- Inserido dinamicamente via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: SIMULADOR DE FINANCIAMENTO HABITACIONAL (CAIXA / BANCOS)           -->
+  <!-- ========================================================================= -->
+  <div id="modal-simulador-financiamento" class="modal-overlay">
+    <div class="modal-content relative !max-w-4xl p-6 sm:p-8 space-y-6">
+      <button onclick="fecharModalSimuladorFinanciamento()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
+      
+      <div class="flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <span class="text-xs font-bold text-amber-600 uppercase tracking-wider flex items-center gap-1.5">
+            <span>🏦</span> Inteligência Financeira & Fechamento de Vendas
+          </span>
+          <h3 class="text-xl font-black text-slate-900 mt-1">Simulador de Financiamento Habitacional</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Cálculo instantâneo de entrada, parcelas SAC/PRICE e renda familiar mínima recomendada (Caixa Econômica e Bancos Privados).</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Coluna de Parâmetros (Esquerda - 6 cols) -->
+        <div class="lg:col-span-6 space-y-4">
+          
+          <!-- Imóvel Vinculado -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Imóvel do Catálogo (Opcional)</label>
+            <select id="sim-select-imovel" onchange="selecionarImovelNoSimulador(this.value)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+              <option value="">-- Digitação Avulsa (Sem vincular imóvel) --</option>
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+
+          <!-- Valor do Imóvel -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-slate-700 uppercase">Valor do Imóvel (R$)</label>
+              <span id="sim-badge-imovel-info" class="text-[11px] text-slate-400 font-mono"></span>
+            </div>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-xs font-bold text-slate-400">R$</span>
+              <input type="number" id="sim-valor-imovel" value="650000" step="5000" min="50000" oninput="recalcularSimulacao()" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-sm font-black text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+          </div>
+
+          <!-- Entrada em R$ e % -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-700 uppercase">Valor de Entrada</label>
+              <span id="sim-label-entrada-perc" class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded">20% Recomendado</span>
+            </div>
+            <div class="grid grid-cols-5 gap-1.5">
+              <button type="button" onclick="setEntradaPercentual(10)" class="btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">10%</button>
+              <button type="button" onclick="setEntradaPercentual(20)" class="btn-sim-perc active text-[11px] font-bold py-1.5 rounded-lg border border-amber-500 bg-amber-50 text-amber-800 transition">20%</button>
+              <button type="button" onclick="setEntradaPercentual(30)" class="btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">30%</button>
+              <button type="button" onclick="setEntradaPercentual(40)" class="btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">40%</button>
+              <button type="button" onclick="setEntradaPercentual(50)" class="btn-sim-perc text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">50%</button>
+            </div>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-xs font-bold text-slate-400">R$</span>
+              <input type="number" id="sim-valor-entrada" value="130000" step="1000" min="0" oninput="recalcularPorValorEntrada()" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+          </div>
+
+          <!-- Uso de FGTS -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Uso de Saldo de FGTS (Opcional)</label>
+            <div class="relative">
+              <span class="absolute left-3 top-2.5 text-xs font-bold text-slate-400">R$</span>
+              <input type="number" id="sim-valor-fgts" value="0" step="1000" min="0" oninput="recalcularSimulacao()" placeholder="0,00" class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-9 pr-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500">
+            </div>
+            <span class="text-[10px] text-slate-500 mt-0.5 block">O FGTS é abatido da entrada à vista do comprador.</span>
+          </div>
+
+          <!-- Prazo de Financiamento e Sistema de Amortização -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Prazo</label>
+              <select id="sim-prazo-meses" onchange="recalcularSimulacao()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none">
+                <option value="420">420 meses (35 anos)</option>
+                <option value="360" selected>360 meses (30 anos)</option>
+                <option value="240">240 meses (20 anos)</option>
+                <option value="180">180 meses (15 anos)</option>
+                <option value="120">120 meses (10 anos)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Tabela (Amortização)</label>
+              <select id="sim-sistema-tabela" onchange="recalcularSimulacao()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none">
+                <option value="SAC" selected>Tabela SAC (Decrescente)</option>
+                <option value="PRICE">Tabela PRICE (Fixa)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Taxa de Juros Anual -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-xs font-bold text-slate-700 uppercase">Taxa de Juros Anual</label>
+              <span id="sim-label-taxa-info" class="text-[11px] text-slate-500">Padrão Caixa Balcão</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" onclick="setTaxaJuros(9.5, 'Caixa Pró-Cotista')" class="btn-sim-taxa text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">9.5% a.a.</button>
+              <button type="button" onclick="setTaxaJuros(10.2, 'Caixa SBPE Padrão')" class="btn-sim-taxa active text-[11px] font-bold py-1.5 rounded-lg border border-amber-500 bg-amber-50 text-amber-800 transition">10.2% a.a.</button>
+              <button type="button" onclick="setTaxaJuros(10.9, 'Bancos Privados')" class="btn-sim-taxa text-[11px] font-bold py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">10.9% a.a.</button>
+            </div>
+            <input type="hidden" id="sim-taxa-anual" value="10.2">
+          </div>
+
+          <!-- Dados do Lead / Cliente para Envio -->
+          <div class="pt-2 border-t border-slate-200/80 grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase mb-0.5">Nome do Lead</label>
+              <input type="text" id="sim-lead-nome" placeholder="Ex: Roberto Silva" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800">
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-slate-600 uppercase mb-0.5">WhatsApp do Lead</label>
+              <input type="text" id="sim-lead-whatsapp" placeholder="(11) 9...." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs text-slate-800">
+            </div>
+          </div>
+        </div>
+
+        <!-- Coluna de Resultados (Direita - 6 cols) -->
+        <div class="lg:col-span-6 flex flex-col justify-between space-y-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white p-6 rounded-3xl border border-slate-700 shadow-xl">
+          <div class="space-y-5">
+            <div class="flex items-center justify-between border-b border-white/10 pb-3">
+              <span class="text-xs font-bold text-amber-400 tracking-wider uppercase flex items-center gap-1.5">
+                <span>⚡</span> Parecer Financeiro Instantâneo
+              </span>
+              <span id="sim-res-sistema-tag" class="text-[10px] font-mono bg-white/10 px-2 py-0.5 rounded text-white">SAC • 360 meses</span>
+            </div>
+
+            <!-- Card Parcela Principal -->
+            <div class="bg-white/5 border border-white/10 p-4 rounded-2xl">
+              <span class="text-xs text-slate-300 block font-medium" id="sim-res-titulo-parcela">Primeira Parcela Estimada:</span>
+              <div class="text-3xl sm:text-4xl font-black text-amber-400 mt-1" id="sim-res-parcela-inicial">
+                R$ 0,00
+              </div>
+              <div class="flex items-center justify-between text-xs text-slate-400 mt-2 pt-2 border-t border-white/10" id="sim-res-box-parcela-final">
+                <span>Última Parcela (Amortizada):</span>
+                <span class="font-bold text-emerald-400" id="sim-res-parcela-final">R$ 0,00</span>
+              </div>
+            </div>
+
+            <!-- Card Renda Mínima Recomendada -->
+            <div class="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl flex items-center justify-between">
+              <div>
+                <span class="text-xs text-emerald-300 block font-bold">Renda Familiar Bruta Recomendada</span>
+                <span class="text-[11px] text-slate-400">Comprometimento máx. 30% da renda (Regra BACEN)</span>
+              </div>
+              <div class="text-right">
+                <span class="text-xl sm:text-2xl font-black text-emerald-400" id="sim-res-renda-minima">
+                  R$ 0,00
+                </span>
+              </div>
+            </div>
+
+            <!-- Resumo das Cifras -->
+            <div class="grid grid-cols-2 gap-3 text-xs">
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span class="text-slate-400 block text-[11px]">Saldo Financiado:</span>
+                <span class="text-sm font-bold text-white mt-0.5 block" id="sim-res-saldo-financiado">R$ 0,00</span>
+              </div>
+              <div class="p-3 bg-white/5 rounded-xl border border-white/5">
+                <span class="text-slate-400 block text-[11px]">Entrada Necessária:</span>
+                <span class="text-sm font-bold text-white mt-0.5 block" id="sim-res-total-entrada">R$ 0,00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ações de Envio e Conversão -->
+          <div class="space-y-2 pt-4 border-t border-white/10">
+            <button type="button" onclick="enviarSimulacaoWhatsApp()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.585 1.961.895 2.791.895 3.181 0 5.767-2.587 5.767-5.766.001-3.187-2.578-5.781-5.767-5.781zm9.969 5.766c0 5.505-4.495 10-10 10-1.776 0-3.441-.471-4.887-1.293l-5.113 1.355 1.373-5.006c-.896-1.488-1.413-3.23-1.413-5.056 0-5.505 4.495-10 10-10 5.505 0 10 4.495 10 10z"/></svg>
+              <span>📲 Enviar Simulação Formatada no WhatsApp</span>
+            </button>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" onclick="copiarTextoSimulacao()" class="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5">
+                <span>📋 Copiar Resumo</span>
+              </button>
+              <button type="button" onclick="imprimirSimulacaoFinanciamento()" class="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs py-2 rounded-xl transition flex items-center justify-center gap-1.5">
+                <span>🖨️ Imprimir Proposta</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TERMO DE VISITA ELETRÔNICO COM ASSINATURA NA TELA (ART. 722 CC)    -->
+  <!-- ========================================================================= -->
+  <div id="modal-termo-visita" class="modal-overlay">
+    <div class="modal-content relative !max-w-3xl p-6 sm:p-8 space-y-5">
+      <button onclick="fecharModalTermoVisita()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
+      
+      <div class="border-b border-slate-200 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Blindagem Jurídica de Comissão
+          </span>
+          <span class="text-xs text-slate-400 font-mono" id="termo-visita-codigo-preview">VIS-2026-NOVO</span>
+        </div>
+        <h3 class="text-xl font-black text-slate-900 mt-1">Termo de Reconhecimento de Visita & Intermediação</h3>
+        <p class="text-xs text-slate-500 mt-0.5">Comprovação jurídica de apresentação do imóvel e assessoria imobiliária nos termos do Art. 722 a 729 da Lei 10.406/02.</p>
+      </div>
+
+      <form id="form-salvar-termo-visita" onsubmit="salvarTermoVisitaSubmit(event)" class="space-y-4">
+        
+        <!-- Seleção do Imóvel -->
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Imóvel Visitado *</label>
+            <select id="termo-select-imovel" onchange="selecionarImovelNoTermoVisita(this.value)" required class="w-full bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Selecione o imóvel que está sendo visitado...</option>
+              <!-- Preenchido via JS -->
+            </select>
+          </div>
+          <div id="termo-imovel-detalhes" class="text-xs text-slate-600 grid grid-cols-1 sm:grid-cols-2 gap-2 bg-white p-3 rounded-xl border border-slate-200/80 hidden">
+            <div><strong>Código:</strong> <span id="termo-det-codigo" class="font-mono text-blue-600">-</span></div>
+            <div><strong>Valor:</strong> <span id="termo-det-valor" class="font-bold text-slate-900">-</span></div>
+            <div class="sm:col-span-2"><strong>Endereço:</strong> <span id="termo-det-endereco">-</span></div>
+          </div>
+        </div>
+
+        <!-- Dados do Visitante -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Nome Completo do Visitante *</label>
+            <input type="text" id="termo-visitante-nome" required placeholder="Ex: Roberto Carlos da Silva" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">CPF do Visitante *</label>
+            <input type="text" id="termo-visitante-cpf" required placeholder="000.000.000-00" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp / Telefone *</label>
+            <input type="text" id="termo-visitante-telefone" required placeholder="(11) 9...." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail do Visitante</label>
+            <input type="email" id="termo-visitante-email" placeholder="cliente@email.com" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Corretor Responsável *</label>
+            <select id="termo-corretor-nome" required class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-semibold">
+              <!-- Preenchido via JS com corretores -->
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Acompanhantes da Visita (Opcional)</label>
+            <input type="text" id="termo-acompanhantes" placeholder="Ex: Esposa Mariana, arquiteto..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+          </div>
+        </div>
+
+        <!-- Cláusula Jurídica Legal -->
+        <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
+          <p class="font-bold mb-1">⚖️ DECLARAÇÃO DE RECONHECIMENTO DE INTERMEDIAÇÃO:</p>
+          <p>
+            O(A) VISITANTE acima qualificado(a) declara que visitou o imóvel indicado sob assessoria exclusiva da imobiliária <strong>RICO RICARDO IMÓVEIS (CRECI 038613-J)</strong>. O(A) visitante compromete-se a não negociar diretamente com o proprietário sem a interveniência desta imobiliária, reconhecendo o direito à comissão devida nos termos dos <strong>artigos 722 a 729 da Lei Federal 10.406/2002 (Código Civil Brasileiro)</strong>.
+          </p>
+        </div>
+
+        <!-- QUADRO DE ASSINATURA DIGITAL TOUCH / CANVAS -->
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-slate-800 uppercase flex items-center gap-1.5">
+              <span>✍️</span> Assinatura do Visitante (Assine com o dedo ou mouse)
+            </label>
+            <button type="button" onclick="limparCanvasAssinaturaTermo()" class="text-xs text-rose-600 hover:text-rose-800 font-bold bg-rose-50 px-2.5 py-1 rounded-lg transition">
+              ↺ Limpar Assinatura
+            </button>
+          </div>
+          
+          <div class="border-2 border-dashed border-indigo-300 bg-white rounded-2xl p-2 relative shadow-inner overflow-hidden">
+            <canvas id="canvas-assinatura-termo" height="150" class="w-full touch-none cursor-crosshair bg-slate-50/50 rounded-xl block"></canvas>
+            <div id="aviso-assine-aqui" class="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-300 font-bold text-sm tracking-wide">
+              Assine com o dedo ou mouse nesta área
+            </div>
+            <div class="absolute bottom-2 left-4 text-[10px] text-slate-400 font-mono pointer-events-none">
+              ✕ _________________________________________________
+            </div>
+          </div>
+          <span class="text-[10px] text-slate-400 block">A assinatura digital tem validade jurídica e é carimbada com data, horário e código de segurança.</span>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="pt-3 border-t border-slate-200 flex items-center justify-between flex-wrap gap-2">
+          <button type="button" onclick="fecharModalTermoVisita()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+            Cancelar
+          </button>
+          <div class="flex items-center gap-2">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+              <span>💾</span> Salvar & Autenticar Termo de Visita
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: VISUALIZAR / IMPRIMIR TERMO DE VISITA TIMBRADO                    -->
+  <!-- ========================================================================= -->
+  <div id="modal-ver-termo-visita" class="modal-overlay">
+    <div class="modal-content relative !max-w-3xl p-6 sm:p-8 space-y-6">
+      <button onclick="document.getElementById('modal-ver-termo-visita').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
+      
+      <!-- Conteúdo Timbrado Oficial para Impressão -->
+      <div id="termo-visita-imprimir-conteudo" class="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 text-slate-800 space-y-6">
+        <!-- Inserido dinamicamente via JS -->
+      </div>
+
+      <!-- Barra de Ações Inferior -->
+      <div class="flex items-center justify-between border-t border-slate-200 pt-4 flex-wrap gap-2">
+        <button onclick="document.getElementById('modal-ver-termo-visita').classList.remove('active')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+          Fechar
+        </button>
+        <div class="flex items-center gap-2">
+          <button id="btn-whats-termo-detalhe" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.585 1.961.895 2.791.895 3.181 0 5.767-2.587 5.767-5.766.001-3.187-2.578-5.781-5.767-5.781zm9.969 5.766c0 5.505-4.495 10-10 10-1.776 0-3.441-.471-4.887-1.293l-5.113 1.355 1.373-5.006c-.896-1.488-1.413-3.23-1.413-5.056 0-5.505 4.495-10 10-10 5.505 0 10 4.495 10 10z"/></svg>
+            <span>Enviar no WhatsApp</span>
+          </button>
+          <button onclick="imprimirTermoVisitaAtual()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>🖨️</span> Imprimir Termo Timbrado (A4)
+          </button>
+        </div>
       </div>
     </div>
   </div>
