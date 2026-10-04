@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel SaaS & CRM — Rico Ricardo Imóveis</title>
+  <title>NEXO CRM — Painel de Gestão Imobiliária & Portais</title>
   <meta name="robots" content="noindex, nofollow">
+  <link rel="icon" type="image/png" href="img/nexo-icone.png">
+  <link rel="apple-touch-icon" href="img/nexo-icone.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -35,17 +37,14 @@
     <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-xl border border-slate-200 text-center space-y-6">
       
       <div class="flex justify-center mb-2">
-        <div class="bg-[#12141A] p-3 rounded-2xl border border-white/10 shadow-md inline-flex items-center justify-center">
-          <img src="assets/images/logo.png" alt="Rico Ricardo Imóveis" class="h-12 w-auto object-contain max-w-[200px]" onerror="this.style.display='none'; document.getElementById('fallback-login-icon').style.display='flex';">
-        </div>
-        <div id="fallback-login-icon" style="display:none;" class="w-14 h-14 bg-slate-900 text-[#FFE600] rounded-2xl items-center justify-center mx-auto shadow-lg">
-          <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-sm inline-flex items-center justify-center">
+          <img src="img/nexo-logo-vertical.png" alt="NEXO CRM" class="h-20 w-auto object-contain">
         </div>
       </div>
 
       <div>
-        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Painel Rico Ricardo Imóveis</h1>
-        <p class="text-xs text-slate-500 mt-1">Gestão de catálogo, portais (ZAP/OLX), leads e contratos</p>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight">Painel de Gestão NEXO CRM</h1>
+        <p class="text-xs text-slate-500 mt-1">Plataforma Inteligente de Gestão Imobiliária, Portais & Leads</p>
       </div>
 
       <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-left text-xs text-blue-900 space-y-1">
@@ -88,12 +87,12 @@
         </div>
 
         <button type="submit" id="btn-submit-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
-          Entrar no Painel Administrativo
+          Entrar no Painel NEXO CRM
         </button>
       </form>
 
       <div class="text-[11px] text-slate-400">
-        Desenvolvido no padrão Ricardo & Severino • Impacto Digital
+        NEXO CRM • Tecnologia Ricardo & Severino
       </div>
     </div>
   </section>
@@ -105,18 +104,19 @@
     
     <!-- Topbar do SaaS -->
     <header class="bg-white border-b border-slate-200 px-4 sm:px-8 py-3.5 sticky top-0 z-30 shadow-sm flex items-center justify-between flex-wrap gap-4">
-      <div class="flex items-center gap-3">
-        <div class="bg-[#12141A] px-3 py-1.5 rounded-xl border border-white/10 flex items-center shadow-sm">
-          <img src="assets/images/logo.png" alt="Rico Ricardo Imóveis" class="h-8 w-auto object-contain max-w-[170px]" onerror="this.style.display='none'; document.getElementById('fallback-admin-logo').style.display='flex';">
-        </div>
-        <div id="fallback-admin-logo" style="display:none;" class="w-10 h-10 rounded-xl bg-slate-900 text-[#FFE600] items-center justify-center font-bold text-lg shadow-sm">
-          R
-        </div>
+      <div class="flex items-center gap-3.5">
+        <a href="admin.html" class="flex items-center hover:opacity-90 transition" title="NEXO CRM">
+          <img src="img/nexo-logo-horizontal.png" alt="NEXO CRM" class="h-9 w-auto object-contain">
+        </a>
+        <div class="h-7 w-px bg-slate-200 hidden sm:block"></div>
         <div>
-          <span class="font-black text-slate-900 text-base leading-none block">
-            RICO RICARDO <span class="text-blue-600">IMÓVEIS</span> <span class="text-[10px] text-slate-400 font-bold bg-slate-100 px-1.5 py-0.5 rounded">SaaS & CRM</span>
-          </span>
-          <span class="text-[11px] text-slate-500 font-medium">Painel de Controle • CRECI 038613-J</span>
+          <div class="flex items-center gap-2">
+            <span class="font-black text-slate-900 text-sm sm:text-base leading-none block">
+              RICO RICARDO <span class="text-blue-600">IMÓVEIS</span>
+            </span>
+            <span class="text-[10px] text-blue-700 font-bold bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded leading-none hidden md:inline">Licença Ativa</span>
+          </div>
+          <span class="text-[11px] text-slate-500 font-medium">Painel de Gestão • CRECI 038613-J</span>
         </div>
       </div>
 
@@ -1586,6 +1586,20 @@
       </section>
 
     </main>
+
+    <!-- Rodapé Administrativo NEXO CRM -->
+    <footer class="bg-white border-t border-slate-200 py-4 px-6 text-center text-xs text-slate-500 mt-auto">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <img src="img/nexo-icone.png" alt="NEXO CRM" class="w-4 h-4 object-contain">
+          <span class="font-bold text-slate-700">NEXO CRM</span>
+          <span class="text-slate-400">• Plataforma Inteligente de Gestão Imobiliária & Portais</span>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          Tecnologia desenvolvida no padrão Ricardo & Severino
+        </div>
+      </div>
+    </footer>
 
   </div>
 
