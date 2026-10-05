@@ -1,9 +1,9 @@
 /**
- * sw.js - Service Worker Oficial do NEXO CRM
+ * sw.js - Service Worker Oficial do NEXO CRM (v2)
  * Permite funcionamento offline, instalação nativa PWA no celular e carregamento instantâneo.
  */
 
-const CACHE_NAME = 'nexo-crm-cache-v1';
+const CACHE_NAME = 'nexo-crm-cache-v2';
 const ASSETS_TO_CACHE = [
   './',
   './admin.html',
@@ -13,6 +13,7 @@ const ASSETS_TO_CACHE = [
   './js/admin.js',
   './js/main.js',
   './js/supabase-config.js',
+  './js/pwa-install.js',
   './manifest.json',
   './favicon.ico',
   './favicon.png',
@@ -57,8 +58,8 @@ self.addEventListener('activate', (event) => {
 
 // Estratégia de Rede com Fallback para Cache (Stale-While-Revalidate / Network First)
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições de extensões ou externas de analytics/CDN que não suportem cache
-  if (!event.request.url.startsWith(self.location.origin) && !event.request.url.includes('jsdelivr.net') && !event.request.url.includes('tailwindcss.com')) {
+  // Apenas requisições GET podem ser interceptadas pelo cache
+  if (event.request.method !== 'GET') {
     return;
   }
 
@@ -67,11 +68,21 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Ignora requisições de esquemas não-HTTP (ex: chrome-extension://)
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
+  // Ignora chamadas de terceiros não essenciais
+  if (!event.request.url.startsWith(self.location.origin) && !event.request.url.includes('jsdelivr.net') && !event.request.url.includes('tailwindcss.com')) {
+    return;
+  }
+
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Se a resposta for válida, atualiza o cache em background
-        if (networkResponse && networkResponse.status === 200) {
+        // Se a resposta for válida (HTTP 200), atualiza o cache em background
+        if (networkResponse && networkResponse.status === 200 && event.request.url.startsWith(self.location.origin)) {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, responseToCache).catch(() => {});
@@ -80,7 +91,7 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // Se estiver offline ou sem internet, responde com o cache local
+        // Se estiver offline ou falhar a rede, responde com o cache local
         return caches.match(event.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;

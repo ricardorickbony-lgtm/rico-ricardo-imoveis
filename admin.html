@@ -109,7 +109,7 @@
       </div>
 
       <div class="text-[11px] text-slate-400">
-        NEXO CRM • Tecnologia Ricardo & Severino
+        Tecnologia NEXO CRM
       </div>
     </div>
   </section>
@@ -157,7 +157,7 @@
         <span class="text-xs text-slate-400 hidden xl:inline">|</span>
         
         <!-- Botão Instalar App no Header -->
-        <button id="btn-instalar-app-header" onclick="acionarInstalacaoPWA()" class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition shadow-sm items-center gap-1.5" title="Instalar aplicativo oficial no celular ou computador">
+        <button id="btn-instalar-app-header" onclick="acionarInstalacaoPWA()" class="flex text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition shadow-sm items-center gap-1.5" title="Instalar aplicativo oficial no celular ou computador">
           <span>📲</span> <span class="hidden sm:inline">Baixar App</span>
         </button>
 
@@ -1665,7 +1665,7 @@
           <span class="text-slate-400">• Plataforma Inteligente de Gestão Imobiliária & Portais</span>
         </div>
         <div class="text-[11px] text-slate-400">
-          Tecnologia desenvolvida no padrão Ricardo & Severino
+          Tecnologia NEXO CRM
         </div>
       </div>
     </footer>
@@ -2539,29 +2539,94 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL: INSTRUÇÕES DE INSTALAÇÃO NO IPHONE / IPAD (APPLE IOS)             -->
+  <!-- MODAL UNIVERSAL: INSTALAÇÃO DO APP NEXO CRM (ANDROID, IOS, PC)           -->
   <!-- ========================================================================= -->
-  <div id="modal-instalar-ios" class="modal-overlay">
-    <div class="modal-content relative !max-w-md p-6 sm:p-8 space-y-6 text-center">
-      <button onclick="document.getElementById('modal-instalar-ios').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
+  <div id="modal-instalar-app-universal" class="modal-overlay">
+    <div class="modal-content relative !max-w-md p-6 sm:p-7 space-y-5 text-center">
+      <button onclick="fecharModalInstalacao()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
 
-      <div class="flex justify-center">
-        <div class="w-16 h-16 rounded-2xl bg-[#0D1B2A] border border-blue-500/30 p-2 shadow-xl flex items-center justify-center">
+      <!-- Cabeçalho do App -->
+      <div class="flex flex-col items-center">
+        <div class="w-16 h-16 rounded-2xl bg-[#0D1B2A] border border-blue-500/30 p-2.5 shadow-xl flex items-center justify-center mb-3 relative">
           <img src="img/nexo-icon-192.png" alt="NEXO CRM" class="w-full h-full object-contain">
+          <span class="absolute -bottom-1 -right-1 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-full shadow">PWA</span>
+        </div>
+        <h3 class="text-xl font-black text-slate-900 tracking-tight leading-tight">Instalar App NEXO CRM</h3>
+        <p class="text-xs text-slate-500 mt-1">Acesso instantâneo em tela cheia direto da tela inicial</p>
+      </div>
+
+      <!-- Alerta Exclusivo: Detectado Navegador Interno do WhatsApp -->
+      <div id="aviso-whatsapp-navegador" class="hidden text-left bg-amber-50 border border-amber-300 rounded-2xl p-3.5 space-y-2">
+        <div class="flex items-center gap-2 text-amber-900 font-bold text-xs">
+          <span>⚠️</span> <span>Você está no navegador do WhatsApp</span>
+        </div>
+        <p class="text-[11px] text-amber-800 leading-relaxed">
+          O WhatsApp não permite instalar aplicativos diretamente da janela de conversa. Para instalar o NEXO CRM:
+        </p>
+        <div class="text-[11px] text-amber-900 space-y-1 font-medium bg-amber-100/70 p-2.5 rounded-xl border border-amber-200">
+          <div>1. Toque nos <span class="font-bold">3 pontinhos (⋮)</span> no topo direito desta tela.</div>
+          <div>2. Selecione <span class="font-bold">"Abrir no Chrome"</span> (ou no seu navegador padrão).</div>
+          <div>3. Toque no botão de instalação para colocar o ícone na tela do celular!</div>
+        </div>
+        <button type="button" onclick="copiarLinkAppPWA()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs py-2 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm">
+          <span>📋</span> <span>Copiar Link para Abrir no Chrome</span>
+        </button>
+      </div>
+
+      <!-- Botão de Instalação Automática Direta (quando suportado nativamente) -->
+      <div id="container-btn-instalacao-direta" class="hidden">
+        <button type="button" onclick="executarInstalacaoNativa()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm py-3.5 px-4 rounded-xl shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 transition active:scale-95 animate-pulse">
+          <span>📲</span> <span>INSTALAR NO CELULAR COM 1 CLIQUE</span>
+        </button>
+      </div>
+
+      <!-- Seletor de Plataformas (Tabs) -->
+      <div class="flex items-center justify-center p-1 bg-slate-100 rounded-xl gap-1 text-xs font-bold">
+        <button type="button" id="tab-btn-android" onclick="mudarAbaInstalacao('android')" class="flex-1 py-2 rounded-lg transition bg-white text-blue-600 shadow-sm font-black">
+          🤖 Android
+        </button>
+        <button type="button" id="tab-btn-ios" onclick="mudarAbaInstalacao('ios')" class="flex-1 py-2 rounded-lg transition text-slate-600 hover:text-slate-900">
+          🍎 iPhone (iOS)
+        </button>
+        <button type="button" id="tab-btn-pc" onclick="mudarAbaInstalacao('pc')" class="flex-1 py-2 rounded-lg transition text-slate-600 hover:text-slate-900">
+          💻 Computador
+        </button>
+      </div>
+
+      <!-- Conteúdo da Aba: ANDROID -->
+      <div id="tab-conteudo-android" class="space-y-2.5 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+          <div>
+            <span class="font-bold text-slate-800">Toque nos 3 pontinhos (⋮)</span>
+            <p class="text-slate-500 text-[11px]">No canto superior direito do seu navegador Google Chrome.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+          <div>
+            <span class="font-bold text-slate-800">Selecione "Instalar aplicativo"</span>
+            <p class="text-slate-500 text-[11px]">Ou "Adicionar à tela inicial" no menu que se abrir.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+          <div>
+            <span class="font-bold text-slate-800">Confirme em "Instalar"</span>
+            <p class="text-slate-500 text-[11px]">O ícone do <span class="font-bold text-blue-600">NEXO CRM</span> será criado na sua tela inicial e funcionará como app oficial!</p>
+          </div>
         </div>
       </div>
 
-      <div>
-        <h3 class="text-xl font-black text-slate-900 tracking-tight">Instalar NEXO CRM no iPhone</h3>
-        <p class="text-xs text-slate-500 mt-1">Siga estes 3 passos simples para ter o app na tela inicial:</p>
-      </div>
-
-      <div class="space-y-3 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+      <!-- Conteúdo da Aba: IPHONE / IOS (Oculto inicialmente se não for iOS) -->
+      <div id="tab-conteudo-ios" class="hidden space-y-2.5 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
         <div class="flex items-start gap-3">
           <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</span>
           <div>
             <span class="font-bold text-slate-800">Toque no botão Compartilhar</span>
-            <p class="text-slate-500 text-[11px]">É o ícone de um quadrado com uma setinha para cima <span class="font-mono bg-white px-1.5 py-0.5 rounded border">⎋</span> na barra inferior do Safari.</p>
+            <p class="text-slate-500 text-[11px]">É o ícone de quadrado com setinha para cima <span class="font-mono bg-white px-1.5 py-0.5 rounded border">⎋</span> na barra inferior do Safari.</p>
           </div>
         </div>
 
@@ -2569,7 +2634,7 @@
           <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</span>
           <div>
             <span class="font-bold text-slate-800">Selecione "Adicionar à Tela de Início"</span>
-            <p class="text-slate-500 text-[11px]">Role o menu para baixo até encontrar a opção com ícone de mais <span class="font-mono bg-white px-1.5 py-0.5 rounded border">➕</span>.</p>
+            <p class="text-slate-500 text-[11px]">Role a lista para baixo até encontrar a opção com ícone de mais <span class="font-mono bg-white px-1.5 py-0.5 rounded border">➕</span>.</p>
           </div>
         </div>
 
@@ -2577,14 +2642,48 @@
           <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">3</span>
           <div>
             <span class="font-bold text-slate-800">Confirme em "Adicionar"</span>
-            <p class="text-slate-500 text-[11px]">No topo direito da tela. O ícone oficial do NEXO CRM aparecerá na sua tela de início!</p>
+            <p class="text-slate-500 text-[11px]">No canto superior direito. O ícone oficial aparecerá na tela do seu iPhone!</p>
           </div>
         </div>
       </div>
 
-      <button onclick="document.getElementById('modal-instalar-ios').classList.remove('active')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow">
-        Entendi, vou instalar agora!
-      </button>
+      <!-- Conteúdo da Aba: COMPUTADOR / PC (Oculto inicialmente) -->
+      <div id="tab-conteudo-pc" class="hidden space-y-2.5 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+          <div>
+            <span class="font-bold text-slate-800">Olhe na Barra de Endereços</span>
+            <p class="text-slate-500 text-[11px]">No canto direito da barra onde fica a URL (ao lado do ícone de estrela de favoritos).</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+          <div>
+            <span class="font-bold text-slate-800">Clique no ícone "Instalar"</span>
+            <p class="text-slate-500 text-[11px]">É um ícone de tela de computador com setinha para baixo <span class="font-mono bg-white px-1.5 py-0.5 rounded border">⬇️</span>.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+          <div>
+            <span class="font-bold text-slate-800">Confirme e use em tela cheia</span>
+            <p class="text-slate-500 text-[11px]">O NEXO CRM abre como uma janela independente com ícone na sua Área de Trabalho!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botões de Ação do Rodapé do Modal -->
+      <div class="space-y-2 pt-1">
+        <button type="button" onclick="copiarLinkAppPWA()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs py-2.5 px-3 rounded-xl border border-slate-200 transition flex items-center justify-center gap-2">
+          <span>📋</span> <span id="texto-btn-copiar-link">Copiar Link do Aplicativo</span>
+        </button>
+
+        <button type="button" onclick="fecharModalInstalacao()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow">
+          Entendi
+        </button>
+      </div>
     </div>
   </div>
 

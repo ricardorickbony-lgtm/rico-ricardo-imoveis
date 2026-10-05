@@ -3,6 +3,7 @@
   "short_name": "NEXO CRM",
   "description": "Plataforma Inteligente de Gestão Imobiliária, Portais & Leads com Inteligência Artificial e Sincronização em Nuvem.",
   "start_url": "admin.html",
+  "id": "admin.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay"],
