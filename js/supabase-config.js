@@ -7,10 +7,9 @@
 (function () {
   'use strict';
 
-  // Chaves Configuráveis Padrão
-  // Substitua pelos dados do seu projeto em https://supabase.com -> Project Settings -> API
-  const DEFAULT_SUPABASE_URL = 'https://SEU-PROJETO.supabase.co';
-  const DEFAULT_SUPABASE_ANON_KEY = 'SUA-ANON-KEY-AQUI';
+  // Chaves Configuráveis Oficiais do Projeto nexo-crm
+  const DEFAULT_SUPABASE_URL = 'https://prxctstfinqkrnwavbbi.supabase.co';
+  const DEFAULT_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByeGN0c3RmaW5xa3Jud2F2YmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNTgxNzAsImV4cCI6MjEwNjczNDE3MH0.g1P4dbkx99mMazOEuCA7DQB-SKnS69UI0NLfhSf5GZQ';
 
   // Permite salvar/sobrescrever chaves via navegador (localStorage) para praticidade
   const STORAGE_URL_KEY = 'nexo_supabase_url_v1';
