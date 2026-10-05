@@ -6,7 +6,17 @@
   <title>NEXO CRM — Painel de Gestão Imobiliária & Portais</title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="icon" type="image/png" href="img/nexo-icone.png">
-  <link rel="apple-touch-icon" href="img/nexo-icone.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="img/nexo-icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="img/nexo-icon-512.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  
+  <!-- PWA & Mobile App Support (NEXO CRM) -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1169B1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NEXO CRM">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -91,6 +101,13 @@
         </button>
       </form>
 
+      <!-- Botão de Instalar App no Login -->
+      <div class="pt-2 border-t border-slate-100">
+        <button type="button" onclick="acionarInstalacaoPWA()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-2 border border-slate-200">
+          <span>📲</span> <span>Baixar / Instalar App no Celular</span>
+        </button>
+      </div>
+
       <div class="text-[11px] text-slate-400">
         NEXO CRM • Tecnologia Ricardo & Severino
       </div>
@@ -138,6 +155,12 @@
         </div>
 
         <span class="text-xs text-slate-400 hidden xl:inline">|</span>
+        
+        <!-- Botão Instalar App no Header -->
+        <button id="btn-instalar-app-header" onclick="acionarInstalacaoPWA()" class="hidden text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition shadow-sm items-center gap-1.5" title="Instalar aplicativo oficial no celular ou computador">
+          <span>📲</span> <span class="hidden sm:inline">Baixar App</span>
+        </button>
+
         <a href="index.html" target="_blank" class="text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg transition" title="Abrir Portal Principal">
           🏢 Portal
         </a>
@@ -2515,9 +2538,81 @@
     <span id="toast-mensagem">Atualização realizada com sucesso!</span>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: INSTRUÇÕES DE INSTALAÇÃO NO IPHONE / IPAD (APPLE IOS)             -->
+  <!-- ========================================================================= -->
+  <div id="modal-instalar-ios" class="modal-overlay">
+    <div class="modal-content relative !max-w-md p-6 sm:p-8 space-y-6 text-center">
+      <button onclick="document.getElementById('modal-instalar-ios').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition" title="Fechar">✕</button>
+
+      <div class="flex justify-center">
+        <div class="w-16 h-16 rounded-2xl bg-[#0D1B2A] border border-blue-500/30 p-2 shadow-xl flex items-center justify-center">
+          <img src="img/nexo-icon-192.png" alt="NEXO CRM" class="w-full h-full object-contain">
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xl font-black text-slate-900 tracking-tight">Instalar NEXO CRM no iPhone</h3>
+        <p class="text-xs text-slate-500 mt-1">Siga estes 3 passos simples para ter o app na tela inicial:</p>
+      </div>
+
+      <div class="space-y-3 text-left text-xs bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">1</span>
+          <div>
+            <span class="font-bold text-slate-800">Toque no botão Compartilhar</span>
+            <p class="text-slate-500 text-[11px]">É o ícone de um quadrado com uma setinha para cima <span class="font-mono bg-white px-1.5 py-0.5 rounded border">⎋</span> na barra inferior do Safari.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">2</span>
+          <div>
+            <span class="font-bold text-slate-800">Selecione "Adicionar à Tela de Início"</span>
+            <p class="text-slate-500 text-[11px]">Role o menu para baixo até encontrar a opção com ícone de mais <span class="font-mono bg-white px-1.5 py-0.5 rounded border">➕</span>.</p>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-3">
+          <span class="w-6 h-6 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center shrink-0 text-xs">3</span>
+          <div>
+            <span class="font-bold text-slate-800">Confirme em "Adicionar"</span>
+            <p class="text-slate-500 text-[11px]">No topo direito da tela. O ícone oficial do NEXO CRM aparecerá na sua tela de início!</p>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="document.getElementById('modal-instalar-ios').classList.remove('active')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow">
+        Entendi, vou instalar agora!
+      </button>
+    </div>
+  </div>
+
+  <!-- Banner Flutuante de Instalação do PWA no Celular -->
+  <aside id="banner-instalar-pwa-mobile" class="hidden fixed bottom-4 left-4 right-4 z-50 bg-slate-900/95 backdrop-blur text-white p-4 rounded-2xl border border-blue-500/40 shadow-2xl items-center justify-between gap-3 max-w-md mx-auto">
+    <div class="flex items-center gap-3">
+      <img src="img/nexo-icon-192.png" alt="NEXO CRM" class="w-11 h-11 rounded-xl shadow border border-white/10 object-contain bg-[#0D1B2A] p-1">
+      <div>
+        <h4 class="text-xs font-black text-white leading-tight">Instale o App NEXO CRM</h4>
+        <p class="text-[11px] text-slate-300">Acesso rápido em tela cheia com 1 toque</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="acionarInstalacaoPWA()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-xl transition shadow whitespace-nowrap">
+        Instalar
+      </button>
+      <button onclick="dispensarBannerInstalacao()" class="text-slate-400 hover:text-white text-xs p-1.5" title="Fechar">
+        ✕
+      </button>
+    </div>
+  </aside>
+
   <!-- Supabase Cloud DB Client & Config (CDN Oficial) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-config.js"></script>
+
+  <!-- PWA & Mobile Installation Engine -->
+  <script src="js/pwa-install.js"></script>
 
   <!-- Scripts -->
   <script src="js/db.js"></script>
