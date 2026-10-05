@@ -17,6 +17,8 @@ const STORAGE_LIXEIRA_KEY = 'ricoricardo_lixeira_v1';
 const STORAGE_AUDITORIA_KEY = 'ricoricardo_audit_log_v1';
 const STORAGE_PERFIL_KEY = 'ricoricardo_perfil_ativo_v1';
 const STORAGE_PERMISSOES_KEY = 'ricoricardo_permissoes_v1';
+const STORAGE_LICENCA_KEY = 'ricoricardo_licenca_v1';
+const STORAGE_MASTER_CLIENTES_KEY = 'ricoricardo_master_clientes_v1';
 
 // Matriz de Permissões Granulares & Governança Corporativa (RBAC Enterprise)
 const PERMISSOES_PADRAO_ENTERPRISE = {
@@ -51,6 +53,155 @@ const PERMISSOES_PADRAO_ENTERPRISE = {
     verLeadsOutrosCorretores: false // Cada corretor atende exclusivamente sua própria carteira
   }
 };
+
+// =============================================================================
+// PLANOS OFICIAIS NEXO CRM — ENGENHARIA DE PREÇOS, RECORRÊNCIA E SETUP DE SITE
+// =============================================================================
+const PLANOS_NEXO = {
+  start: {
+    id: 'start',
+    nome: 'NEXO Start',
+    valorMensal: 100.00,
+    taxaAdesaoSetup: 600.00,
+    diasTestePadrao: 4,
+    limiteImoveis: 60,
+    limiteCorretores: 2,
+    badgeCor: 'bg-slate-100 text-slate-800 border-slate-300',
+    descricao: 'Para corretores autônomos ou imobiliárias iniciando a digitalização com custo mínimo.',
+    recursos: [
+      'Site Oficial Responsivo de Alta Conversão',
+      'Catálogo para até 60 imóveis ativos',
+      'Até 2 corretores cadastrados na equipe',
+      'CRM e Funil Kanban de Leads com WhatsApp',
+      'Simulador de Financiamento Habitacional Caixa (SAC/Price)',
+      'Botão Inteligente de WhatsApp com Status de Expediente',
+      'Suporte Técnico Dedicado'
+    ]
+  },
+  prime: {
+    id: 'prime',
+    nome: 'NEXO Prime',
+    valorMensal: 150.00,
+    taxaAdesaoSetup: 600.00,
+    diasTestePadrao: 4,
+    limiteImoveis: 200,
+    limiteCorretores: 5,
+    destaque: true,
+    badgeCor: 'bg-blue-100 text-blue-900 border-blue-300',
+    descricao: 'O pacote mais contratado por imobiliárias pequenas e médias em expansão no mercado.',
+    recursos: [
+      'Tudo do Plano Start incluso',
+      'Catálogo para até 200 imóveis ativos',
+      'Até 5 corretores cadastrados',
+      'Roleta Inteligente de Leads (Distribuição Equilibrada)',
+      'Integração Multi-Portais (ZAP, VivaReal, OLX, Imovelweb)',
+      'Termos de Visita com Assinatura na Tela do Celular',
+      'Laudos de Vistoria Digital de Imóveis (Entrada e Saída)',
+      'Suporte Prioritário Direto via WhatsApp'
+    ]
+  },
+  pro: {
+    id: 'pro',
+    nome: 'NEXO Pro',
+    valorMensal: 250.00,
+    taxaAdesaoSetup: 600.00,
+    diasTestePadrao: 4,
+    limiteImoveis: 999999,
+    limiteCorretores: 999999,
+    destaque: true,
+    badgeCor: 'bg-purple-100 text-purple-900 border-purple-300',
+    descricao: 'A máquina completa sem nenhum limite. Robô de IA, notas fiscais da prefeitura e governança.',
+    recursos: [
+      'Tudo do Plano Prime incluso',
+      'Imóveis e Corretores ILIMITADOS',
+      'Sofia IA — Assistente de Atendimento 24h no WhatsApp e Site',
+      'Módulo Fiscal NFS-e Prefeitura em Lote com DANFSE e XML',
+      'Gestão Completa de Locação e Repasses PIX Automáticos',
+      'Relatórios e Exportação DIMOB Anual para a Receita Federal',
+      'Central de Segurança RBAC e Trilha de Auditoria LGPD',
+      'Sincronização Cloud Multi-Dispositivos (Supabase)'
+    ]
+  }
+};
+
+// Licença do Tenant Ativo (Padrão Oficial)
+const LICENCA_PADRAO = {
+  planoId: 'pro',
+  status: 'active', // 'trial' | 'active' | 'grace_period' | 'blocked'
+  dataInicio: new Date().toISOString(),
+  dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  diasTesteTotal: 4,
+  valorMensal: 250.00,
+  taxaAdesaoSetup: 600.00,
+  adesaoPaga: true,
+  chavePixCobranca: 'ricardo.nexo@pix.com.br',
+  titularPix: 'Ricardo — NEXO CRM',
+  cidadePix: 'Santo André - SP'
+};
+
+// Carteira de Clientes do Painel Master da NEXO (Super Admin de Ricardo & Severino)
+const CLIENTES_MASTER_INICIAIS = [
+  {
+    id: 'cli-01',
+    nomeImobiliaria: 'Imobiliária Rico Ricardo',
+    responsavel: 'Ricardo Oliveira',
+    whatsapp: '11914879393',
+    cidade: 'Santo André - SP',
+    planoId: 'pro',
+    status: 'active',
+    dataInicio: '01/09/2026',
+    dataVencimento: new Date(Date.now() + 24 * 24 * 60 * 60 * 1000).toISOString(),
+    valorMensal: 250.00,
+    adesaoPaga: true,
+    totalImoveis: 12,
+    totalLeads: 28
+  },
+  {
+    id: 'cli-02',
+    nomeImobiliaria: 'Vanguard Prime Imóveis',
+    responsavel: 'Paulo Fontes',
+    whatsapp: '11999998888',
+    cidade: 'São Paulo - SP',
+    planoId: 'prime',
+    status: 'trial',
+    dataInicio: '02/10/2026',
+    dataVencimento: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+    valorMensal: 150.00,
+    adesaoPaga: false,
+    totalImoveis: 8,
+    totalLeads: 14
+  },
+  {
+    id: 'cli-03',
+    nomeImobiliaria: 'Bastos & Cia Imóveis',
+    responsavel: 'Marcos Bastos',
+    whatsapp: '11988887777',
+    cidade: 'São Caetano do Sul - SP',
+    planoId: 'start',
+    status: 'grace_period',
+    dataInicio: '05/08/2026',
+    dataVencimento: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    valorMensal: 100.00,
+    adesaoPaga: true,
+    totalImoveis: 18,
+    totalLeads: 36
+  },
+  {
+    id: 'cli-04',
+    nomeImobiliaria: 'Lopes & Associados Consultoria',
+    responsavel: 'Fernando Lopes',
+    whatsapp: '11977776666',
+    cidade: 'São Bernardo do Campo - SP',
+    planoId: 'pro',
+    status: 'blocked',
+    dataInicio: '10/07/2026',
+    dataVencimento: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+    valorMensal: 250.00,
+    adesaoPaga: true,
+    totalImoveis: 32,
+    totalLeads: 75
+  }
+];
 
 // Configurações Oficiais da Rico Ricardo Imóveis
 const CONFIG_IMOB_PADRAO = {
@@ -2322,6 +2473,243 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     return {
       imoveis: sucessoImoveis,
       leads: sucessoLeads
+    };
+  },
+
+  // =========================================================================
+  // GESTÃO DE LICENÇAS SAAS, PLANOS NEXO & PAINEL MASTER (SUPER ADMIN)
+  // =========================================================================
+  getPlanosNexo() {
+    return PLANOS_NEXO;
+  },
+
+  getLicenca() {
+    try {
+      const data = localStorage.getItem(STORAGE_LICENCA_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        return { ...LICENCA_PADRAO, ...parsed };
+      }
+    } catch (e) {}
+    this.salvarLicenca(LICENCA_PADRAO);
+    return LICENCA_PADRAO;
+  },
+
+  salvarLicenca(licenca) {
+    try {
+      localStorage.setItem(STORAGE_LICENCA_KEY, JSON.stringify(licenca));
+      window.dispatchEvent(new CustomEvent('nexo_licenca_atualizada', { detail: licenca }));
+    } catch (e) {}
+  },
+
+  verificarStatusLicenca() {
+    const lic = this.getLicenca();
+    const agora = new Date().getTime();
+    const vencimento = new Date(lic.dataVencimento).getTime();
+    const diffDias = Math.ceil((vencimento - agora) / (1000 * 60 * 60 * 24));
+
+    let statusCalculado = lic.status;
+
+    if (lic.bloqueioManual) {
+      statusCalculado = 'blocked';
+    } else if (lic.desbloqueioManual) {
+      statusCalculado = 'active';
+    } else if (lic.status === 'trial') {
+      if (diffDias < 0) {
+        statusCalculado = 'blocked';
+      }
+    } else if (lic.status === 'active' || lic.status === 'grace_period') {
+      if (diffDias < -5) {
+        statusCalculado = 'blocked';
+      } else if (diffDias < 0) {
+        statusCalculado = 'grace_period';
+      } else {
+        statusCalculado = 'active';
+      }
+    }
+
+    if (statusCalculado !== lic.status) {
+      lic.status = statusCalculado;
+      this.salvarLicenca(lic);
+    }
+
+    return {
+      licenca: lic,
+      plano: PLANOS_NEXO[lic.planoId] || PLANOS_NEXO.pro,
+      diasRestantes: diffDias,
+      isTrial: lic.status === 'trial',
+      isBloqueado: lic.status === 'blocked',
+      isCarencia: lic.status === 'grace_period',
+      isAtivo: lic.status === 'active'
+    };
+  },
+
+  getClientesMaster() {
+    try {
+      const data = localStorage.getItem(STORAGE_MASTER_CLIENTES_KEY);
+      if (data) {
+        const parsed = JSON.parse(data);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    this.salvarClientesMaster(CLIENTES_MASTER_INICIAIS);
+    return CLIENTES_MASTER_INICIAIS;
+  },
+
+  salvarClientesMaster(clientes) {
+    try {
+      localStorage.setItem(STORAGE_MASTER_CLIENTES_KEY, JSON.stringify(clientes));
+      window.dispatchEvent(new CustomEvent('nexo_master_clientes_atualizados', { detail: clientes }));
+    } catch (e) {}
+  },
+
+  adicionarClienteMaster(cliente) {
+    const clientes = this.getClientesMaster();
+    if (!cliente.id) cliente.id = 'cli-' + Date.now();
+    if (!cliente.dataInicio) cliente.dataInicio = new Date().toLocaleDateString('pt-BR');
+    if (!cliente.planoId) cliente.planoId = 'prime';
+    const plano = PLANOS_NEXO[cliente.planoId] || PLANOS_NEXO.prime;
+    cliente.valorMensal = plano.valorMensal;
+    if (cliente.status === 'trial') {
+      cliente.dataVencimento = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
+    } else {
+      cliente.dataVencimento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    }
+    clientes.unshift(cliente);
+    this.salvarClientesMaster(clientes);
+
+    this.registrarLogAuditoria(
+      'Cadastro de Cliente Master',
+      'Gestão de SaaS',
+      `Nova imobiliária "${cliente.nomeImobiliaria}" cadastrada no plano ${plano.nome} (Responsável: ${cliente.responsavel}).`,
+      this.getPerfilAtivo()
+    );
+
+    return cliente;
+  },
+
+  atualizarStatusClienteMaster(clienteId, novoStatus) {
+    const clientes = this.getClientesMaster();
+    const cli = clientes.find(c => c.id === clienteId);
+    if (!cli) return null;
+
+    cli.status = novoStatus;
+    if (novoStatus === 'active') {
+      cli.dataVencimento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    }
+
+    this.salvarClientesMaster(clientes);
+
+    this.registrarLogAuditoria(
+      'Licença de Cliente',
+      'Gestão de SaaS',
+      `Status do cliente "${cli.nomeImobiliaria}" alterado para ${novoStatus.toUpperCase()}.`,
+      this.getPerfilAtivo()
+    );
+
+    return cli;
+  },
+
+  estenderTesteClienteMaster(clienteId, dias = 4) {
+    const clientes = this.getClientesMaster();
+    const cli = clientes.find(c => c.id === clienteId);
+    if (!cli) return null;
+
+    cli.status = 'trial';
+    const baseTempo = Math.max(Date.now(), new Date(cli.dataVencimento).getTime());
+    cli.dataVencimento = new Date(baseTempo + dias * 24 * 60 * 60 * 1000).toISOString();
+
+    this.salvarClientesMaster(clientes);
+
+    this.registrarLogAuditoria(
+      'Extensão de Teste',
+      'Gestão de SaaS',
+      `Liberados +${dias} dias de degustação gratuita para a imobiliária "${cli.nomeImobiliaria}".`,
+      this.getPerfilAtivo()
+    );
+
+    return cli;
+  },
+
+  alterarPlanoClienteMaster(clienteId, novoPlanoId) {
+    const clientes = this.getClientesMaster();
+    const cli = clientes.find(c => c.id === clienteId);
+    if (!cli) return null;
+
+    const plano = PLANOS_NEXO[novoPlanoId] || PLANOS_NEXO.prime;
+    cli.planoId = novoPlanoId;
+    cli.valorMensal = plano.valorMensal;
+
+    this.salvarClientesMaster(clientes);
+
+    this.registrarLogAuditoria(
+      'Migração de Plano',
+      'Gestão de SaaS',
+      `Plano da imobiliária "${cli.nomeImobiliaria}" alterado para ${plano.nome} (R$ ${plano.valorMensal}/mês).`,
+      this.getPerfilAtivo()
+    );
+
+    return cli;
+  },
+
+  removerClienteMaster(clienteId) {
+    let clientes = this.getClientesMaster();
+    const cli = clientes.find(c => c.id === clienteId);
+    clientes = clientes.filter(c => c.id !== clienteId);
+    this.salvarClientesMaster(clientes);
+
+    if (cli) {
+      this.registrarLogAuditoria(
+        'Remoção de Cliente',
+        'Gestão de SaaS',
+        `Cliente "${cli.nomeImobiliaria}" removido da base Master.`,
+        this.getPerfilAtivo()
+      );
+    }
+
+    return true;
+  },
+
+  calcularMetricasMasterSaaS() {
+    const clientes = this.getClientesMaster();
+    const ativos = clientes.filter(c => c.status === 'active');
+    const trials = clientes.filter(c => c.status === 'trial');
+    const carencia = clientes.filter(c => c.status === 'grace_period');
+    const bloqueados = clientes.filter(c => c.status === 'blocked');
+
+    const mrr = ativos.reduce((acc, c) => acc + (Number(c.valorMensal) || 0), 0);
+    const receitaAdesaoTotal = clientes.filter(c => c.adesaoPaga).length * 600.00;
+
+    return {
+      totalClientes: clientes.length,
+      totalAtivos: ativos.length,
+      totalTrials: trials.length,
+      totalCarencia: carencia.length,
+      totalBloqueados: bloqueados.length,
+      mrr,
+      receitaAdesaoTotal,
+      taxaInadimplencia: clientes.length > 0 ? (((bloqueados.length + carencia.length) / clientes.length) * 100).toFixed(0) : 0
+    };
+  },
+
+  gerarDadosCobrancaPix(cliente, tipo = 'mensalidade') {
+    const valor = tipo === 'setup' ? 600.00 : (cliente?.valorMensal || 150.00);
+    const chavePix = 'ricardo.nexo@pix.com.br';
+    const beneficiario = 'Ricardo — NEXO CRM';
+    const cidade = 'Santo André';
+    const txid = `NEXO${cliente?.id ? String(cliente.id).replace(/\D/g, '') : Date.now().toString().slice(-6)}`;
+    const payloadPix = `00020126580014BR.GOV.BCB.PIX0136${chavePix}520400005303986540${valor.toFixed(2)}5802BR59${String(beneficiario.length).padStart(2, '0')}${beneficiario}60${String(cidade.length).padStart(2, '0')}${cidade}62150511${txid}6304`;
+
+    return {
+      valor,
+      chavePix,
+      beneficiario,
+      cidade,
+      txid,
+      payloadPix,
+      descricao: tipo === 'setup' 
+        ? `Setup Oficial & Implantação do Site NEXO (${cliente?.nomeImobiliaria || 'Cliente'})`
+        : `Mensalidade SaaS NEXO CRM — Plano ${PLANOS_NEXO[cliente?.planoId]?.nome || 'Oficial'} (${cliente?.nomeImobiliaria || 'Cliente'})`
     };
   }
 };

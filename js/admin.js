@@ -263,6 +263,9 @@ function exibirPainelPrincipal() {
   carregarFormularioConfig();
   atualizarStatusPortaisNaTela();
   renderizarAbaSeguranca();
+  atualizarBadgeLicencaHeader();
+  verificarTravaLicenca();
+  renderizarPainelMaster();
   verificarAcoesUrlShortcut();
 }
 
@@ -351,6 +354,10 @@ function configurarNavegacaoAbas() {
         alert('🔒 Acesso Restrito pela Política de Segurança: O painel de Backup e Reset de dados é restrito à Diretoria.');
         return;
       }
+      if (targetId === 'aba-master' && !DB.usuarioTemPermissao('verComissoesFaturamento')) {
+        alert('👑 Acesso Restrito ao Painel Master NEXO: Exclusivo para Diretores e Donos do SaaS.');
+        return;
+      }
 
       // Atualiza botões
       document.querySelectorAll('.tab-admin-nav').forEach(b => {
@@ -382,6 +389,7 @@ function configurarNavegacaoAbas() {
       if (targetId === 'aba-dashboard') carregarMetricasDashboard();
       if (targetId === 'aba-portais') atualizarStatusPortaisNaTela();
       if (targetId === 'aba-seguranca') renderizarAbaSeguranca();
+      if (targetId === 'aba-master') renderizarPainelMaster();
     });
   });
 }
@@ -2636,6 +2644,12 @@ function aplicarPermissoesNaInterface() {
     }
   }
 
+  const navMaster = document.getElementById('btn-tab-master');
+  if (navMaster) {
+    const podeMaster = DB.usuarioTemPermissao('verComissoesFaturamento');
+    navMaster.style.display = podeMaster ? 'inline-flex' : 'none';
+  }
+
   // 4. Re-renderiza tabelas e pipelines para refletir as permissões instantaneamente
   renderizarTabelaImoveis();
   renderizarPipelineKanban();
@@ -3844,5 +3858,539 @@ window.salvarConfiguracaoSupabase = salvarConfiguracaoSupabase;
 window.testarConexaoSupabase = testarConexaoSupabase;
 window.sincronizarTudoParaSupabase = sincronizarTudoParaSupabase;
 window.atualizarBadgeSupabaseUI = atualizarBadgeSupabaseUI;
+
+// =============================================================================
+// MÓDULO MASTER DE GESTÃO DE LICENÇAS, SAAS & SUPER ADMIN (RICARDO & SEVERINO)
+// =============================================================================
+
+function atualizarBadgeLicencaHeader() {
+  const statusInfo = DB.verificarStatusLicenca();
+  const lic = statusInfo.licenca;
+  const plano = statusInfo.plano;
+
+  const badgePill = document.getElementById('header-badge-licenca-pill');
+  const badgeDot = document.getElementById('header-badge-dot');
+  const badgeTexto = document.getElementById('header-licenca-texto');
+  const bannerCarencia = document.getElementById('banner-carencia-licenca');
+  const bannerCarenciaTexto = document.getElementById('banner-carencia-texto');
+
+  if (!badgePill || !badgeTexto) return;
+
+  // Limpa classes anteriores de cor
+  badgePill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center gap-1.5 shadow-xs transition';
+  badgeDot.className = 'w-1.5 h-1.5 rounded-full';
+
+  if (lic.status === 'trial') {
+    badgePill.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
+    badgeDot.classList.add('bg-blue-500', 'animate-pulse');
+    const dias = Math.max(0, statusInfo.diasRestantes);
+    badgeTexto.textContent = `${plano.nome} • Degustação (${dias}d restantes)`;
+  } else if (lic.status === 'active') {
+    badgePill.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
+    badgeDot.classList.add('bg-emerald-500');
+    badgeTexto.textContent = `${plano.nome} • Sinal Ativo`;
+  } else if (lic.status === 'grace_period') {
+    badgePill.classList.add('bg-amber-50', 'text-amber-800', 'border-amber-300');
+    badgeDot.classList.add('bg-amber-500', 'animate-ping');
+    const diasTolerancia = Math.max(0, 5 + statusInfo.diasRestantes);
+    badgeTexto.textContent = `${plano.nome} • Carência (${diasTolerancia}d tolerância)`;
+  } else if (lic.status === 'blocked') {
+    badgePill.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-300');
+    badgeDot.classList.add('bg-rose-600');
+    badgeTexto.textContent = `${plano.nome} • Sinal Cortado`;
+  }
+
+  // Controle do banner de carência
+  if (bannerCarencia) {
+    if (lic.status === 'grace_period') {
+      bannerCarencia.classList.remove('hidden');
+      if (bannerCarenciaTexto) {
+        const diasTolerancia = Math.max(0, 5 + statusInfo.diasRestantes);
+        bannerCarenciaTexto.textContent = `Atenção: A licença do seu CRM expirou e está no período de carência (${diasTolerancia} dias de tolerância restantes). Regularize para evitar o bloqueio automático de toda a equipe.`;
+      }
+    } else {
+      bannerCarencia.classList.add('hidden');
+    }
+  }
+}
+
+function verificarTravaLicenca() {
+  const statusInfo = DB.verificarStatusLicenca();
+  const telaBloqueio = document.getElementById('tela-bloqueio-sinal');
+  if (!telaBloqueio) return;
+
+  if (statusInfo.isBloqueado) {
+    telaBloqueio.classList.remove('hidden');
+    const valorEl = document.getElementById('tela-bloqueio-valor');
+    if (valorEl) {
+      valorEl.textContent = `R$ ${statusInfo.plano.valorMensal.toFixed(2)}`;
+    }
+  } else {
+    telaBloqueio.classList.add('hidden');
+  }
+}
+
+function abrirModalStatusLicenca() {
+  const statusInfo = DB.verificarStatusLicenca();
+  const lic = statusInfo.licenca;
+  const plano = statusInfo.plano;
+  const config = DB.getConfig();
+
+  const tenantEl = document.getElementById('modal-lic-tenant-nome');
+  const planoEl = document.getElementById('modal-lic-plano-nome');
+  const badgeEl = document.getElementById('modal-lic-status-badge');
+  const valorEl = document.getElementById('modal-lic-valor-mensal');
+  const vencEl = document.getElementById('modal-lic-data-vencimento');
+  const diasEl = document.getElementById('modal-lic-dias-restantes');
+
+  if (tenantEl) tenantEl.textContent = `Licença: ${config.nome || 'Imobiliária Parceira'}`;
+  if (planoEl) planoEl.textContent = plano.nome;
+  if (valorEl) valorEl.textContent = `R$ ${plano.valorMensal.toFixed(2)}/mês`;
+  
+  if (vencEl) {
+    const dataVenc = new Date(lic.dataVencimento);
+    vencEl.textContent = dataVenc.toLocaleDateString('pt-BR');
+  }
+
+  if (badgeEl) {
+    if (lic.status === 'trial') {
+      badgeEl.className = 'font-bold px-2.5 py-0.5 rounded-full text-[11px] bg-blue-100 text-blue-900';
+      badgeEl.textContent = '🔵 Degustação Gratuita';
+    } else if (lic.status === 'active') {
+      badgeEl.className = 'font-bold px-2.5 py-0.5 rounded-full text-[11px] bg-emerald-100 text-emerald-900';
+      badgeEl.textContent = '🟢 Sinal Ativo & Regular';
+    } else if (lic.status === 'grace_period') {
+      badgeEl.className = 'font-bold px-2.5 py-0.5 rounded-full text-[11px] bg-amber-100 text-amber-900';
+      badgeEl.textContent = '🟡 Em Carência';
+    } else {
+      badgeEl.className = 'font-bold px-2.5 py-0.5 rounded-full text-[11px] bg-rose-100 text-rose-900';
+      badgeEl.textContent = '🔴 Sinal Bloqueado';
+    }
+  }
+
+  if (diasEl) {
+    if (statusInfo.diasRestantes >= 0) {
+      diasEl.textContent = `${statusInfo.diasRestantes} dias restantes`;
+      diasEl.className = 'font-bold text-blue-600';
+    } else {
+      diasEl.textContent = `Vencido há ${Math.abs(statusInfo.diasRestantes)} dias`;
+      diasEl.className = 'font-bold text-rose-600';
+    }
+  }
+
+  document.getElementById('modal-status-licenca')?.classList.add('active');
+}
+
+function renderizarPainelMaster() {
+  const metricas = DB.calcularMetricasMasterSaaS();
+
+  // KPIs
+  const mrrEl = document.getElementById('kpi-master-mrr');
+  const setupEl = document.getElementById('kpi-master-setup');
+  const totalEl = document.getElementById('kpi-master-total-clientes');
+  const distEl = document.getElementById('kpi-master-distribuicao-status');
+  const atencaoEl = document.getElementById('kpi-master-atencao');
+  const bloqEl = document.getElementById('kpi-master-bloqueados-carencia');
+
+  if (mrrEl) mrrEl.textContent = `R$ ${metricas.mrr.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  if (setupEl) setupEl.textContent = `R$ ${metricas.receitaAdesaoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`;
+  if (totalEl) totalEl.textContent = metricas.totalClientes;
+  if (distEl) distEl.textContent = `${metricas.totalAtivos} Ativas • ${metricas.totalTrials} Trials (4d)`;
+  if (atencaoEl) atencaoEl.textContent = metricas.totalCarencia + metricas.totalBloqueados;
+  if (bloqEl) bloqEl.textContent = `${metricas.totalCarencia} carência • ${metricas.totalBloqueados} bloqueadas`;
+
+  renderizarTabelaClientesMaster();
+}
+
+function renderizarTabelaClientesMaster() {
+  const tbody = document.getElementById('tabela-master-clientes-corpo');
+  if (!tbody) return;
+
+  const filtroStatus = document.getElementById('filtro-status-master-cliente')?.value || '';
+  let clientes = DB.getClientesMaster();
+  const planos = DB.getPlanosNexo();
+
+  if (filtroStatus) {
+    clientes = clientes.filter(c => c.status === filtroStatus);
+  }
+
+  if (clientes.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="py-8 text-center text-slate-400 text-xs">
+          Nenhuma imobiliária encontrada para o filtro selecionado.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = clientes.map(c => {
+    const plano = planos[c.planoId] || planos.prime;
+    const dataVenc = new Date(c.dataVencimento);
+    const diffDias = Math.ceil((dataVenc.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+
+    let statusBadge = '';
+    if (c.status === 'active') {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">🟢 Ativo</span>';
+    } else if (c.status === 'trial') {
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">🔵 Trial (${diffDias}d)</span>`;
+    } else if (c.status === 'grace_period') {
+      statusBadge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">🟡 Carência</span>`;
+    } else {
+      statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300">🔴 Bloqueado</span>';
+    }
+
+    const setupBadge = c.adesaoPaga
+      ? '<span class="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">✅ R$ 600 Pago</span>'
+      : '<span class="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">⏳ Pendente</span>';
+
+    const whatsappLimpo = (c.whatsapp || '').replace(/\D/g, '');
+
+    return `
+      <tr class="hover:bg-slate-50/80 transition">
+        <td class="py-3 px-4">
+          <div class="font-black text-slate-900">${c.nomeImobiliaria}</div>
+          <div class="text-[11px] text-slate-500 font-medium">Resp: ${c.responsavel || 'Não informado'}</div>
+        </td>
+        <td class="py-3 px-4">
+          <div class="font-semibold text-slate-700">${c.cidade || 'São Paulo - SP'}</div>
+          <a href="https://wa.me/55${whatsappLimpo}" target="_blank" class="text-[11px] text-emerald-600 hover:text-emerald-700 font-bold inline-flex items-center gap-1">
+            <span>📲</span> ${c.whatsapp || ''}
+          </a>
+        </td>
+        <td class="py-3 px-4">
+          <span class="inline-block px-2 py-0.5 rounded-md text-[11px] font-black border ${plano.badgeCor || 'bg-slate-100 text-slate-800'}">
+            ${plano.nome}
+          </span>
+          <div class="text-[11px] font-bold text-slate-600 mt-0.5">R$ ${Number(c.valorMensal || plano.valorMensal).toFixed(2)}/mês</div>
+        </td>
+        <td class="py-3 px-4">
+          ${statusBadge}
+        </td>
+        <td class="py-3 px-4">
+          ${setupBadge}
+        </td>
+        <td class="py-3 px-4 text-center font-mono text-slate-600 text-[11px]">
+          ${dataVenc.toLocaleDateString('pt-BR')}
+        </td>
+        <td class="py-3 px-4 text-right">
+          <div class="flex items-center justify-end gap-1.5 flex-wrap">
+            <button onclick="estenderTesteCliente('${c.id}')" title="Dar +4 dias de degustação gratuita" class="bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 px-2 py-1 rounded-lg text-[11px] font-bold transition">
+              +4d Teste
+            </button>
+            ${c.status === 'blocked' ? `
+              <button onclick="alternarStatusLicencaCliente('${c.id}', 'active')" title="Liberar sinal de acesso" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded-lg text-[11px] font-bold transition shadow-xs">
+                🟢 Liberar
+              </button>
+            ` : `
+              <button onclick="alternarStatusLicencaCliente('${c.id}', 'blocked')" title="Cortar sinal de acesso" class="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2 py-1 rounded-lg text-[11px] font-bold transition">
+                🔴 Cortar
+              </button>
+            `}
+            <button onclick="abrirModalCobrancaPixCliente('${c.id}', 'mensalidade')" title="Gerar cobrança PIX" class="bg-slate-900 hover:bg-slate-800 text-white px-2 py-1 rounded-lg text-[11px] font-bold transition shadow-xs flex items-center gap-1">
+              <span>⚡</span> PIX
+            </button>
+            <button onclick="alterarPlanoClientePrompt('${c.id}')" title="Alterar plano (Start / Prime / Pro)" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded-lg text-[11px] font-bold transition">
+              Plano
+            </button>
+            <button onclick="removerClienteMasterConfirm('${c.id}')" title="Remover da base" class="text-rose-500 hover:text-rose-700 hover:bg-rose-50 p-1 rounded-lg text-xs transition">
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function estenderTesteCliente(clienteId) {
+  const cli = DB.estenderTesteClienteMaster(clienteId, 4);
+  if (!cli) return;
+
+  mostrarToastFeedback(`+4 dias de degustação concedidos para "${cli.nomeImobiliaria}"!`, '🎁');
+  renderizarPainelMaster();
+  atualizarBadgeLicencaHeader();
+}
+
+function alternarStatusLicencaCliente(clienteId, novoStatus) {
+  const cli = DB.atualizarStatusClienteMaster(clienteId, novoStatus);
+  if (!cli) return;
+
+  // Se o cliente for a própria imobiliária do tenant ativo, sincroniza a licença local
+  const licAtual = DB.getLicenca();
+  licAtual.status = novoStatus;
+  if (novoStatus === 'active') {
+    licAtual.bloqueioManual = false;
+    licAtual.desbloqueioManual = true;
+    licAtual.dataVencimento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  } else if (novoStatus === 'blocked') {
+    licAtual.bloqueioManual = true;
+    licAtual.desbloqueioManual = false;
+  }
+  DB.salvarLicenca(licAtual);
+
+  const statusLabel = novoStatus === 'active' ? '🟢 LIBERADO' : '🔴 CORTADO';
+  mostrarToastFeedback(`Sinal de "${cli.nomeImobiliaria}" agora está ${statusLabel}!`, '⚡');
+  renderizarPainelMaster();
+  atualizarBadgeLicencaHeader();
+  verificarTravaLicenca();
+}
+
+function abrirModalNovoClienteMaster() {
+  const form = document.getElementById('form-novo-cliente-master');
+  if (form) form.reset();
+  document.getElementById('modal-novo-cliente-master')?.classList.add('active');
+}
+
+function salvarNovoClienteMasterSubmit(event) {
+  event.preventDefault();
+
+  const nomeImobiliaria = document.getElementById('input-master-nome')?.value.trim();
+  const responsavel = document.getElementById('input-master-responsavel')?.value.trim();
+  const whatsapp = document.getElementById('input-master-whatsapp')?.value.trim();
+  const cidade = document.getElementById('input-master-cidade')?.value.trim();
+  const planoRadio = document.querySelector('input[name="master_plano"]:checked');
+  const planoId = planoRadio ? planoRadio.value : 'prime';
+  const statusInicial = document.getElementById('input-master-status-inicial')?.value || 'trial';
+  const adesaoVal = document.getElementById('input-master-adesao')?.value || 'pago';
+
+  if (!nomeImobiliaria || !responsavel || !whatsapp) {
+    alert('Preencha os campos obrigatórios.');
+    return;
+  }
+
+  DB.adicionarClienteMaster({
+    nomeImobiliaria,
+    responsavel,
+    whatsapp,
+    cidade,
+    planoId,
+    status: statusInicial,
+    adesaoPaga: adesaoVal === 'pago'
+  });
+
+  document.getElementById('modal-novo-cliente-master')?.classList.remove('active');
+  mostrarToastFeedback(`Imobiliária "${nomeImobiliaria}" cadastrada com sucesso!`, '🎉');
+  renderizarPainelMaster();
+}
+
+function alterarPlanoClientePrompt(clienteId) {
+  const clientes = DB.getClientesMaster();
+  const cli = clientes.find(c => c.id === clienteId);
+  if (!cli) return;
+
+  const novoPlano = prompt(
+    `Alterar plano de "${cli.nomeImobiliaria}". Digite:\n1 para NEXO Start (R$ 100)\n2 para NEXO Prime (R$ 150)\n3 para NEXO Pro (R$ 250)`,
+    cli.planoId === 'start' ? '1' : (cli.planoId === 'pro' ? '3' : '2')
+  );
+
+  if (!novoPlano) return;
+  const mapa = { '1': 'start', '2': 'prime', '3': 'pro' };
+  const targetPlano = mapa[novoPlano.trim()] || 'prime';
+
+  DB.alterarPlanoClienteMaster(clienteId, targetPlano);
+  mostrarToastFeedback(`Plano atualizado para "${DB.getPlanosNexo()[targetPlano].nome}"!`, '🚀');
+  renderizarPainelMaster();
+}
+
+function removerClienteMasterConfirm(clienteId) {
+  const clientes = DB.getClientesMaster();
+  const cli = clientes.find(c => c.id === clienteId);
+  if (!cli) return;
+
+  if (confirm(`Tem certeza que deseja remover "${cli.nomeImobiliaria}" da carteira Master?`)) {
+    DB.removerClienteMaster(clienteId);
+    mostrarToastFeedback(`Cliente removido.`, '🗑️');
+    renderizarPainelMaster();
+  }
+}
+
+function abrirModalCobrancaPixCliente(clienteId, tipo = 'mensalidade') {
+  let cliente = null;
+  if (clienteId) {
+    cliente = DB.getClientesMaster().find(c => c.id === clienteId);
+  } else {
+    // Usa o tenant atual
+    const cfg = DB.getConfig();
+    const lic = DB.getLicenca();
+    cliente = {
+      nomeImobiliaria: cfg.nome || 'Imobiliária Parceira',
+      whatsapp: cfg.whatsapp || '11914879393',
+      planoId: lic.planoId || 'pro',
+      valorMensal: lic.valorMensal || 250.00
+    };
+  }
+
+  const pixData = DB.gerarDadosCobrancaPix(cliente, tipo);
+  window._cobrancaPixAtual = { cliente, tipo, pixData };
+
+  const tituloEl = document.getElementById('modal-pix-titulo');
+  const descEl = document.getElementById('modal-pix-descricao');
+  const valorEl = document.getElementById('modal-pix-valor');
+  const benefEl = document.getElementById('modal-pix-beneficiario');
+  const payloadEl = document.getElementById('modal-pix-payload');
+  const qrContainer = document.getElementById('modal-pix-qrcode-container');
+
+  if (tituloEl) tituloEl.textContent = tipo === 'setup' ? 'Taxa de Setup do Site NEXO' : 'Mensalidade SaaS NEXO CRM';
+  if (descEl) descEl.textContent = pixData.descricao;
+  if (valorEl) valorEl.textContent = `R$ ${pixData.valor.toFixed(2)}`;
+  if (benefEl) benefEl.textContent = `Beneficiário: ${pixData.beneficiario} • ${pixData.cidade}`;
+  if (payloadEl) payloadEl.value = pixData.payloadPix;
+
+  // Renderiza QR Code visual estilizado em SVG
+  if (qrContainer) {
+    qrContainer.innerHTML = `
+      <svg class="w-44 h-44 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+        <rect x="5" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+        <rect x="12" y="12" width="12" height="12" fill="currentColor"/>
+        <rect x="69" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+        <rect x="76" y="12" width="12" height="12" fill="currentColor"/>
+        <rect x="5" y="69" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+        <rect x="12" y="76" width="12" height="12" fill="currentColor"/>
+        <rect x="38" y="10" width="8" height="8" fill="currentColor"/>
+        <rect x="50" y="10" width="8" height="8" fill="currentColor"/>
+        <rect x="38" y="24" width="8" height="8" fill="currentColor"/>
+        <rect x="10" y="38" width="8" height="8" fill="currentColor"/>
+        <rect x="24" y="38" width="8" height="8" fill="currentColor"/>
+        <rect x="38" y="38" width="24" height="24" rx="2" fill="currentColor"/>
+        <rect x="68" y="38" width="10" height="8" fill="currentColor"/>
+        <rect x="82" y="38" width="8" height="8" fill="currentColor"/>
+        <rect x="68" y="52" width="10" height="8" fill="currentColor"/>
+        <rect x="38" y="68" width="8" height="10" fill="currentColor"/>
+        <rect x="50" y="68" width="8" height="10" fill="currentColor"/>
+        <rect x="38" y="82" width="20" height="8" fill="currentColor"/>
+        <rect x="68" y="68" width="22" height="22" rx="2" fill="currentColor"/>
+      </svg>
+    `;
+  }
+
+  document.getElementById('modal-cobranca-pix-master')?.classList.add('active');
+}
+
+function copiarPixCodigoCola() {
+  const input = document.getElementById('modal-pix-payload');
+  if (!input) return;
+
+  navigator.clipboard.writeText(input.value).then(() => {
+    const btnTexto = document.getElementById('btn-copiar-pix-texto');
+    if (btnTexto) {
+      btnTexto.textContent = 'Copiado! ✓';
+      setTimeout(() => { btnTexto.textContent = 'Copiar'; }, 2000);
+    }
+    mostrarToastFeedback('Código PIX Copia e Cola copiado!', '📋');
+  });
+}
+
+function enviarCobrancaWhatsAppAtual() {
+  if (!window._cobrancaPixAtual) return;
+  const { cliente, tipo, pixData } = window._cobrancaPixAtual;
+
+  const tipoTexto = tipo === 'setup' ? 'Setup & Criação do Site Oficial' : 'Mensalidade da Licença NEXO CRM';
+  const whatsappLimpo = (cliente?.whatsapp || '').replace(/\D/g, '');
+
+  const msg = 
+`Olá, ${cliente?.responsavel || 'Parceiro'}! Tudo bem? 🏢
+
+Aqui é o Ricardo da *NEXO CRM*. Seguem os dados para pagamento do *${tipoTexto}*:
+
+💰 *Valor:* R$ ${pixData.valor.toFixed(2)}
+👤 *Beneficiário:* ${pixData.beneficiario}
+🔑 *Chave PIX:* ${pixData.chavePix}
+
+📋 *Código PIX Copia e Cola:*
+${pixData.payloadPix}
+
+Após realizar o pagamento, basta me enviar o comprovante por aqui para mantermos o seu sistema ativo e com sinal 100% liberado! 🚀`;
+
+  const link = `https://wa.me/55${whatsappLimpo}?text=${encodeURIComponent(msg)}`;
+  window.open(link, '_blank');
+}
+
+function copiarPropostaComercialWhatsApp(planoId = 'prime') {
+  const planos = DB.getPlanosNexo();
+  const p = planos[planoId] || planos.prime;
+
+  const msg = 
+`🏢 *PROPOSTA COMERCIAL EXCLUSIVA — NEXO CRM* 🏢
+
+Olá! Sou o Ricardo, especialista em tecnologia imobiliária da *NEXO CRM*.
+
+Conforme conversamos, montei a proposta oficial no plano *${p.nome.toUpperCase()}* para a sua imobiliária:
+
+✨ *PLANO ESCOLHIDO:* ${p.nome}
+💰 *Mensalidade:* R$ ${p.valorMensal.toFixed(2)}/mês
+💻 *Setup & Criação do Site Oficial:* R$ ${p.taxaAdesaoSetup.toFixed(2)} (Taxa única de implantação)
+🎁 *DEGUSTAÇÃO GRATUITA:* *${p.diasTestePadrao} DIAS DE TESTE TOTALMENTE GRÁTIS*
+
+🎯 *O QUE ESTÁ INCLUSO NO PACOTE:*
+${p.recursos.map(r => `• ${r}`).join('\n')}
+
+🚀 *Diferenciais que nenhuma outra ferramenta entrega:*
+• Sistema Mobile First super rápido (funciona como App no celular e computador)
+• Botão de WhatsApp sincronizado com horário de atendimento da equipe
+• Painel intuitivo sem complicação para os corretores venderem mais
+
+Podemos liberar os seus *4 dias de teste grátis* hoje mesmo? Me avise aqui para eu ativar o seu acesso!`;
+
+  navigator.clipboard.writeText(msg).then(() => {
+    mostrarToastFeedback(`Proposta Comercial do ${p.nome} copiada! Basta colar no WhatsApp.`, '📋');
+  });
+}
+
+function abrirModalShowcasePlanos() {
+  document.getElementById('modal-showcase-planos')?.classList.add('active');
+}
+
+function copiarPixBloqueio() {
+  const pixData = DB.gerarDadosCobrancaPix(null, 'mensalidade');
+  navigator.clipboard.writeText(pixData.payloadPix).then(() => {
+    const btnTexto = document.getElementById('btn-copiar-pix-bloqueio-texto');
+    if (btnTexto) {
+      btnTexto.textContent = 'Copiado! ✓';
+      setTimeout(() => { btnTexto.textContent = 'Copiar Código PIX'; }, 2000);
+    }
+    mostrarToastFeedback('Código PIX de regularização copiado!', '📋');
+  });
+}
+
+function desbloquearSinalMasterEmergencia() {
+  const senha = prompt('👑 Acesso Master: Digite a senha administrativa de Ricardo & Severino para liberação de emergência:');
+  if (senha === 'admin123' || senha === 'ricardo2026') {
+    const lic = DB.getLicenca();
+    lic.status = 'active';
+    lic.bloqueioManual = false;
+    lic.desbloqueioManual = true;
+    lic.dataVencimento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+    DB.salvarLicenca(lic);
+
+    document.getElementById('tela-bloqueio-sinal')?.classList.add('hidden');
+    atualizarBadgeLicencaHeader();
+    mostrarToastFeedback('Sinal desbloqueado com sucesso pelo Super Admin!', '👑');
+  } else if (senha !== null) {
+    alert('Senha master incorreta.');
+  }
+}
+
+// Exportações Globais do Módulo Master
+window.atualizarBadgeLicencaHeader = atualizarBadgeLicencaHeader;
+window.verificarTravaLicenca = verificarTravaLicenca;
+window.abrirModalStatusLicenca = abrirModalStatusLicenca;
+window.renderizarPainelMaster = renderizarPainelMaster;
+window.renderizarTabelaClientesMaster = renderizarTabelaClientesMaster;
+window.estenderTesteCliente = estenderTesteCliente;
+window.alternarStatusLicencaCliente = alternarStatusLicencaCliente;
+window.abrirModalNovoClienteMaster = abrirModalNovoClienteMaster;
+window.salvarNovoClienteMasterSubmit = salvarNovoClienteMasterSubmit;
+window.alterarPlanoClientePrompt = alterarPlanoClientePrompt;
+window.removerClienteMasterConfirm = removerClienteMasterConfirm;
+window.abrirModalCobrancaPixCliente = abrirModalCobrancaPixCliente;
+window.copiarPixCodigoCola = copiarPixCodigoCola;
+window.enviarCobrancaWhatsAppAtual = enviarCobrancaWhatsAppAtual;
+window.copiarPropostaComercialWhatsApp = copiarPropostaComercialWhatsApp;
+window.abrirModalShowcasePlanos = abrirModalShowcasePlanos;
+window.copiarPixBloqueio = copiarPixBloqueio;
+window.desbloquearSinalMasterEmergencia = desbloquearSinalMasterEmergencia;
+
 
 
