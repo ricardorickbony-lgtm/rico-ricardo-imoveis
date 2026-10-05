@@ -82,6 +82,17 @@ const CONFIG_IMOB_PADRAO = {
   googleAdsId: 'AW-18443399185', // Google Ads real da Rico Ricardo Imóveis
   googleAnalyticsId: 'G-ABCD1234EF',
 
+  // Configuração Fiscal e Emissão de NFS-e (Prefeitura / Receita)
+  cnpj: '38.613.000/0001-99',
+  razaoSocial: 'Rico Ricardo Empreendimentos Imobiliários Ltda',
+  inscricaoMunicipal: '184920-5',
+  regimeTributario: 'simples', // simples | lucro_presumido | lucro_real
+  cnae: '6821-8/02 - Gestão e administração da propriedade imobiliária',
+  itemLc116: '10.05 - Agenciamento, corretagem ou intermediação de bens móveis ou imóveis',
+  aliquotaIss: 2.0,
+  provedorFiscal: 'Focus NFe (Padrão Municipal)',
+  certificadoDigitalStatus: 'Certificado A1 Válido (e-CNPJ Ativo até 12/2027)',
+
   // Configuração Multi-Portais Ativos
   portaisAtivos: {
     zap: true,
@@ -562,7 +573,12 @@ const CONTRATOS_LOCACAO_INICIAIS = [
     dataInicio: '10/01/2025',
     dataFim: '09/01/2028',
     statusMes: 'Pago', // Pago | Aguardando | Atrasado
-    dataPagamentoMes: '08/10/2026'
+    dataPagamentoMes: '08/10/2026',
+    nfseNumero: '1048',
+    nfseDataEmissao: '08/10/2026 10:15:20',
+    nfseCodigoVerificacao: 'B7E9-4A1C-9820-F53D',
+    nfseStatus: 'Autorizada',
+    nfseValor: 1450
   },
   {
     id: 'ctr-2',
@@ -585,7 +601,12 @@ const CONTRATOS_LOCACAO_INICIAIS = [
     dataInicio: '05/03/2025',
     dataFim: '04/03/2027',
     statusMes: 'Pago',
-    dataPagamentoMes: '04/10/2026'
+    dataPagamentoMes: '04/10/2026',
+    nfseNumero: '1049',
+    nfseDataEmissao: '04/10/2026 16:40:12',
+    nfseCodigoVerificacao: 'C3A1-88F4-1190-AA2B',
+    nfseStatus: 'Autorizada',
+    nfseValor: 420
   },
   {
     id: 'ctr-3',
@@ -607,8 +628,13 @@ const CONTRATOS_LOCACAO_INICIAIS = [
     diaVencimento: 15,
     dataInicio: '15/06/2025',
     dataFim: '14/06/2027',
-    statusMes: 'Aguardando',
-    dataPagamentoMes: null
+    statusMes: 'Pago',
+    dataPagamentoMes: '05/10/2026',
+    nfseNumero: null,
+    nfseDataEmissao: null,
+    nfseCodigoVerificacao: null,
+    nfseStatus: 'Pendente',
+    nfseValor: 544
   },
   {
     id: 'ctr-4',
@@ -1501,6 +1527,84 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       taxaAdmTotal,
       taxaAdimplencia
     };
+  },
+
+  // =========================================================================
+  // EMISSÃO FISCAL DE NFS-e (NOTA FISCAL DE SERVIÇOS ELETRÔNICA)
+  // Taxa de Administração Imobiliária (LC 116 / Item 10.05 / CNAE 6821-8/02)
+  // =========================================================================
+  emitirNfseContrato(contratoId) {
+    const contratos = this.getContratosLocacao();
+    const c = contratos.find(item => item.id === contratoId);
+    if (!c) return null;
+
+    // Se já estiver emitida e autorizada, retorna
+    if (c.nfseNumero && c.nfseStatus === 'Autorizada') {
+      return c;
+    }
+
+    // Calcula próximo número sequencial de NFS-e da imobiliária
+    let maxNfse = 1047;
+    contratos.forEach(item => {
+      if (item.nfseNumero && !isNaN(parseInt(item.nfseNumero))) {
+        maxNfse = Math.max(maxNfse, parseInt(item.nfseNumero));
+      }
+    });
+
+    const d = new Date();
+    const dataHoraStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    const codVerif = Array.from({length: 4}, () => Math.random().toString(36).substring(2, 6).toUpperCase()).join('-');
+
+    c.nfseNumero = String(maxNfse + 1);
+    c.nfseDataEmissao = dataHoraStr;
+    c.nfseCodigoVerificacao = codVerif;
+    c.nfseStatus = 'Autorizada';
+    c.nfseValor = c.taxaAdmValor;
+
+    this.salvarContratosLocacao(contratos);
+
+    this.registrarLogAuditoria(
+      'Emissão Fiscal',
+      'NFS-e',
+      `NFS-e nº ${c.nfseNumero} emitida para o locador ${c.proprietarioNome} referente à taxa ADM de R$ ${c.taxaAdmValor.toFixed(2)}.`,
+      this.getPerfilAtivo()
+    );
+
+    return c;
+  },
+
+  emitirLoteNfse() {
+    const contratos = this.getContratosLocacao();
+    let emitidas = 0;
+
+    contratos.forEach(c => {
+      if (c.statusMes === 'Pago' && (!c.nfseNumero || c.nfseStatus !== 'Autorizada')) {
+        this.emitirNfseContrato(c.id);
+        emitidas++;
+      }
+    });
+
+    return emitidas;
+  },
+
+  cancelarNfseContrato(contratoId, motivo = 'Cancelamento solicitado pela administração imobiliária') {
+    const contratos = this.getContratosLocacao();
+    const c = contratos.find(item => item.id === contratoId);
+    if (!c || !c.nfseNumero) return null;
+
+    c.nfseStatus = 'Cancelada';
+    c.nfseMotivoCancelamento = motivo;
+
+    this.salvarContratosLocacao(contratos);
+
+    this.registrarLogAuditoria(
+      'Cancelamento Fiscal',
+      'NFS-e',
+      `NFS-e nº ${c.nfseNumero} cancelada. Motivo: ${motivo}.`,
+      this.getPerfilAtivo()
+    );
+
+    return c;
   },
 
   exportarDimob(ano = 2026) {

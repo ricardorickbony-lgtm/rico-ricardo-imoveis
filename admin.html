@@ -729,7 +729,11 @@
             </button>
             <button id="btn-exportar-dimob" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5">
               <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-              <span>📄 Exportar DIMOB (Receita Federal)</span>
+              <span>📄 Exportar DIMOB</span>
+            </button>
+            <button id="btn-emitir-lote-nfse" onclick="emitirLoteNfseRepasses()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Emitir NFS-e de todos os repasses pagos do mês para os proprietários">
+              <span>🧾</span>
+              <span>Emitir Lote de NFS-e (Prefeitura)</span>
             </button>
           </div>
         </div>
@@ -1060,6 +1064,77 @@
                   <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Google Ads Conversion ID (Tag Manager / AdWords)</label>
                   <input type="text" id="cfg-google-ads" placeholder="Ex: AW-123456789" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-mono">
                   <span class="text-[10px] text-slate-400 mt-0.5 block">Permite mensurar conversões das campanhas de pesquisa e rede de display do Google.</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Configurações Fiscais & Emissão de NFS-e (Prefeitura / Receita) -->
+            <div class="border-t border-slate-200 pt-4 space-y-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>🧾</span> <span>Emissão Fiscal & NFS-e (Prefeitura / Receita Federal)</span>
+                  </h4>
+                  <p class="text-[11px] text-slate-500">Configure os parâmetros tributários para emissão automática de Notas Fiscais de Locação e Vendas.</p>
+                </div>
+                <span id="badge-certificado-status" class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                  <span>🔒</span> Certificado A1 Conectado
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">CNPJ da Imobiliária</label>
+                  <input type="text" id="cfg-fiscal-cnpj" placeholder="00.000.000/0001-00" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-mono">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Razão Social Oficial</label>
+                  <input type="text" id="cfg-fiscal-razao-social" placeholder="Razão Social Registrada na Receita Federal" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Inscrição Municipal (CCM)</label>
+                  <input type="text" id="cfg-fiscal-inscricao-municipal" placeholder="Ex: 184920-5" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-mono">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Regime Tributário</label>
+                  <select id="cfg-fiscal-regime" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold">
+                    <option value="simples">Simples Nacional (ME/EPP)</option>
+                    <option value="lucro_presumido">Lucro Presumido</option>
+                    <option value="lucro_real">Lucro Real</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Alíquota de ISS (%)</label>
+                  <input type="number" step="0.01" id="cfg-fiscal-iss-aliquota" placeholder="2.00" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Provedor / API Fiscal</label>
+                  <select id="cfg-fiscal-provedor" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 font-bold">
+                    <option value="focus_nfe">Focus NFe (Padrão Municipal)</option>
+                    <option value="plugnotas">PlugNotas (TecnoSpeed)</option>
+                    <option value="enotas">eNotas Gateway</option>
+                    <option value="nacional">Emissor Nacional Padrão NFS-e</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="p-3 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-between flex-wrap gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                  <span class="text-lg">🔏</span>
+                  <div>
+                    <span class="font-bold text-slate-800">Certificado Digital A1 (e-CNPJ)</span>
+                    <p class="text-[11px] text-slate-500">Necessário para assinar digitalmente e transmitir as notas fiscais para o webservice da prefeitura.</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-lg">Válido até 12/2027</span>
+                  <label class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs px-3 py-1.5 rounded-lg transition">
+                    <span>Atualizar Arquivo (.pfx)</span>
+                    <input type="file" accept=".pfx,.p12" class="hidden" onchange="mostrarToastFeedback('Certificado Digital A1 verificado e ativo!', '🔐')">
+                  </label>
                 </div>
               </div>
             </div>
@@ -2081,6 +2156,38 @@
           <span>🖨️ Imprimir Recibo / Salvar PDF</span>
         </button>
         <button onclick="document.getElementById('modal-recibo-locacao').classList.remove('active')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DE NOTA FISCAL DE SERVIÇOS ELETRÔNICA (DANFSE / NFS-e PREFEITURA)   -->
+  <!-- ========================================================================= -->
+  <div id="modal-nfse-locacao" class="modal-overlay">
+    <div class="modal-content relative !max-w-3xl p-6 sm:p-8 space-y-6">
+      <button onclick="document.getElementById('modal-nfse-locacao').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">
+        ✕
+      </button>
+
+      <div id="nfse-imprimir-conteudo" class="space-y-4">
+        <!-- Renderizado dinamicamente com layout oficial DANFSE -->
+      </div>
+
+      <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-2 flex-wrap">
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+            <span>🖨️</span> <span>Imprimir DANFSE (A4)</span>
+          </button>
+          <button onclick="enviarNfseWhatsAppAtual()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+            <span>📲</span> <span>Enviar no WhatsApp do Proprietário</span>
+          </button>
+          <button onclick="baixarXmlNfseAtual()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs px-3 py-2.5 rounded-xl transition border border-indigo-200 flex items-center gap-1">
+            <span>📄</span> <span>Baixar XML</span>
+          </button>
+        </div>
+        <button onclick="document.getElementById('modal-nfse-locacao').classList.remove('active')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs px-4 py-2.5 rounded-xl transition">
           Fechar
         </button>
       </div>

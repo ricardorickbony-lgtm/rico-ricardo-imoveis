@@ -1222,6 +1222,26 @@ function carregarFormularioConfig() {
   document.getElementById('cfg-hora-semana-fim').value = config.horaFimSemana || 19;
   document.getElementById('cfg-hora-sabado-inicio').value = config.horaInicioSabado || 9;
   document.getElementById('cfg-hora-sabado-fim').value = config.horaFimSabado || 16;
+
+  // Configuração Fiscal e NFS-e
+  if (document.getElementById('cfg-fiscal-cnpj')) {
+    document.getElementById('cfg-fiscal-cnpj').value = config.cnpj || '38.613.000/0001-99';
+  }
+  if (document.getElementById('cfg-fiscal-razao-social')) {
+    document.getElementById('cfg-fiscal-razao-social').value = config.razaoSocial || (config.nome + ' Ltda');
+  }
+  if (document.getElementById('cfg-fiscal-inscricao-municipal')) {
+    document.getElementById('cfg-fiscal-inscricao-municipal').value = config.inscricaoMunicipal || '184920-5';
+  }
+  if (document.getElementById('cfg-fiscal-regime')) {
+    document.getElementById('cfg-fiscal-regime').value = config.regimeTributario || 'simples';
+  }
+  if (document.getElementById('cfg-fiscal-iss-aliquota')) {
+    document.getElementById('cfg-fiscal-iss-aliquota').value = config.aliquotaIss || 2.0;
+  }
+  if (document.getElementById('cfg-fiscal-provedor')) {
+    document.getElementById('cfg-fiscal-provedor').value = config.provedorFiscal || 'focus_nfe';
+  }
 }
 
 function configurarFormularioConfiguracoes() {
@@ -1254,11 +1274,19 @@ function configurarFormularioConfiguracoes() {
       horaInicioSemana: parseFloat(document.getElementById('cfg-hora-semana-inicio').value) || 8.5,
       horaFimSemana: parseFloat(document.getElementById('cfg-hora-semana-fim').value) || 19,
       horaInicioSabado: parseFloat(document.getElementById('cfg-hora-sabado-inicio').value) || 9,
-      horaFimSabado: parseFloat(document.getElementById('cfg-hora-sabado-fim').value) || 16
+      horaFimSabado: parseFloat(document.getElementById('cfg-hora-sabado-fim').value) || 16,
+
+      // Parâmetros Fiscais da Imobiliária
+      cnpj: document.getElementById('cfg-fiscal-cnpj')?.value.trim() || configAtual.cnpj || '',
+      razaoSocial: document.getElementById('cfg-fiscal-razao-social')?.value.trim() || configAtual.razaoSocial || '',
+      inscricaoMunicipal: document.getElementById('cfg-fiscal-inscricao-municipal')?.value.trim() || configAtual.inscricaoMunicipal || '',
+      regimeTributario: document.getElementById('cfg-fiscal-regime')?.value || 'simples',
+      aliquotaIss: parseFloat(document.getElementById('cfg-fiscal-iss-aliquota')?.value) || 2.0,
+      provedorFiscal: document.getElementById('cfg-fiscal-provedor')?.value || 'focus_nfe'
     };
 
     DB.salvarConfig(novasConfigs);
-    alert('Configurações salvas com sucesso! As tags de Remarketing e Portais estão ativas.');
+    mostrarToastFeedback('Configurações fiscais e da imobiliária salvas com sucesso!', '🧾');
   });
 }
 
@@ -1628,13 +1656,24 @@ function renderizarGestaoLocacao() {
           </select>
         </td>
         <td class="py-3 px-4 text-right">
-          <div class="flex items-center justify-end gap-1 flex-wrap">
-            <button onclick="abrirReciboInquilino('${c.id}')" class="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition" title="Emitir Recibo Oficial">
+          <div class="flex items-center justify-end gap-1.5 flex-wrap">
+            <button onclick="abrirReciboInquilino('${c.id}')" class="bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 text-[10px] font-bold px-2 py-1 rounded-lg transition" title="Emitir Recibo Oficial para o Inquilino">
               🧾 Recibo
             </button>
             <button onclick="abrirExtratoProprietario('${c.id}')" class="bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-lg transition" title="Extrato de Repasse">
               📊 Extrato
             </button>
+            ${c.nfseNumero && c.nfseStatus === 'Autorizada' ? `
+              <button onclick="abrirNfseContrato('${c.id}')" class="bg-purple-50 hover:bg-purple-600 hover:text-white text-purple-700 text-[10px] font-bold px-2 py-1 rounded-lg transition border border-purple-200 flex items-center gap-1 shadow-xs" title="Ver DANFSE / Nota Fiscal Autorizada #${c.nfseNumero}">
+                <span>📑</span> <span>NFS-e #${c.nfseNumero}</span>
+              </button>
+            ` : (c.statusMes === 'Pago' ? `
+              <button onclick="emitirNfseContrato('${c.id}')" class="bg-amber-50 hover:bg-emerald-600 hover:text-white text-amber-800 text-[10px] font-bold px-2 py-1 rounded-lg transition border border-amber-200 flex items-center gap-1 shadow-xs" title="Emitir NFS-e da Taxa de Administração para a Prefeitura">
+                <span>⚡</span> <span>Emitir NFS-e</span>
+              </button>
+            ` : `
+              <span class="text-slate-400 text-[10px] font-medium px-1.5 py-0.5" title="Aguardando quitação do aluguel para emissão fiscal">NFS-e Pend.</span>
+            `)}
           </div>
         </td>
       </tr>
@@ -1769,6 +1808,258 @@ function abrirExtratoProprietario(contratoId) {
   `;
 
   document.getElementById('modal-recibo-locacao')?.classList.add('active');
+}
+
+/**
+ * 13.1 Módulo Fiscal de Emissão de NFS-e (Prefeitura / Receita Federal)
+ * Taxa de Administração Imobiliária e Comissões de Venda (LC 116 / Item 10.05 / CNAE 6821-8/02)
+ */
+let contratoNfseAtual = null;
+
+function abrirNfseContrato(contratoId) {
+  const contrato = DB.getContratosLocacao().find(c => c.id === contratoId);
+  if (!contrato) return;
+
+  contratoNfseAtual = contrato;
+  window.contratoNfseAtual = contrato;
+
+  const config = DB.getConfig();
+  const container = document.getElementById('nfse-imprimir-conteudo');
+  if (!container) return;
+
+  const nfseNum = contrato.nfseNumero || '00001050';
+  const dataEmissao = contrato.nfseDataEmissao || new Date().toLocaleString('pt-BR');
+  const codVerif = contrato.nfseCodigoVerificacao || 'A1B2-C3D4-E5F6-G7H8';
+  const valorServico = contrato.taxaAdmValor || 0;
+  const aliqIss = config.aliquotaIss || 2.0;
+  const valorIss = (valorServico * (aliqIss / 100));
+  const cnpjPrestador = config.cnpj || '38.613.000/0001-99';
+  const razaoPrestador = config.razaoSocial || config.nome;
+  const imPrestador = config.inscricaoMunicipal || '184920-5';
+  const cidadePrestador = config.cidade || 'Santo André - SP';
+
+  container.innerHTML = `
+    <div class="p-6 bg-white border-2 border-slate-300 rounded-2xl space-y-4 text-slate-800 font-sans shadow-sm">
+      <!-- Cabeçalho Oficial NFS-e -->
+      <div class="border-b-2 border-slate-300 pb-4">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 bg-slate-900 text-white rounded-xl flex items-center justify-center text-2xl shadow">
+              🏛️
+            </div>
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 block">Prefeitura Municipal • Sistema de Arrecadação Tributária</span>
+              <h2 class="text-sm sm:text-base font-black text-slate-900 leading-tight">NOTA FISCAL DE SERVIÇOS ELETRÔNICA — NFS-e</h2>
+              <span class="text-[11px] font-bold text-slate-600 block">Documento Auxiliar da NFS-e (DANFSE) • Emissão Oficial</span>
+            </div>
+          </div>
+          <div class="text-right bg-slate-50 border border-slate-200 p-2.5 rounded-xl">
+            <span class="text-[10px] font-bold text-slate-400 uppercase block">Número da NFS-e</span>
+            <span class="text-lg font-black font-mono text-purple-700 block">Nº 0000${nfseNum}</span>
+            <span class="text-[9px] font-mono text-slate-500 block mt-0.5">Emissão: ${dataEmissao}</span>
+            <span class="text-[9px] font-mono text-emerald-700 font-bold block mt-0.5">Código: ${codVerif}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dados do Prestador de Serviços -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-1 mb-1">
+          <span class="font-black text-slate-800 uppercase text-[10px] tracking-wider">Prestador de Serviços (Imobiliária)</span>
+          <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Optante pelo Simples Nacional</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px]">
+          <div><strong>Razão Social:</strong> ${razaoPrestador}</div>
+          <div><strong>CNPJ:</strong> <span class="font-mono">${cnpjPrestador}</span></div>
+          <div><strong>Inscrição Municipal:</strong> <span class="font-mono">${imPrestador}</span></div>
+          <div><strong>Endereço:</strong> ${config.endereco || cidadePrestador}</div>
+        </div>
+      </div>
+
+      <!-- Dados do Tomador de Serviços (Proprietário/Locador) -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs space-y-1">
+        <div class="flex items-center justify-between border-b border-slate-200 pb-1 mb-1">
+          <span class="font-black text-slate-800 uppercase text-[10px] tracking-wider">Tomador dos Serviços (Proprietário / Locador)</span>
+          <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">Contrato #${contrato.codigo}</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px]">
+          <div><strong>Nome / Razão Social:</strong> ${contrato.proprietarioNome}</div>
+          <div><strong>CPF / CNPJ:</strong> <span class="font-mono">${contrato.proprietarioDocumento}</span></div>
+          <div><strong>Imóvel Administrado:</strong> ${contrato.imovelCodigo} - ${contrato.imovelTitulo}</div>
+          <div><strong>Inquilino:</strong> ${contrato.inquilinoNome}</div>
+        </div>
+      </div>
+
+      <!-- Discriminação dos Serviços -->
+      <div class="border border-slate-200 rounded-xl p-3 text-xs space-y-2">
+        <span class="font-black text-slate-800 uppercase text-[10px] tracking-wider block">Discriminação dos Serviços Prestados</span>
+        <div class="bg-white p-3 rounded-lg border border-slate-100 text-[11px] leading-relaxed text-slate-700 font-mono space-y-1">
+          <p>PRESTAÇÃO DE SERVIÇOS DE GESTÃO, COBRANÇA E ADMINISTRAÇÃO IMOBILIÁRIA REFERENTE AO CONTRATO DE LOCAÇÃO Nº ${contrato.codigo}.</p>
+          <p>IMÓVEL: ${contrato.imovelCodigo} (${contrato.imovelTitulo.toUpperCase()}).</p>
+          <p>ALUGUEL RECEBIDO: R$ ${contrato.valorAluguel.toLocaleString('pt-BR', { minimumFractionDigits: 2 })} | TAXA DE ADMINISTRAÇÃO (${contrato.taxaAdmPercentual}%): R$ ${valorServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.</p>
+          <p class="text-slate-500 pt-1 border-t border-slate-200 text-[10px]">CÓDIGO DE TRIBUTAÇÃO: 10.05 - Intermediação, corretagem e administração de bens imóveis. CNAE: 6821-8/02. Tributado no Município (${cidadePrestador}). Não há retenção de tributos na fonte.</p>
+        </div>
+      </div>
+
+      <!-- Tabela Tributária e Valores da NFS-e -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Valor dos Serviços</span>
+          <span class="font-black text-slate-900 text-sm">R$ ${valorServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        </div>
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Deduções / Descontos</span>
+          <span class="font-black text-slate-500 text-sm">R$ 0,00</span>
+        </div>
+        <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <span class="text-[10px] font-bold text-slate-400 block uppercase">Base de Cálculo ISS</span>
+          <span class="font-black text-slate-900 text-sm">R$ ${valorServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        </div>
+        <div class="bg-purple-50 p-2.5 rounded-xl border border-purple-200">
+          <span class="text-[10px] font-bold text-purple-700 block uppercase">ISS (${aliqIss.toFixed(2)}%)</span>
+          <span class="font-black text-purple-900 text-sm">R$ ${valorIss.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+        </div>
+      </div>
+
+      <!-- Total Líquido e Rodapé Fiscal com QR Code -->
+      <div class="p-3.5 bg-emerald-50/80 border border-emerald-200 rounded-xl flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <span class="text-[10px] font-bold text-emerald-800 uppercase block">VALOR LÍQUIDO DA NOTA FISCAL</span>
+          <span class="text-xl font-black text-emerald-900">R$ ${valorServico.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
+          <span class="text-[10px] text-emerald-700 block">Comprovante fiscal legal para dedução no Carnê-Leão / Imposto de Renda do Locador.</span>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <div class="text-right text-[10px] text-slate-500">
+            <span class="font-bold text-slate-800 block">Autenticidade Garantida:</span>
+            <span>Código: ${codVerif}</span><br>
+            <span class="text-emerald-700 font-bold">✔ Assinatura Digital ICP-Brasil</span>
+          </div>
+          <div class="w-16 h-16 bg-white p-1 rounded-lg border border-slate-300 shadow-xs flex items-center justify-center">
+            <svg class="w-full h-full text-slate-800" viewBox="0 0 100 100" fill="currentColor">
+              <rect x="5" y="5" width="30" height="30" />
+              <rect x="10" y="10" width="20" height="20" fill="white" />
+              <rect x="15" y="15" width="10" height="10" />
+              <rect x="65" y="5" width="30" height="30" />
+              <rect x="70" y="10" width="20" height="20" fill="white" />
+              <rect x="75" y="15" width="10" height="10" />
+              <rect x="5" y="65" width="30" height="30" />
+              <rect x="10" y="70" width="20" height="20" fill="white" />
+              <rect x="15" y="75" width="10" height="10" />
+              <rect x="45" y="15" width="10" height="10" />
+              <rect x="45" y="45" width="15" height="15" />
+              <rect x="70" y="45" width="10" height="20" />
+              <rect x="45" y="75" width="20" height="10" />
+              <rect x="75" y="75" width="15" height="15" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('modal-nfse-locacao')?.classList.add('active');
+}
+
+function emitirNfseContrato(contratoId) {
+  const contrato = DB.getContratosLocacao().find(c => c.id === contratoId);
+  if (!contrato) return;
+
+  const atualizado = DB.emitirNfseContrato(contratoId);
+  if (atualizado) {
+    if (typeof mostrarToastFeedback === 'function') {
+      mostrarToastFeedback(`NFS-e nº ${atualizado.nfseNumero} emitida e autorizada na Prefeitura!`, '🧾');
+    }
+    renderizarGestaoLocacao();
+    abrirNfseContrato(contratoId);
+  }
+}
+
+function emitirLoteNfseRepasses() {
+  const emitidas = DB.emitirLoteNfse();
+  renderizarGestaoLocacao();
+
+  if (emitidas > 0) {
+    if (typeof mostrarToastFeedback === 'function') {
+      mostrarToastFeedback(`Sucesso! ${emitidas} Notas Fiscais (NFS-e) emitidas e autorizadas em lote!`, '🎉');
+    }
+  } else {
+    if (typeof mostrarToastFeedback === 'function') {
+      mostrarToastFeedback('Todos os contratos quitados no mês já possuem NFS-e emitida.', '✅');
+    }
+  }
+}
+
+function enviarNfseWhatsAppAtual() {
+  const c = window.contratoNfseAtual;
+  if (!c) return;
+
+  const config = DB.getConfig();
+  const telLimpo = (c.proprietarioPix && !c.proprietarioPix.includes('@') && c.proprietarioPix.length >= 10)
+    ? c.proprietarioPix.replace(/\D/g, '')
+    : '';
+
+  const msg = encodeURIComponent(
+    `Olá, ${c.proprietarioNome}!\n\n` +
+    `Segue a sua Nota Fiscal de Serviços Eletrônica (*NFS-e nº 0000${c.nfseNumero}*) referente à Taxa de Administração da locação do imóvel *${c.imovelCodigo}* (${c.imovelTitulo}) no mês atual.\n\n` +
+    `📄 *Valor do Serviço:* R$ ${c.taxaAdmValor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}\n` +
+    `🔐 *Código de Autenticidade:* ${c.nfseCodigoVerificacao}\n` +
+    `🏛️ *Emissor:* ${config.nome} (CNPJ: ${config.cnpj || '38.613.000/0001-99'})\n\n` +
+    `Este comprovante é válido para dedução e prestação de contas no seu Imposto de Renda (IRPF / Carnê-Leão).\n\n` +
+    `Qualquer dúvida, estamos à disposição!\n*${config.nome}*`
+  );
+
+  const url = telLimpo
+    ? `https://api.whatsapp.com/send?phone=55${telLimpo}&text=${msg}`
+    : `https://api.whatsapp.com/send?text=${msg}`;
+
+  window.open(url, '_blank');
+}
+
+function baixarXmlNfseAtual() {
+  const c = window.contratoNfseAtual;
+  if (!c) return;
+
+  const config = DB.getConfig();
+  const xmlContent = `<?xml version="1.0" encoding="UTF-8"?>
+<CompNfse xmlns="http://www.abrasf.org.br/nfse.xsd">
+  <Nfse versao="2.03">
+    <InfNfse Id="NFS${c.nfseNumero}">
+      <Numero>${c.nfseNumero}</Numero>
+      <CodigoVerificacao>${c.nfseCodigoVerificacao}</CodigoVerificacao>
+      <DataEmissao>${new Date().toISOString()}</DataEmissao>
+      <ValoresNfse>
+        <ValorServicos>${c.taxaAdmValor.toFixed(2)}</ValorServicos>
+        <ValorDeducoes>0.00</ValorDeducoes>
+        <ValorIss>${(c.taxaAdmValor * 0.02).toFixed(2)}</ValorIss>
+        <Aliquota>0.02</Aliquota>
+        <ValorLiquidoNfse>${c.taxaAdmValor.toFixed(2)}</ValorLiquidoNfse>
+      </ValoresNfse>
+      <PrestadorServico>
+        <IdentificacaoPrestador>
+          <Cnpj>${(config.cnpj || '38613000000199').replace(/\D/g, '')}</Cnpj>
+          <InscricaoMunicipal>${(config.inscricaoMunicipal || '1849205').replace(/\D/g, '')}</InscricaoMunicipal>
+        </IdentificacaoPrestador>
+        <RazaoSocial>${config.razaoSocial || config.nome}</RazaoSocial>
+      </PrestadorServico>
+      <TomadorServico>
+        <IdentificacaoTomador>
+          <CpfCnpj>
+            <Cpf>${c.proprietarioDocumento.replace(/\D/g, '')}</Cpf>
+          </CpfCnpj>
+        </IdentificacaoTomador>
+        <RazaoSocial>${c.proprietarioNome}</RazaoSocial>
+      </TomadorServico>
+      <Discriminacao>Prestação de serviços de administração imobiliária ref. contrato ${c.codigo}. Imóvel: ${c.imovelCodigo}. Taxa ADM R$ ${c.taxaAdmValor.toFixed(2)}. Item LC 116: 10.05. CNAE: 6821-8/02.</Discriminacao>
+    </InfNfse>
+  </Nfse>
+</CompNfse>`;
+
+  const blob = new Blob([xmlContent], { type: 'application/xml' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `NFSe_${c.nfseNumero}_Contrato_${c.codigo}.xml`;
+  link.click();
 }
 
 /**
@@ -2596,6 +2887,11 @@ window.avancarEtapaLeadRapido = avancarEtapaLeadRapido;
 window.alternarStatusCorretor = alternarStatusCorretor;
 window.abrirReciboInquilino = abrirReciboInquilino;
 window.abrirExtratoProprietario = abrirExtratoProprietario;
+window.abrirNfseContrato = abrirNfseContrato;
+window.emitirNfseContrato = emitirNfseContrato;
+window.emitirLoteNfseRepasses = emitirLoteNfseRepasses;
+window.enviarNfseWhatsAppAtual = enviarNfseWhatsAppAtual;
+window.baixarXmlNfseAtual = baixarXmlNfseAtual;
 window.alterarStatusContratoRapido = alterarStatusContratoRapido;
 window.abrirLaudoVistoria = abrirLaudoVistoria;
 window.excluirLead = excluirLead;
