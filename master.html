@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>👑 Painel Master NEXO SaaS — Ricardo & Severino</title>
+  <link rel="icon" type="image/png" href="img/nexo-icone.png">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            obsidian: '#0A0F1D',
+            charcoal: '#0F172A',
+            cardBg: '#131D31',
+            accentGold: '#F59E0B',
+            solarGold: '#FBBF24',
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0A0F1D;
+      color: #E2E8F0;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background-color: rgba(10, 15, 29, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      background-color: #131D31;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 1.5rem;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0A0F1D;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #25334D;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3B82F6;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-amber-400 selection:text-slate-950">
+
+  <!-- ========================================================================= -->
+  <!-- CONTAINER DE TOASTS (NOTIFICAÇÕES FLUTUANTES)                             -->
+  <!-- ========================================================================= -->
+  <div id="toast-container-master" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ========================================================================= -->
+  <!-- TELA 1: LOGIN EXCLUSIVO SUPER ADMIN (RICARDO & SEVERINO)                 -->
+  <!-- ========================================================================= -->
+  <section id="secao-login-master" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-[#131D31] border border-slate-700/60 rounded-3xl p-8 sm:p-10 shadow-2xl space-y-6 relative overflow-hidden">
+      <!-- Glow Decorativo de Fundo -->
+      <div class="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="text-center space-y-2 relative">
+        <div class="w-16 h-16 rounded-2xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center mx-auto text-3xl shadow-inner">
+          👑
+        </div>
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs font-bold text-amber-400 tracking-wider uppercase mt-2">
+          <span>Ambiente Isolado</span> • <span>Super Admin</span>
+        </div>
+        <h1 class="text-2xl sm:text-3xl font-black text-white tracking-tight mt-1">Painel Master NEXO</h1>
+        <p class="text-xs text-slate-400 max-w-xs mx-auto">
+          Cockpit executivo e controle financeiro de operações SaaS. Exclusivo para Ricardo & Severino.
+        </p>
+      </div>
+
+      <form id="form-login-master" class="space-y-4 relative">
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+            Senha do Super Admin
+          </label>
+          <input 
+            type="password" 
+            id="input-senha-master" 
+            required 
+            placeholder="Digite sua senha master..." 
+            class="w-full bg-[#0A0F1D] border border-slate-700 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 transition outline-none font-medium"
+          >
+        </div>
+
+        <div id="login-master-erro" class="hidden text-xs text-rose-400 font-bold bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl text-center">
+          <!-- Mensagem de erro dinâmica -->
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-black text-sm py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+        >
+          <span>Desbloquear Cockpit Master</span>
+          <span>→</span>
+        </button>
+
+        <div class="pt-2 text-center">
+          <a href="admin.html" class="text-xs text-slate-500 hover:text-slate-300 transition">
+            Voltar ao CRM Imobiliário Local
+          </a>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- TELA 2: COCKPIT SUPER ADMIN COMPLETO                                      -->
+  <!-- ========================================================================= -->
+  <div id="painel-master-conteudo" class="hidden flex-1 flex flex-col">
+
+    <!-- Topbar de Navegação Master -->
+    <header class="bg-[#101828] border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-xl shadow-xs">
+            👑
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base font-black text-white tracking-tight">NEXO SaaS Master</span>
+              <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/40">
+                Ricardo & Severino
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">Controle Central de Imobiliárias, Sinais de Acesso & MRR</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <button onclick="abrirModalNovoClienteMaster()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>➕</span> <span>Nova Imobiliária</span>
+          </button>
+          <button onclick="abrirModalShowcasePlanos()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition border border-slate-700 flex items-center gap-1.5">
+            <span>📋</span> <span>Vitrine de Planos (WhatsApp)</span>
+          </button>
+          <a href="admin.html" class="bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white font-semibold text-xs px-3 py-2 rounded-xl transition border border-slate-700" title="Abrir CRM do Tenant Local">
+            <span>🏢 CRM Demo</span>
+          </a>
+          <button onclick="logoutMaster()" class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 font-bold text-xs px-3 py-2 rounded-xl transition" title="Encerrar Sessão">
+            <span>🔒 Sair</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+      <!-- ===================================================================== -->
+      <!-- LINHA 1: KPIS EXECUTIVOS DE FATURAMENTO E OPERAÇÕES                   -->
+      <!-- ===================================================================== -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- MRR Recorrência Mensal -->
+        <div class="bg-[#131D31] p-5 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">MRR Recorrência</span>
+            <span class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-lg">💰</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-emerald-400 mt-2" id="kpi-mrr-valor">R$ 0,00</div>
+          <span class="text-[11px] text-slate-400 mt-1 block">Faturamento mensal fixo das imobiliárias</span>
+        </div>
+
+        <!-- Receita de Adesão / Setup -->
+        <div class="bg-[#131D31] p-5 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Setup Sites (R$ 600)</span>
+            <span class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center text-lg">🚀</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-blue-400 mt-2" id="kpi-setup-valor">R$ 0,00</div>
+          <span class="text-[11px] text-slate-400 mt-1 block">Total arrecadado em implantações de sites</span>
+        </div>
+
+        <!-- Total de Imobiliárias Parceiras -->
+        <div class="bg-[#131D31] p-5 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Carteira de Clientes</span>
+            <span class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 flex items-center justify-center text-lg">🏢</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-white mt-2" id="kpi-total-clientes-valor">0</div>
+          <span class="text-[11px] text-slate-400 mt-1 block" id="kpi-distribuicao-status-detalhe">0 Ativas • 0 Trials</span>
+        </div>
+
+        <!-- Alertas & Inadimplência / Cortes -->
+        <div class="bg-[#131D31] p-5 rounded-2xl border border-slate-800 shadow-lg relative overflow-hidden">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Em Atenção / Suspensão</span>
+            <span class="w-9 h-9 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center text-lg">⚠️</span>
+          </div>
+          <div class="text-2xl sm:text-3xl font-black text-rose-400 mt-2" id="kpi-atencao-valor">0</div>
+          <span class="text-[11px] text-slate-400 mt-1 block" id="kpi-atencao-detalhe">0 em carência • 0 cortadas</span>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- LINHA 2: TABELA DE GESTÃO DA CARTEIRA & SINAIS DE ACESSO             -->
+      <!-- ===================================================================== -->
+      <section class="bg-[#131D31] rounded-3xl border border-slate-800 shadow-xl p-5 sm:p-6 space-y-4">
+        <!-- Barra de Ferramentas / Filtros -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-lg font-black text-white">Carteira de Imobiliárias SaaS</h2>
+              <span class="text-xs font-bold text-slate-400 bg-slate-800 px-2.5 py-0.5 rounded-full" id="contagem-carteira-clientes">0 imobiliária(s)</span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Controle de sinal em tempo real, liberação de degustação gratuita de 4 dias e emissão de cobranças PIX
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <!-- Busca Instantânea -->
+            <div class="relative">
+              <input 
+                type="text" 
+                id="busca-master-cliente" 
+                placeholder="Buscar por nome, cidade ou fone..." 
+                class="bg-[#0A0F1D] border border-slate-700 rounded-xl pl-8 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:border-amber-400 outline-none w-52 sm:w-64 transition"
+              >
+              <span class="absolute left-2.5 top-2.5 text-xs text-slate-500">🔍</span>
+            </div>
+
+            <!-- Filtro de Status -->
+            <select 
+              id="filtro-status-master-cliente" 
+              onchange="renderizarTabelaClientes()" 
+              class="bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-300 focus:border-amber-400 outline-none transition"
+            >
+              <option value="">Todos os Status</option>
+              <option value="active">🟢 Apenas Ativos</option>
+              <option value="trial">🔵 Apenas Trials (4 Dias)</option>
+              <option value="grace_period">🟡 Em Carência (Aviso)</option>
+              <option value="blocked">🔴 Bloqueados (Sinal Cortado)</option>
+            </select>
+
+            <button onclick="renderizarDashboardMaster()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-xl text-xs font-bold transition border border-slate-700" title="Atualizar dados">
+              ↻ Atualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- Tabela Responsiva de Clientes -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs text-left">
+            <thead class="bg-[#0A0F1D] text-slate-400 font-bold uppercase tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="py-3 px-4">Imobiliária / Razão</th>
+                <th class="py-3 px-4">Cidade / WhatsApp</th>
+                <th class="py-3 px-4">Plano Contratado</th>
+                <th class="py-3 px-4">Status do Sinal</th>
+                <th class="py-3 px-4">Setup (R$ 600)</th>
+                <th class="py-3 px-4 text-center">Vencimento</th>
+                <th class="py-3 px-4 text-right">Ações de Controle</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-master-clientes-corpo" class="divide-y divide-slate-800">
+              <!-- Populado dinamicamente via JS -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===================================================================== -->
+      <!-- LINHA 3: VITRINE COMERCIAL RÁPIDA DOS 3 PLANOS (COM CÓPIA NO WHATSAPP)-->
+      <!-- ===================================================================== -->
+      <section class="bg-[#131D31] rounded-3xl border border-slate-800 p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-base font-black text-white">🎯 Tabela Oficial de Planos NEXO CRM (2026)</span>
+              <span class="text-[10px] font-bold bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded-full uppercase border border-amber-400/30">
+                Padrão Severino & Ricardo
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">Clique em qualquer plano para copiar a proposta comercial completa e colar direto no WhatsApp do cliente.</p>
+          </div>
+          <span class="text-xs font-bold text-amber-400 bg-amber-400/10 border border-amber-400/30 px-3 py-1.5 rounded-xl">
+            🎁 Todos com 4 Dias de Teste Grátis + R$ 600 Setup de Site
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+          <!-- NEXO Start R$ 100 -->
+          <div class="bg-[#0A0F1D] rounded-2xl border border-slate-800 p-5 flex flex-col justify-between space-y-4 hover:border-slate-700 transition">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black uppercase text-slate-300 bg-slate-800 px-2.5 py-0.5 rounded-md">NEXO Start</span>
+                <span class="text-xs font-bold text-slate-500">Até 60 Imóveis</span>
+              </div>
+              <div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl font-black text-white">R$ 100</span>
+                  <span class="text-xs font-bold text-slate-400">/mês</span>
+                </div>
+                <span class="text-[11px] text-slate-400 block font-medium">+ R$ 600,00 taxa única de setup do site</span>
+              </div>
+              <ul class="text-xs text-slate-400 space-y-1.5 pt-2 border-t border-slate-800">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Site Oficial Responsivo de Alta Conversão</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Até 2 corretores cadastrados</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Pipeline Kanban de Leads</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Simulador Habitacional Caixa (SAC/Price)</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>WhatsApp Inteligente com Expediente</span></li>
+              </ul>
+            </div>
+            <button onclick="copiarPropostaComercialWhatsApp('start')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2.5 px-3 rounded-xl border border-slate-700 transition flex items-center justify-center gap-1.5">
+              <span>📋</span> <span>Copiar Proposta WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- NEXO Prime R$ 150 -->
+          <div class="bg-gradient-to-b from-blue-900/30 to-[#0A0F1D] rounded-2xl border-2 border-blue-500 p-5 flex flex-col justify-between space-y-4 shadow-lg relative">
+            <span class="absolute -top-3 right-4 bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">
+              ★ Mais Recomendado
+            </span>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black uppercase text-blue-300 bg-blue-900/50 px-2.5 py-0.5 rounded-md border border-blue-500/30">NEXO Prime</span>
+                <span class="text-xs font-bold text-blue-400">Até 200 Imóveis</span>
+              </div>
+              <div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl font-black text-white">R$ 150</span>
+                  <span class="text-xs font-bold text-blue-300">/mês</span>
+                </div>
+                <span class="text-[11px] text-blue-300/80 block font-medium">+ R$ 600,00 taxa única de setup do site</span>
+              </div>
+              <ul class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-blue-500/30">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Tudo do plano Start incluso</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Até 5 corretores cadastrados</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Integração Multi-Portais (ZAP, VivaReal, OLX)</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Termos de Visita com Assinatura na Tela</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Vistorias Digitais de Entrada e Saída</span></li>
+              </ul>
+            </div>
+            <button onclick="copiarPropostaComercialWhatsApp('prime')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-black text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+              <span>📋</span> <span>Copiar Proposta WhatsApp</span>
+            </button>
+          </div>
+
+          <!-- NEXO Pro R$ 250 -->
+          <div class="bg-gradient-to-b from-amber-500/10 to-[#0A0F1D] rounded-2xl border-2 border-amber-400/60 p-5 flex flex-col justify-between space-y-4 shadow-lg relative">
+            <span class="absolute -top-3 right-4 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow">
+              👑 Enterprise Completo
+            </span>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black uppercase text-amber-300 bg-amber-500/20 px-2.5 py-0.5 rounded-md border border-amber-500/30">NEXO Pro</span>
+                <span class="text-xs font-bold text-amber-400">ILIMITADO</span>
+              </div>
+              <div>
+                <div class="flex items-baseline gap-1">
+                  <span class="text-3xl font-black text-white">R$ 250</span>
+                  <span class="text-xs font-bold text-amber-300">/mês</span>
+                </div>
+                <span class="text-[11px] text-amber-300/80 block font-medium">+ R$ 600,00 taxa única de setup do site</span>
+              </div>
+              <ul class="text-xs text-slate-300 space-y-1.5 pt-2 border-t border-amber-400/30">
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Imóveis e Corretores ILIMITADOS</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Sofia IA 24h no WhatsApp e Site Oficial</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Módulo Fiscal NFS-e Prefeitura (RPS Automático)</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Gestão de Contratos de Locação & Repasses PIX</span></li>
+                <li class="flex items-center gap-1.5"><span class="text-emerald-400">✓</span> <span>Exportação de Informe de Rendimentos & DIMOB</span></li>
+              </ul>
+            </div>
+            <button onclick="copiarPropostaComercialWhatsApp('pro')" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs py-2.5 px-3 rounded-xl transition flex items-center justify-center gap-1.5 shadow">
+              <span>📋</span> <span>Copiar Proposta WhatsApp</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Rodapé Master -->
+    <footer class="bg-[#101828] border-t border-slate-800 py-4 px-6 text-center text-xs text-slate-500 mt-auto">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <span>👑</span>
+          <span class="font-bold text-slate-300">NEXO CRM SaaS Master Cockpit</span>
+          <span>•</span>
+          <span>Padrão Oficial Ricardo & Severino</span>
+        </div>
+        <div class="text-[11px] text-slate-400">
+          Versão Master 2.0 • Sincronizado com Nuvem Supabase & LocalStorage
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: CADASTRAR NOVA IMOBILIÁRIA (SUPER ADMIN MASTER)                    -->
+  <!-- ========================================================================= -->
+  <div id="modal-novo-cliente-master" class="modal-overlay">
+    <div class="modal-content relative !max-w-2xl p-6 sm:p-8 space-y-5">
+      <button onclick="fecharModalNovoClienteMaster()" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Painel Master SaaS
+          </span>
+          <span class="text-xs text-slate-400 font-mono">NOVA CONTRATAÇÃO</span>
+        </div>
+        <h3 class="text-xl font-black text-white mt-1">Cadastrar Nova Imobiliária Parceira</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Cadastre a nova empresa, defina o plano contratado e libere os 4 dias de teste grátis ou o sinal imediato.</p>
+      </div>
+
+      <form id="form-novo-cliente-master" onsubmit="salvarNovoClienteMasterSubmit(event)" class="space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Nome da Imobiliária / Razão</label>
+            <input type="text" id="input-master-nome" required placeholder="Ex: Morumbi Prime Imóveis" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400 outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Nome do Responsável / Corretor</label>
+            <input type="text" id="input-master-responsavel" required placeholder="Ex: Dr. Carlos Eduardo" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">WhatsApp de Contato (com DDD)</label>
+            <input type="text" id="input-master-whatsapp" required placeholder="Ex: 11999998888" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:border-amber-400 outline-none">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Cidade / Estado</label>
+            <input type="text" id="input-master-cidade" required placeholder="Ex: Santo André - SP" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-400 outline-none">
+          </div>
+        </div>
+
+        <div class="p-4 bg-[#0A0F1D] rounded-2xl border border-slate-800 space-y-3">
+          <label class="block font-black text-white uppercase">Escolha o Plano NEXO Contratado</label>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="cursor-pointer border-2 border-slate-800 rounded-xl p-3 bg-slate-900/60 hover:border-slate-700 transition flex flex-col justify-between space-y-2 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-300 text-xs">NEXO Start</span>
+                <input type="radio" name="master_plano" value="start" class="accent-blue-500">
+              </div>
+              <div class="text-base font-black text-white">R$ 100<span class="text-[10px] text-slate-400 font-normal">/mês</span></div>
+              <span class="text-[10px] text-slate-400 leading-tight">Até 60 imóveis e 2 corretores</span>
+            </label>
+
+            <label class="cursor-pointer border-2 border-blue-500/60 rounded-xl p-3 bg-blue-500/5 hover:border-blue-500 transition flex flex-col justify-between space-y-2 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/20 shadow-xs">
+              <div class="flex items-center justify-between">
+                <span class="font-black text-blue-300 text-xs">NEXO Prime ★</span>
+                <input type="radio" name="master_plano" value="prime" checked class="accent-blue-500">
+              </div>
+              <div class="text-base font-black text-white">R$ 150<span class="text-[10px] text-blue-300 font-normal">/mês</span></div>
+              <span class="text-[10px] text-slate-300 leading-tight">Até 200 imóveis, Portais e Vistorias</span>
+            </label>
+
+            <label class="cursor-pointer border-2 border-amber-500/40 rounded-xl p-3 bg-amber-500/5 hover:border-amber-400 transition flex flex-col justify-between space-y-2 has-[:checked]:border-amber-400 has-[:checked]:bg-amber-400/20">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-amber-300 text-xs">NEXO Pro 👑</span>
+                <input type="radio" name="master_plano" value="pro" class="accent-amber-400">
+              </div>
+              <div class="text-base font-black text-white">R$ 250<span class="text-[10px] text-amber-300 font-normal">/mês</span></div>
+              <span class="text-[10px] text-slate-300 leading-tight">Ilimitado, Sofia IA e Módulo Fiscal</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Status Inicial do Sinal</label>
+            <select id="input-master-status-inicial" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400 outline-none">
+              <option value="trial">🔵 Período de Teste Grátis (4 Dias)</option>
+              <option value="active">🟢 Sinal Totalmente Ativo (Mensalidade Paga)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-300 uppercase mb-1">Setup do Site (R$ 600,00)</label>
+            <select id="input-master-adesao" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400 outline-none">
+              <option value="pago">✅ R$ 600,00 Pago</option>
+              <option value="pendente">⏳ Pendente de Pagamento</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 flex items-center justify-end gap-2">
+          <button type="button" onclick="fecharModalNovoClienteMaster()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2.5 rounded-xl transition">
+            Cancelar
+          </button>
+          <button type="submit" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-5 py-2.5 rounded-xl transition shadow">
+            Ativar Nova Imobiliária
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: COBRANÇA PIX INSTANTÂNEA COM QR CODE & WHATSAPP                    -->
+  <!-- ========================================================================= -->
+  <div id="modal-cobranca-pix-master" class="modal-overlay">
+    <div class="modal-content relative !max-w-lg p-6 sm:p-8 space-y-5 text-center">
+      <button onclick="fecharModalCobrancaPixMaster()" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div>
+        <span class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center justify-center text-2xl font-black mb-2 shadow-xs">
+          ⚡
+        </span>
+        <h3 class="text-xl font-black text-white" id="modal-pix-titulo">Cobrança PIX NEXO CRM</h3>
+        <p class="text-xs text-slate-400 mt-0.5" id="modal-pix-descricao">Mensalidade recorrente do plano contratado</p>
+      </div>
+
+      <!-- Card com Valor -->
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-800 text-white p-5 rounded-2xl shadow-lg space-y-1 border border-emerald-500/30">
+        <span class="text-xs uppercase tracking-wider font-semibold opacity-90">Valor a Receber via PIX</span>
+        <div class="text-3xl sm:text-4xl font-black" id="modal-pix-valor">R$ 150,00</div>
+        <span class="text-[11px] opacity-80 block" id="modal-pix-beneficiario">Beneficiário: Ricardo — NEXO CRM</span>
+      </div>
+
+      <!-- QR Code SVG Dinâmico -->
+      <div class="bg-white p-4 rounded-2xl border-2 border-dashed border-slate-400 inline-block mx-auto shadow-inner">
+        <div id="modal-pix-qrcode-container" class="flex items-center justify-center">
+          <!-- Renderizado via JS -->
+        </div>
+        <span class="text-[10px] text-slate-500 block mt-2 font-mono">Abra o app do banco e aponte a câmera</span>
+      </div>
+
+      <!-- Chave PIX e Copia e Cola -->
+      <div class="space-y-2 text-left">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1">Código PIX Copia e Cola</label>
+          <div class="flex items-center gap-1.5">
+            <input type="text" id="modal-pix-payload" readonly class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-300 truncate select-all">
+            <button onclick="copiarPixCodigoCola()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs px-3.5 py-2 rounded-xl transition shrink-0 flex items-center gap-1 shadow-sm">
+              <span>📋</span> <span id="btn-copiar-pix-texto">Copiar</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-3 bg-[#0A0F1D] rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
+          <span class="text-slate-400">Chave PIX Oficial:</span>
+          <span class="font-mono font-bold text-amber-400">ricardo.nexo@pix.com.br</span>
+        </div>
+      </div>
+
+      <!-- Botão Enviar Cobrança no WhatsApp -->
+      <div class="pt-2 border-t border-slate-800 space-y-2">
+        <button id="btn-enviar-pix-whatsapp" onclick="enviarCobrancaWhatsAppAtual()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.585 1.961.895 2.791.895 3.181 0 5.767-2.587 5.767-5.766.001-3.187-2.578-5.781-5.767-5.781zm9.969 5.766c0 5.505-4.495 10-10 10-1.776 0-3.441-.471-4.887-1.293l-5.113 1.355 1.373-5.006c-.896-1.488-1.413-3.23-1.413-5.056 0-5.505 4.495-10 10-10 5.505 0 10 4.495 10 10z"/></svg>
+          <span>Encaminhar Cobrança Formatada no WhatsApp do Cliente</span>
+        </button>
+        <button onclick="fecharModalCobrancaPixMaster()" class="w-full text-slate-400 hover:text-white text-xs font-semibold py-1 transition">
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: SHOWCASE / VITRINE COMPLETA DOS 3 PLANOS NEXO                      -->
+  <!-- ========================================================================= -->
+  <div id="modal-showcase-planos" class="modal-overlay">
+    <div class="modal-content relative !max-w-4xl p-6 sm:p-8 space-y-6">
+      <button onclick="fecharModalShowcasePlanos()" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div class="text-center max-w-xl mx-auto space-y-1">
+        <span class="text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full uppercase tracking-wider">
+          Proposta Comercial Oficial
+        </span>
+        <h3 class="text-2xl font-black text-white">Planos & Soluções NEXO CRM</h3>
+        <p class="text-xs text-slate-400">Modelos comerciais prontos para fechamento rápido com imobiliárias parceiras.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+        <!-- Start R$ 100 -->
+        <div class="bg-[#0A0F1D] rounded-2xl border border-slate-800 p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-2">
+            <span class="text-xs font-bold text-slate-400 uppercase">Iniciante</span>
+            <h4 class="text-lg font-black text-white">NEXO Start</h4>
+            <div class="text-2xl font-black text-white">R$ 100<span class="text-xs text-slate-400 font-normal">/mês</span></div>
+            <p class="text-[11px] text-slate-400">+ R$ 600 taxa única de setup do site</p>
+            <ul class="text-xs text-slate-300 space-y-1 pt-2 border-t border-slate-800">
+              <li>✓ Site Oficial Responsivo</li>
+              <li>✓ Até 60 imóveis cadastrados</li>
+              <li>✓ Até 2 corretores na equipe</li>
+              <li>✓ Funil Kanban de Leads</li>
+              <li>✓ Simulador Habitacional Caixa</li>
+            </ul>
+          </div>
+          <button onclick="copiarPropostaComercialWhatsApp('start')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-2 rounded-xl transition border border-slate-700">
+            Copiar Proposta WhatsApp
+          </button>
+        </div>
+
+        <!-- Prime R$ 150 -->
+        <div class="bg-gradient-to-b from-blue-900/30 to-[#0A0F1D] rounded-2xl border-2 border-blue-500 p-5 flex flex-col justify-between space-y-4 relative shadow-sm">
+          <span class="absolute -top-3 right-4 bg-blue-600 text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-full">Recomendado</span>
+          <div class="space-y-2">
+            <span class="text-xs font-bold text-blue-300 uppercase">Crescimento</span>
+            <h4 class="text-lg font-black text-white">NEXO Prime</h4>
+            <div class="text-2xl font-black text-blue-300">R$ 150<span class="text-xs text-blue-400 font-normal">/mês</span></div>
+            <p class="text-[11px] text-blue-400">+ R$ 600 taxa única de setup do site</p>
+            <ul class="text-xs text-slate-200 space-y-1 pt-2 border-t border-blue-500/30">
+              <li>✓ Tudo do Start incluso</li>
+              <li>✓ Até 200 imóveis cadastrados</li>
+              <li>✓ Até 5 corretores na equipe</li>
+              <li>✓ Multi-Portais (ZAP, OLX)</li>
+              <li>✓ Termos de Visita com Assinatura</li>
+              <li>✓ Vistorias Digitais de Entrada e Saída</li>
+            </ul>
+          </div>
+          <button onclick="copiarPropostaComercialWhatsApp('prime')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs py-2 rounded-xl transition">
+            Copiar Proposta WhatsApp
+          </button>
+        </div>
+
+        <!-- Pro R$ 250 -->
+        <div class="bg-[#0A0F1D] text-white rounded-2xl border-2 border-amber-400/60 p-5 flex flex-col justify-between space-y-4 shadow-lg">
+          <div class="space-y-2">
+            <span class="text-xs font-bold text-amber-400 uppercase">Enterprise</span>
+            <h4 class="text-lg font-black text-amber-400">NEXO Pro</h4>
+            <div class="text-2xl font-black text-white">R$ 250<span class="text-xs text-slate-400 font-normal">/mês</span></div>
+            <p class="text-[11px] text-slate-400">+ R$ 600 taxa única de setup do site</p>
+            <ul class="text-xs text-slate-300 space-y-1 pt-2 border-t border-slate-800">
+              <li>✓ Imóveis e Corretores ILIMITADOS</li>
+              <li>✓ Sofia IA 24h WhatsApp e Site</li>
+              <li>✓ Módulo Fiscal NFS-e Prefeitura</li>
+              <li>✓ Gestão de Locação e Repasses PIX</li>
+              <li>✓ Exportação DIMOB Receita Federal</li>
+              <li>✓ Trilha de Auditoria LGPD & RBAC</li>
+            </ul>
+          </div>
+          <button onclick="copiarPropostaComercialWhatsApp('pro')" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs py-2 rounded-xl transition">
+            Copiar Proposta WhatsApp
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-[#0A0F1D] p-4 rounded-2xl border border-slate-800 text-xs text-slate-400 text-center">
+        💡 <strong>Garantia de 4 Dias de Teste Gratuito:</strong> Novos clientes testam todo o ecossistema antes do primeiro pagamento da recorrência.
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/master.js"></script>
+</body>
+</html>

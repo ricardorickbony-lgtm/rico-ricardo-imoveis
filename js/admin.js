@@ -265,7 +265,6 @@ function exibirPainelPrincipal() {
   renderizarAbaSeguranca();
   atualizarBadgeLicencaHeader();
   verificarTravaLicenca();
-  renderizarPainelMaster();
   verificarAcoesUrlShortcut();
 }
 
@@ -354,10 +353,6 @@ function configurarNavegacaoAbas() {
         alert('🔒 Acesso Restrito pela Política de Segurança: O painel de Backup e Reset de dados é restrito à Diretoria.');
         return;
       }
-      if (targetId === 'aba-master' && !DB.usuarioTemPermissao('verComissoesFaturamento')) {
-        alert('👑 Acesso Restrito ao Painel Master NEXO: Exclusivo para Diretores e Donos do SaaS.');
-        return;
-      }
 
       // Atualiza botões
       document.querySelectorAll('.tab-admin-nav').forEach(b => {
@@ -389,7 +384,6 @@ function configurarNavegacaoAbas() {
       if (targetId === 'aba-dashboard') carregarMetricasDashboard();
       if (targetId === 'aba-portais') atualizarStatusPortaisNaTela();
       if (targetId === 'aba-seguranca') renderizarAbaSeguranca();
-      if (targetId === 'aba-master') renderizarPainelMaster();
     });
   });
 }
@@ -2642,12 +2636,6 @@ function aplicarPermissoesNaInterface() {
       navBackup.classList.remove('opacity-40');
       navBackup.title = '';
     }
-  }
-
-  const navMaster = document.getElementById('btn-tab-master');
-  if (navMaster) {
-    const podeMaster = DB.usuarioTemPermissao('verComissoesFaturamento');
-    navMaster.style.display = podeMaster ? 'inline-flex' : 'none';
   }
 
   // 4. Re-renderiza tabelas e pipelines para refletir as permissões instantaneamente
