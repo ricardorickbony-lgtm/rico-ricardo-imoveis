@@ -455,7 +455,7 @@ function renderizarGridImoveis() {
           <!-- Imagem e Badges -->
           <div class="relative h-60 sm:h-64 overflow-hidden bg-slate-900 cursor-pointer ${isVendido ? 'grayscale-[20%]' : ''}" onclick="abrirModalImovel('${im.id}')">
             <img 
-              src="${im.fotoPrincipal || im.fotos[0]}" 
+              src="${im.fotoPrincipal || (im.fotos && im.fotos[0]) || 'assets/images/logo.png'}" 
               alt="${im.titulo}" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               loading="lazy"
@@ -754,7 +754,7 @@ function abrirModalImovel(id) {
 
   // Galeria de Fotos
   const containerFotos = document.getElementById('modal-galeria-fotos');
-  const fotos = (imovel.fotos && imovel.fotos.length > 0) ? imovel.fotos : [imovel.fotoPrincipal];
+  const fotos = (imovel.fotos && imovel.fotos.length > 0) ? imovel.fotos : [imovel.fotoPrincipal || 'assets/images/logo.png'];
   if (containerFotos) {
     containerFotos.innerHTML = `
       <div class="relative h-64 sm:h-96 rounded-2xl overflow-hidden mb-3 bg-slate-900 shadow-inner">

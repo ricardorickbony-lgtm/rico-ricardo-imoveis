@@ -88,6 +88,60 @@ function initAdminSaaS() {
 }
 
 /**
+ * Configurações Globais de Modais (UX & Acessibilidade)
+ * Permite fechar qualquer modal clicando fora do conteúdo (overlay) ou pressionando tecla ESC.
+ */
+function configurarModaisGlobais() {
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.classList.remove('active');
+      }
+    });
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+        modal.classList.remove('active');
+      });
+    }
+  });
+}
+
+/**
+ * Atalhos Diretos de URL (PWA Shortcuts & Deep Links)
+ * Trata parâmetros como ?action=novo-imovel, ?action=leads, ?action=locacao, etc.
+ */
+function verificarAcoesUrlShortcut() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const action = params.get('action');
+    if (!action) return;
+
+    if (action === 'novo-imovel') {
+      const abaBtn = document.querySelector('[data-tab="aba-imoveis"]');
+      abaBtn?.click();
+      setTimeout(() => {
+        const btnNovo = document.getElementById('btn-abrir-modal-novo-imovel');
+        btnNovo?.click();
+      }, 150);
+    } else if (action === 'leads') {
+      const abaBtn = document.querySelector('[data-tab="aba-leads"]');
+      abaBtn?.click();
+    } else if (action === 'locacao') {
+      const abaBtn = document.querySelector('[data-tab="aba-locacao"]');
+      abaBtn?.click();
+    } else if (action === 'vistorias' || action === 'termos') {
+      const abaBtn = document.querySelector('[data-tab="aba-vistorias"]');
+      abaBtn?.click();
+    }
+  } catch (e) {
+    console.warn('Erro ao processar shortcut de URL:', e);
+  }
+}
+
+/**
  * 1. Autenticação, Defesa Anti-Força Bruta e Sessão Segura
  */
 const STORAGE_BRUTE_FORCE_KEY = 'ricoricardo_brute_force_lock_v1';
@@ -209,6 +263,7 @@ function exibirPainelPrincipal() {
   carregarFormularioConfig();
   atualizarStatusPortaisNaTela();
   renderizarAbaSeguranca();
+  verificarAcoesUrlShortcut();
 }
 
 function configurarEventosLogin() {
@@ -433,7 +488,7 @@ function renderizarTabelaImoveis() {
       <tr class="hover:bg-slate-50/80 transition border-b border-slate-100">
         <td class="py-3 px-4">
           <div class="w-14 h-11 rounded-lg overflow-hidden bg-slate-900 flex-shrink-0">
-            <img src="${im.fotoPrincipal || im.fotos[0]}" class="w-full h-full object-cover">
+            <img src="${im.fotoPrincipal || (im.fotos && im.fotos[0]) || 'assets/images/logo.png'}" class="w-full h-full object-cover">
           </div>
         </td>
         <td class="py-3 px-4 font-bold text-xs text-blue-600">
@@ -3338,7 +3393,7 @@ function verTermoVisitaDetalhe(id) {
         </div>
 
         <div class="text-center pt-2 text-[10px] text-slate-400 font-mono border-t border-slate-100">
-          Autenticação Digital: SHA256-${btoa(termo.codigo + termo.dataHora).substring(0, 24)} • Rico Ricardo Imóveis
+          Autenticação Digital: SHA256-${btoa(termo.codigo + termo.dataHora).substring(0, 24)} • ${config.nome || 'Rico Ricardo Imóveis'}
         </div>
       </div>
     `;
