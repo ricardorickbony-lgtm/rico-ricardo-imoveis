@@ -3339,4 +3339,159 @@ window.enviarSimulacaoWhatsApp = enviarSimulacaoWhatsApp;
 window.copiarTextoSimulacao = copiarTextoSimulacao;
 window.imprimirSimulacaoFinanciamento = imprimirSimulacaoFinanciamento;
 
+// =========================================================================
+// SUPABASE CLOUD SYNC & UI CONTROLS
+// =========================================================================
+
+function atualizarBadgeSupabaseUI() {
+  const badge = document.getElementById('supabase-status-badge');
+  const dot = document.getElementById('supabase-status-dot');
+  const texto = document.getElementById('supabase-status-texto');
+  const inputUrl = document.getElementById('cfg-supabase-url');
+  const inputKey = document.getElementById('cfg-supabase-key');
+
+  if (window.NexoSupabase) {
+    const creds = window.NexoSupabase.getCredentials();
+    if (inputUrl && creds.url && !creds.url.includes('SEU-PROJETO')) {
+      inputUrl.value = creds.url;
+    }
+    if (inputKey && creds.key && !creds.key.includes('SUA-ANON-KEY')) {
+      inputKey.value = creds.key;
+    }
+
+    if (creds.isConfigured) {
+      if (badge) {
+        badge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 flex items-center gap-2 whitespace-nowrap';
+      }
+      if (dot) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+      }
+      if (texto) {
+        texto.textContent = '🟢 Nuvem Conectada (Supabase)';
+      }
+    } else {
+      if (badge) {
+        badge.className = 'px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 border border-amber-400/30 text-amber-300 flex items-center gap-2 whitespace-nowrap';
+      }
+      if (dot) {
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+      }
+      if (texto) {
+        texto.textContent = 'Modo Local / Demo';
+      }
+    }
+  }
+}
+
+async function salvarConfiguracaoSupabase() {
+  const url = document.getElementById('cfg-supabase-url')?.value?.trim();
+  const key = document.getElementById('cfg-supabase-key')?.value?.trim();
+  const feedback = document.getElementById('supabase-feedback-box');
+
+  if (!url || !key) {
+    alert('Por favor, informe a Project URL e a Anon Public Key.');
+    return;
+  }
+
+  try {
+    window.NexoSupabase.saveCredentials(url, key);
+    atualizarBadgeSupabaseUI();
+
+    if (feedback) {
+      feedback.className = 'text-xs p-3.5 rounded-xl border bg-blue-950/80 border-blue-500/40 text-blue-200 block';
+      feedback.innerHTML = '⏳ Testando conexão com o Supabase...';
+    }
+
+    const res = await window.NexoSupabase.testConnection();
+    if (res.ok) {
+      if (feedback) {
+        feedback.className = 'text-xs p-3.5 rounded-xl border bg-emerald-950/80 border-emerald-500/40 text-emerald-200 block';
+        feedback.innerHTML = '✅ <strong>Conexão bem-sucedida!</strong> Seu CRM agora sincroniza em tempo real com o banco PostgreSQL na nuvem.';
+      }
+      mostrarToastFeedback('Supabase conectado com sucesso!', '☁️');
+      DB.sincronizarComSupabase().then(() => {
+        renderizarTabelaImoveis();
+        renderizarPipelineKanban();
+        renderizarTabelaLeads();
+      });
+    } else {
+      if (feedback) {
+        feedback.className = 'text-xs p-3.5 rounded-xl border bg-rose-950/80 border-rose-500/40 text-rose-200 block';
+        feedback.innerHTML = `⚠️ <strong>Falha na conexão:</strong> ${res.mensagem}<br><span class="text-[11px] text-slate-300">Certifique-se de ter executado o <code>schema.sql</code> no SQL Editor do Supabase.</span>`;
+      }
+    }
+  } catch (err) {
+    alert('Erro ao salvar credenciais: ' + err.message);
+  }
+}
+
+async function testarConexaoSupabase() {
+  const feedback = document.getElementById('supabase-feedback-box');
+  if (feedback) {
+    feedback.className = 'text-xs p-3.5 rounded-xl border bg-blue-950/80 border-blue-500/40 text-blue-200 block';
+    feedback.innerHTML = '⏳ Verificando status da nuvem...';
+  }
+
+  const res = await window.NexoSupabase.testConnection();
+  if (res.ok) {
+    if (feedback) {
+      feedback.className = 'text-xs p-3.5 rounded-xl border bg-emerald-950/80 border-emerald-500/40 text-emerald-200 block';
+      feedback.innerHTML = '✅ <strong>Online & Conectado!</strong> O banco de dados PostgreSQL está respondendo normalmente.';
+    }
+    mostrarToastFeedback('Conexão com o Supabase confirmada!', '✅');
+  } else {
+    if (feedback) {
+      feedback.className = 'text-xs p-3.5 rounded-xl border bg-amber-950/80 border-amber-500/40 text-amber-200 block';
+      feedback.innerHTML = `ℹ️ ${res.mensagem}`;
+    }
+  }
+}
+
+async function sincronizarTudoParaSupabase() {
+  if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) {
+    alert('Configure e conecte o Supabase primeiro antes de sincronizar.');
+    return;
+  }
+
+  const btn = document.getElementById('btn-subir-supabase');
+  if (btn) btn.disabled = true;
+
+  try {
+    mostrarToastFeedback('Enviando dados locais para o Supabase...', '⏳');
+    const res = await DB.exportarTudoParaSupabase();
+    mostrarToastFeedback(`Sucesso! ${res.imoveis} imóveis e ${res.leads} leads enviados para a nuvem.`, '🚀');
+    const feedback = document.getElementById('supabase-feedback-box');
+    if (feedback) {
+      feedback.className = 'text-xs p-3.5 rounded-xl border bg-emerald-950/80 border-emerald-500/40 text-emerald-200 block';
+      feedback.innerHTML = `🚀 <strong>Sincronização 1-Clique Concluída!</strong> ${res.imoveis} imóveis e ${res.leads} leads agora estão permanentemente salvos no PostgreSQL na nuvem.`;
+    }
+  } catch (err) {
+    alert('Erro ao sincronizar: ' + err.message);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// Inicia verificação do Supabase ao carregar
+window.addEventListener('DOMContentLoaded', () => {
+  atualizarBadgeSupabaseUI();
+  if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+    DB.sincronizarComSupabase().then(() => {
+      renderizarTabelaImoveis();
+      renderizarPipelineKanban();
+      renderizarTabelaLeads();
+    });
+  }
+});
+
+// Event listeners nos botões
+document.getElementById('btn-salvar-supabase')?.addEventListener('click', salvarConfiguracaoSupabase);
+document.getElementById('btn-testar-supabase')?.addEventListener('click', testarConexaoSupabase);
+document.getElementById('btn-subir-supabase')?.addEventListener('click', sincronizarTudoParaSupabase);
+
+window.salvarConfiguracaoSupabase = salvarConfiguracaoSupabase;
+window.testarConexaoSupabase = testarConexaoSupabase;
+window.sincronizarTudoParaSupabase = sincronizarTudoParaSupabase;
+window.atualizarBadgeSupabaseUI = atualizarBadgeSupabaseUI;
+
 

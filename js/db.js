@@ -930,6 +930,12 @@ const DB = {
     }
     imoveis.unshift(imovel);
     this.salvarImoveis(imoveis);
+
+    // Sincronização em nuvem via Supabase
+    if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+      this.enviarImovelSupabase(imovel).catch(e => console.warn('[Supabase] Falha ao sincronizar imóvel:', e));
+    }
+
     return imovel;
   },
 
@@ -939,6 +945,12 @@ const DB = {
     if (index !== -1) {
       imoveis[index] = { ...imoveis[index], ...dadosAtualizados };
       this.salvarImoveis(imoveis);
+
+      // Sincronização em nuvem via Supabase
+      if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+        this.enviarImovelSupabase(imoveis[index]).catch(e => console.warn('[Supabase] Falha ao atualizar imóvel:', e));
+      }
+
       return imoveis[index];
     }
     return null;
@@ -948,6 +960,12 @@ const DB = {
     let imoveis = this.getImoveis();
     imoveis = imoveis.filter(im => im.id !== id);
     this.salvarImoveis(imoveis);
+
+    // Remoção em nuvem via Supabase
+    if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+      this.removerImovelSupabase(id).catch(e => console.warn('[Supabase] Falha ao remover imóvel:', e));
+    }
+
     return true;
   },
 
@@ -1024,6 +1042,11 @@ const DB = {
     leads.unshift(lead);
     this.salvarLeads(leads);
 
+    // Sincronização em nuvem via Supabase
+    if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+      this.enviarLeadSupabase(lead).catch(e => console.warn('[Supabase] Falha ao sincronizar lead:', e));
+    }
+
     // Dispara webhook se configurado (n8n / CRM / Zapier)
     const config = this.getConfig();
     if (config.webhookLeads && config.webhookLeads.startsWith('http')) {
@@ -1057,6 +1080,12 @@ const DB = {
       else if (novoStatus === 'Visita Agendada') l.etapa = 'visita';
       else if (novoStatus === 'Em Atendimento') l.etapa = 'contato';
       this.salvarLeads(leads);
+
+      // Sincronização com Supabase
+      if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+        this.enviarLeadSupabase(l).catch(e => console.warn('[Supabase] Falha ao atualizar lead:', e));
+      }
+
       return l;
     }
     return null;
@@ -1073,6 +1102,12 @@ const DB = {
       else if (novaEtapa === 'contato') l.status = 'Em Atendimento';
       else l.status = 'Novo';
       this.salvarLeads(leads);
+
+      // Sincronização com Supabase
+      if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+        this.enviarLeadSupabase(l).catch(e => console.warn('[Supabase] Falha ao atualizar lead no Kanban:', e));
+      }
+
       return l;
     }
     return null;
@@ -1968,6 +2003,222 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     this.salvarLixeira([]);
     this.salvarAuditLog(AUDIT_LOG_INICIAIS);
     this.salvarPerfilAtivo('diretor');
+  },
+
+  // =========================================================================
+  // SUPABASE CLOUD DATABASE ADAPTER (PostgreSQL Multi-Dispositivos)
+  // =========================================================================
+
+  converterImovelParaSupabase(im) {
+    return {
+      id: im.id,
+      codigo: im.codigo,
+      titulo: im.titulo || '',
+      descricao: im.descricao || '',
+      tipo: im.tipo || 'casa',
+      finalidade: im.finalidade || 'venda',
+      valor: Number(im.preco || im.valor || 0),
+      preco_aluguel: Number(im.precoAluguel || 0),
+      condominio: Number(im.condominio || 0),
+      iptu: Number(im.iptu || 0),
+      area_m2: Number(im.areaUtil || im.area_m2 || 0),
+      area_total: Number(im.areaTotal || 0),
+      quartos: Number(im.quartos || 0),
+      suites: Number(im.suites || 0),
+      banheiros: Number(im.banheiros || 0),
+      vagas: Number(im.vagas || 0),
+      endereco: im.endereco || '',
+      bairro: im.bairro || '',
+      cidade: im.cidade || 'Santo André - SP',
+      status: im.status || 'disponivel',
+      destaque: Boolean(im.destaque),
+      foto_principal: im.fotoPrincipal || (im.fotos && im.fotos[0]) || '',
+      fotos: Array.isArray(im.fotos) ? im.fotos : [],
+      diferenciais: Array.isArray(im.diferenciais) ? im.diferenciais : [],
+      tags: Array.isArray(im.tags) ? im.tags : [],
+      portais_sincronizados: Array.isArray(im.portaisSincronizados) ? im.portaisSincronizados : [],
+      corretor_responsavel: im.corretorResponsavel || null,
+      proprietario_nome: im.proprietarioNome || '',
+      proprietario_telefone: im.proprietarioTelefone || '',
+      updated_at: new Date().toISOString()
+    };
+  },
+
+  converterImovelDeSupabase(row) {
+    return {
+      id: row.id,
+      codigo: row.codigo,
+      titulo: row.titulo,
+      descricao: row.descricao || '',
+      tipo: row.tipo,
+      finalidade: row.finalidade,
+      preco: Number(row.valor || 0),
+      precoAluguel: Number(row.preco_aluguel || 0),
+      condominio: Number(row.condominio || 0),
+      iptu: Number(row.iptu || 0),
+      areaUtil: Number(row.area_m2 || 0),
+      areaTotal: Number(row.area_total || 0),
+      quartos: Number(row.quartos || 0),
+      suites: Number(row.suites || 0),
+      banheiros: Number(row.banheiros || 0),
+      vagas: Number(row.vagas || 0),
+      endereco: row.endereco || '',
+      bairro: row.bairro || '',
+      cidade: row.cidade || '',
+      status: row.status || 'disponivel',
+      destaque: Boolean(row.destaque),
+      fotoPrincipal: row.foto_principal || (row.fotos && row.fotos[0]) || '',
+      fotos: Array.isArray(row.fotos) ? row.fotos : [],
+      diferenciais: Array.isArray(row.diferenciais) ? row.diferenciais : [],
+      tags: Array.isArray(row.tags) ? row.tags : [],
+      portaisSincronizados: Array.isArray(row.portais_sincronizados) ? row.portais_sincronizados : [],
+      corretorResponsavel: row.corretor_responsavel || {},
+      proprietarioNome: row.proprietario_nome || '',
+      proprietarioTelefone: row.proprietario_telefone || ''
+    };
+  },
+
+  converterLeadParaSupabase(lead) {
+    return {
+      id: lead.id,
+      nome: lead.nome || '',
+      telefone: lead.whatsapp || lead.telefone || '',
+      email: lead.email || '',
+      imovel_id: lead.imovelId || '',
+      imovel_codigo: lead.imovelCodigo || '',
+      imovel_titulo: lead.imovelTitulo || '',
+      etapa_funil: lead.etapa || 'novo',
+      corretor_atribuido: lead.corretor || '',
+      temperatura: lead.temperatura || 'morno',
+      origem: lead.origem || 'Site',
+      tipo_interesse: lead.tipoInteresse || '',
+      valor_negocio: Number(lead.valorNegocio || 0),
+      valor_proposta: lead.valorProposta || '',
+      preferencias: lead.preferencias || {},
+      updated_at: new Date().toISOString()
+    };
+  },
+
+  converterLeadDeSupabase(row) {
+    return {
+      id: row.id,
+      nome: row.nome,
+      whatsapp: row.telefone || '',
+      telefone: row.telefone || '',
+      email: row.email || '',
+      imovelCodigo: row.imovel_codigo || '',
+      imovelTitulo: row.imovel_titulo || '',
+      etapa: row.etapa_funil || 'novo',
+      corretor: row.corretor_atribuido || '',
+      temperatura: row.temperatura || 'morno',
+      origem: row.origem || 'Site',
+      tipoInteresse: row.tipo_interesse || '',
+      valorNegocio: Number(row.valor_negocio || 0),
+      valorProposta: row.valor_proposta || '',
+      preferencias: row.preferencias || {}
+    };
+  },
+
+  async enviarImovelSupabase(imovel) {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) return;
+    const dados = this.converterImovelParaSupabase(imovel);
+    const { error } = await window.NexoSupabase.client.from('imoveis').upsert(dados);
+    if (error) console.warn('[Supabase] Erro ao sincronizar imóvel:', error);
+  },
+
+  async removerImovelSupabase(id) {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) return;
+    const { error } = await window.NexoSupabase.client.from('imoveis').delete().eq('id', id);
+    if (error) console.warn('[Supabase] Erro ao remover imóvel:', error);
+  },
+
+  async enviarLeadSupabase(lead) {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) return;
+    const dados = this.converterLeadParaSupabase(lead);
+    const { error } = await window.NexoSupabase.client.from('leads').upsert(dados);
+    if (error) console.warn('[Supabase] Erro ao sincronizar lead:', error);
+  },
+
+  async removerLeadSupabase(id) {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) return;
+    const { error } = await window.NexoSupabase.client.from('leads').delete().eq('id', id);
+    if (error) console.warn('[Supabase] Erro ao remover lead:', error);
+  },
+
+  // Sincronização em background da Nuvem para o Navegador
+  async sincronizarComSupabase() {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) {
+      return { ok: false, motivo: 'Supabase não configurado' };
+    }
+
+    try {
+      console.log('[NEXO CRM / Supabase] 🔄 Verificando atualizações na nuvem...');
+
+      // 1. Sincroniza Imóveis
+      const { data: imoveisCloud, error: errImob } = await window.NexoSupabase.client
+        .from('imoveis')
+        .select('*');
+
+      if (!errImob && imoveisCloud && imoveisCloud.length > 0) {
+        const imoveisMapeados = imoveisCloud.map(this.converterImovelDeSupabase.bind(this));
+        localStorage.setItem(STORAGE_IMOVEIS_KEY, JSON.stringify(imoveisMapeados));
+        window.dispatchEvent(new CustomEvent('imob_dados_atualizados', { detail: imoveisMapeados }));
+        console.log(`[Supabase] ✅ ${imoveisMapeados.length} imóveis sincronizados da nuvem.`);
+      }
+
+      // 2. Sincroniza Leads
+      const { data: leadsCloud, error: errLeads } = await window.NexoSupabase.client
+        .from('leads')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!errLeads && leadsCloud && leadsCloud.length > 0) {
+        const leadsMapeados = leadsCloud.map(this.converterLeadDeSupabase.bind(this));
+        localStorage.setItem(STORAGE_LEADS_KEY, JSON.stringify(leadsMapeados));
+        window.dispatchEvent(new CustomEvent('imob_leads_atualizados', { detail: leadsMapeados }));
+        console.log(`[Supabase] ✅ ${leadsMapeados.length} leads sincronizados da nuvem.`);
+      }
+
+      return { ok: true };
+    } catch (err) {
+      console.warn('[Supabase] Falha durante sincronização:', err);
+      return { ok: false, erro: err.message };
+    }
+  },
+
+  // Exporta todo o catálogo e leads locais para o Supabase (1-Clique)
+  async exportarTudoParaSupabase() {
+    if (!window.NexoSupabase || !window.NexoSupabase.isConfigured()) {
+      throw new Error('Supabase ainda não configurado. Insira a URL e Chave Anon primeiro.');
+    }
+
+    const imoveis = this.getImoveis().map(this.converterImovelParaSupabase.bind(this));
+    const leads = this.getLeads().map(this.converterLeadParaSupabase.bind(this));
+    const corretores = this.getCorretores();
+
+    let sucessoImoveis = 0;
+    let sucessoLeads = 0;
+
+    if (imoveis.length > 0) {
+      const { error } = await window.NexoSupabase.client.from('imoveis').upsert(imoveis);
+      if (error) throw new Error('Erro ao enviar imóveis: ' + error.message);
+      sucessoImoveis = imoveis.length;
+    }
+
+    if (leads.length > 0) {
+      const { error } = await window.NexoSupabase.client.from('leads').upsert(leads);
+      if (error) throw new Error('Erro ao enviar leads: ' + error.message);
+      sucessoLeads = leads.length;
+    }
+
+    if (corretores && corretores.length > 0) {
+      await window.NexoSupabase.client.from('corretores').upsert(corretores);
+    }
+
+    return {
+      imoveis: sucessoImoveis,
+      leads: sucessoLeads
+    };
   }
 };
 

@@ -1061,6 +1061,52 @@
           <p class="text-xs text-slate-500">Exporte backups ou resete o catálogo para apresentar a um novo cliente</p>
         </div>
 
+        <!-- Conexão Supabase Cloud PostgreSQL (Sincronização Multi-Dispositivos) -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950 text-white p-6 sm:p-8 rounded-3xl border border-blue-500/30 shadow-xl space-y-6">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-5">
+            <div>
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[11px] font-bold uppercase tracking-wider mb-2 border border-blue-400/30">
+                ⚡ Banco de Dados em Nuvem (PostgreSQL)
+              </div>
+              <h3 class="text-xl font-extrabold text-white">Sincronização Multi-Dispositivos via Supabase</h3>
+              <p class="text-xs text-slate-300 mt-1">Conecte seu projeto Supabase para sincronizar imóveis, corretores e leads em tempo real entre celulares e computadores.</p>
+            </div>
+            <div id="supabase-status-badge" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500/20 border border-amber-400/30 text-amber-300 flex items-center gap-2 whitespace-nowrap">
+              <span id="supabase-status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
+              <span id="supabase-status-texto">Modo Local / Demo</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Project URL (Supabase)</label>
+              <input type="text" id="cfg-supabase-url" placeholder="https://xyzcompany.supabase.co" class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <span class="text-[10px] text-slate-400 mt-1 block">Obtenha em: Supabase &gt; Project Settings &gt; API &gt; Project URL</span>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-300 uppercase mb-1">Anon Public API Key</label>
+              <input type="password" id="cfg-supabase-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." class="w-full bg-slate-950/80 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <span class="text-[10px] text-slate-400 mt-1 block">Obtenha em: Supabase &gt; Project Settings &gt; API &gt; Project API Keys (anon public)</span>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+            <div class="flex items-center gap-2 flex-wrap">
+              <button type="button" id="btn-salvar-supabase" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2">
+                <span>💾</span> Salvar &amp; Conectar Nuvem
+              </button>
+              <button type="button" id="btn-testar-supabase" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl transition border border-slate-700 flex items-center gap-2">
+                <span>🔌</span> Testar Conexão
+              </button>
+            </div>
+            <button type="button" id="btn-subir-supabase" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition shadow flex items-center gap-2">
+              <span>🚀</span> Enviar Dados Locais para o Supabase (1-Clique)
+            </button>
+          </div>
+          
+          <div id="supabase-feedback-box" class="hidden text-xs p-3.5 rounded-xl border"></div>
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
             <h3 class="font-bold text-slate-900 text-base">Exportar Backup JSON</h3>
@@ -2468,6 +2514,10 @@
     <span id="toast-icone">✅</span>
     <span id="toast-mensagem">Atualização realizada com sucesso!</span>
   </div>
+
+  <!-- Supabase Cloud DB Client & Config (CDN Oficial) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-config.js"></script>
 
   <!-- Scripts -->
   <script src="js/db.js"></script>
