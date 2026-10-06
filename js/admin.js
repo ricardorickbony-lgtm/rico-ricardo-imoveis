@@ -575,6 +575,15 @@ function carregarMetricasDashboard() {
           ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-rose-100 text-rose-700">🔥 Quente</span>'
           : (l.temperatura === 'morno' ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-100 text-amber-700">⚡ Morno</span>' : '<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-600">❄️ Frio</span>');
 
+        const etapaNomeMap = {
+          'novo': 'Novo Lead',
+          'contato': 'Em Atendimento',
+          'visita': 'Visita Agendada',
+          'proposta': 'Em Proposta',
+          'fechado': 'Fechado'
+        };
+        const statusTexto = l.status || etapaNomeMap[l.etapa] || (l.etapa ? (l.etapa.charAt(0).toUpperCase() + l.etapa.slice(1)) : 'Em Atendimento');
+
         return `
           <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-200/80">
             <div>
@@ -582,7 +591,7 @@ function carregarMetricasDashboard() {
                 <span class="font-bold text-slate-900 text-sm">${l.nome}</span>
                 ${scoreBadge}
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
-                  ${l.status}
+                  ${statusTexto}
                 </span>
               </div>
               <p class="text-xs text-slate-500 mt-0.5">${l.imovelTitulo} (${l.tipoInteresse})</p>
