@@ -1,0 +1,217 @@
+{
+  "name": "NEXO CRM — Automação Webhook Asaas & Liberação de Sinal SaaS",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "asaas-nexo",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook-asaas",
+      "name": "Webhook Asaas Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "webhookId": "asaas-nexo-webhook-prod"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Webhook recebido com sucesso pelo NEXO SaaS Engine\"\n}",
+        "options": {}
+      },
+      "id": "node-respond-webhook",
+      "name": "Responder HTTP 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        440,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.event }}",
+                    "rightValue": "PAYMENT_RECEIVED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.event }}",
+                    "rightValue": "PAYMENT_CONFIRMED",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-switch-evento",
+      "name": "Filtrar Pagamento Aprovado",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extrai e normaliza os dados do pagamento do Asaas\nconst body = $input.first().json.body || {};\nconst payment = body.payment || {};\nconst externalRef = payment.externalReference || '';\n\nconst partes = externalRef.split(':');\nconst clienteId = partes[0] || payment.customer || 'tenant_desconhecido';\nconst tipo = partes[1] || (Number(payment.value) >= 600 ? 'setup' : 'mensalidade');\n\n// Calcula a nova data de vencimento (+30 dias)\nconst agora = new Date();\nconst novaDataVencimento = new Date(agora.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString();\n\nreturn [\n  {\n    json: {\n      clienteId: clienteId,\n      paymentId: payment.id,\n      valor: Number(payment.value || 0),\n      tipo: tipo,\n      formaPagamento: payment.billingType || 'PIX',\n      statusSinal: 'active',\n      dataVencimento: novaDataVencimento,\n      confirmadoEm: agora.toISOString(),\n      mensagemWhatsApp: `🎉 *PAGAMENTO RECEBIDO — NEXO CRM SaaS* 🏢\\n\\n💰 *Valor:* R$ ${Number(payment.value || 0).toFixed(2)}\\n⚡ *Forma:* ${payment.billingType || 'PIX'}\\n👤 *ID Tenant:* ${clienteId}\\n🏷️ *Tipo:* ${tipo.toUpperCase()}\\n📅 *Novo Vencimento:* +30 dias (${novaDataVencimento.split('T')[0]})\\n\\n🟢 *Sinal de acesso da imobiliária liberado com sucesso no piloto automático!*`\n    }\n  }\n];"
+      },
+      "id": "node-code-processar",
+      "name": "Calcular Vencimento & Sinal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        900,
+        280
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://prxctstfinqkrnwavbbi.supabase.co/rest/v1/licencas_saas",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByeGN0c3RmaW5xa3Jud2F2YmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNTgxNzAsImV4cCI6MjEwNjczNDE3MH0.g1P4dbkx99mMazOEuCA7DQB-SKnS69UI0NLfhSf5GZQ"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByeGN0c3RmaW5xa3Jud2F2YmJpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTExNTgxNzAsImV4cCI6MjEwNjczNDE3MH0.g1P4dbkx99mMazOEuCA7DQB-SKnS69UI0NLfhSf5GZQ"
+            },
+            {
+              "name": "Prefer",
+              "value": "resolution=merge-duplicates"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "tenant_id",
+              "value": "={{ $json.clienteId }}"
+            },
+            {
+              "name": "status",
+              "value": "active"
+            },
+            {
+              "name": "data_vencimento",
+              "value": "={{ $json.dataVencimento }}"
+            },
+            {
+              "name": "ultimo_pagamento_em",
+              "value": "={{ $json.confirmadoEm }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "node-supabase-update",
+      "name": "Atualizar Sinal no Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        280
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook Asaas Trigger": {
+      "main": [
+        [
+          {
+            "node": "Responder HTTP 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Responder HTTP 200": {
+      "main": [
+        [
+          {
+            "node": "Filtrar Pagamento Aprovado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filtrar Pagamento Aprovado": {
+      "main": [
+        [
+          {
+            "node": "Calcular Vencimento & Sinal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calcular Vencimento & Sinal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calcular Vencimento & Sinal": {
+      "main": [
+        [
+          {
+            "node": "Atualizar Sinal no Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

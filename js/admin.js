@@ -3902,6 +3902,8 @@ function atualizarBadgeLicencaHeader() {
   }
 }
 
+let _ultimoEstadoBloqueio = null;
+
 function verificarTravaLicenca() {
   const statusInfo = DB.verificarStatusLicenca();
   const telaBloqueio = document.getElementById('tela-bloqueio-sinal');
@@ -3909,14 +3911,27 @@ function verificarTravaLicenca() {
 
   if (statusInfo.isBloqueado) {
     telaBloqueio.classList.remove('hidden');
+    _ultimoEstadoBloqueio = true;
     const valorEl = document.getElementById('tela-bloqueio-valor');
     if (valorEl) {
       valorEl.textContent = `R$ ${statusInfo.plano.valorMensal.toFixed(2)}`;
     }
   } else {
     telaBloqueio.classList.add('hidden');
+    if (_ultimoEstadoBloqueio === true) {
+      _ultimoEstadoBloqueio = false;
+      mostrarToastFeedback('🎉 Pagamento Confirmado! Sinal restabelecido com sucesso.', '⚡');
+    }
   }
 }
+
+// Sincronização e detecção automática de desbloqueio em background
+window.addEventListener('focus', () => {
+  verificarTravaLicenca();
+});
+setInterval(() => {
+  verificarTravaLicenca();
+}, 20000);
 
 function abrirModalStatusLicenca() {
   const statusInfo = DB.verificarStatusLicenca();

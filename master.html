@@ -163,6 +163,10 @@
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
+          <button onclick="abrirModalConfigAsaas()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold text-xs px-3.5 py-2 rounded-xl transition flex items-center gap-1.5 shadow-xs">
+            <span id="header-asaas-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>⚡ Gateway Asaas (PIX)</span>
+          </button>
           <button onclick="abrirModalNovoClienteMaster()" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5">
             <span>➕</span> <span>Nova Imobiliária</span>
           </button>
@@ -533,9 +537,14 @@
       <button onclick="fecharModalCobrancaPixMaster()" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
 
       <div>
-        <span class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center justify-center text-2xl font-black mb-2 shadow-xs">
-          ⚡
-        </span>
+        <div class="flex items-center justify-center gap-2 mb-1.5 flex-wrap">
+          <span class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 inline-flex items-center justify-center text-xl font-black shadow-xs">
+            ⚡
+          </span>
+          <span id="modal-pix-asaas-badge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-500/20 text-blue-300 border border-blue-500/30">
+            <span>⚡</span> <span>Gateway Asaas Ativo</span>
+          </span>
+        </div>
         <h3 class="text-xl font-black text-white" id="modal-pix-titulo">Cobrança PIX NEXO CRM</h3>
         <p class="text-xs text-slate-400 mt-0.5" id="modal-pix-descricao">Mensalidade recorrente do plano contratado</p>
       </div>
@@ -567,18 +576,33 @@
           </div>
         </div>
 
-        <div class="p-3 bg-[#0A0F1D] rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between">
-          <span class="text-slate-400">Chave PIX Oficial:</span>
-          <span class="font-mono font-bold text-amber-400">ricardo.nexo@pix.com.br</span>
+        <div class="p-3 bg-[#0A0F1D] rounded-xl border border-slate-800 text-xs text-slate-300 flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <span class="text-slate-400 block text-[10px] uppercase font-bold">Beneficiário / Gateway:</span>
+            <span class="font-mono font-bold text-amber-400" id="modal-pix-chave-texto">Asaas PIX Gateway</span>
+          </div>
+          <a id="modal-pix-link-fatura" href="#" target="_blank" class="hidden text-xs text-blue-400 hover:text-blue-300 underline font-bold inline-flex items-center gap-1">
+            <span>🔗 Fatura Asaas</span>
+          </a>
         </div>
       </div>
 
-      <!-- Botão Enviar Cobrança no WhatsApp -->
+      <!-- Botões de Ação Rápida & Automação -->
       <div class="pt-2 border-t border-slate-800 space-y-2">
         <button id="btn-enviar-pix-whatsapp" onclick="enviarCobrancaWhatsAppAtual()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.669-.699c.969.585 1.961.895 2.791.895 3.181 0 5.767-2.587 5.767-5.766.001-3.187-2.578-5.781-5.767-5.781zm9.969 5.766c0 5.505-4.495 10-10 10-1.776 0-3.441-.471-4.887-1.293l-5.113 1.355 1.373-5.006c-.896-1.488-1.413-3.23-1.413-5.056 0-5.505 4.495-10 10-10 5.505 0 10 4.495 10 10z"/></svg>
           <span>Encaminhar Cobrança Formatada no WhatsApp do Cliente</span>
         </button>
+
+        <div class="grid grid-cols-2 gap-2">
+          <button type="button" onclick="verificarPagamentoAsaasAtual()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>🔄 Checar Status</span>
+          </button>
+          <button type="button" onclick="simularPagamentoAsaasAtual()" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5" title="Simula webhook de PIX aprovado para testar desbloqueio imediato">
+            <span>🧪 Simular Pago</span>
+          </button>
+        </div>
+
         <button onclick="fecharModalCobrancaPixMaster()" class="w-full text-slate-400 hover:text-white text-xs font-semibold py-1 transition">
           Fechar
         </button>
@@ -672,8 +696,108 @@
     </div>
   </div>
 
+  <!-- ========================================================================= -->
+  <!-- MODAL: CONFIGURAÇÃO DE INTEGRAÇÃO ASAAS & WEBHOOK AUTOMÁTICO              -->
+  <!-- ========================================================================= -->
+  <div id="modal-config-asaas" class="modal-overlay">
+    <div class="modal-content relative !max-w-2xl p-6 sm:p-8 space-y-5">
+      <button onclick="fecharModalConfigAsaas()" class="absolute top-4 right-4 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-black bg-blue-500/20 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+            Gateway de Pagamento SaaS
+          </span>
+          <span class="text-xs text-slate-400 font-mono">AUTOMAÇÃO COMPLETA</span>
+        </div>
+        <h3 class="text-xl font-black text-white mt-1">Configuração do Asaas & Webhook</h3>
+        <p class="text-xs text-slate-400 mt-0.5">Conecte sua conta do Asaas para emissão de PIX dinâmico com QR Code oficial e liberação automática de sinal via Webhook.</p>
+      </div>
+
+      <!-- Card de Status da Conexão e Saldo -->
+      <div id="asaas-status-card" class="bg-[#0A0F1D] border border-slate-800 p-4 rounded-2xl flex items-center justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <div id="asaas-status-icon" class="w-10 h-10 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 flex items-center justify-center text-xl">
+            ⚡
+          </div>
+          <div>
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <span id="asaas-status-badge">Modo Simulação & Testes</span>
+              <span id="asaas-env-tag" class="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">Sandbox</span>
+            </div>
+            <p class="text-[11px] text-slate-400 mt-0.5" id="asaas-status-mensagem">Pronto para gerar cobranças e simular webhook em tempo real.</p>
+          </div>
+        </div>
+        <div class="text-right">
+          <span class="text-[10px] text-slate-400 block uppercase font-bold">Saldo Asaas</span>
+          <span class="text-sm font-black text-emerald-400" id="asaas-saldo-display">R$ --,--</span>
+        </div>
+      </div>
+
+      <!-- Formulário de Credenciais -->
+      <form id="form-config-asaas" onsubmit="salvarConfigAsaasSubmit(event)" class="space-y-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="sm:col-span-1">
+            <label class="block font-bold text-slate-300 uppercase mb-1">Ambiente</label>
+            <select id="input-asaas-ambiente" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-white focus:border-amber-400 outline-none">
+              <option value="sandbox">🟡 Sandbox (Testes Gratuitos)</option>
+              <option value="producao">🟢 Produção (Chave Real)</option>
+            </select>
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block font-bold text-slate-300 uppercase mb-1">Chave de API do Asaas (API Key)</label>
+            <input type="password" id="input-asaas-key" placeholder="$aact_YTU5YTE0M2M6N2Zm..." class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:border-amber-400 outline-none">
+            <span class="text-[10px] text-slate-500 mt-0.5 block">Obtenha no painel Asaas em: Configurações de Conta &gt; Integrações &gt; Chaves de API.</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-300 uppercase mb-1">Token Secreto de Validação do Webhook (Opcional)</label>
+          <input type="text" id="input-asaas-webhook-secret" placeholder="nexo_sec_2026" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-white focus:border-amber-400 outline-none">
+        </div>
+
+        <div class="p-4 bg-slate-900/60 rounded-2xl border border-slate-800 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white uppercase text-[11px]">Endereço do Webhook para Produção (n8n ou Supabase)</span>
+            <span class="text-[10px] text-emerald-400 font-mono">POST HTTP</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="input-asaas-webhook-url" readonly value="https://prxctstfinqkrnwavbbi.supabase.co/functions/v1/asaas-webhook" class="w-full bg-[#0A0F1D] border border-slate-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-300 truncate select-all">
+            <button type="button" onclick="copiarUrlWebhookAsaas()" class="bg-slate-800 hover:bg-slate-700 text-white font-bold px-3 py-2 rounded-xl transition shrink-0">
+              Copiar
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">
+            💡 No painel do Asaas (<em>Configurações &gt; Integrações &gt; Webhooks</em>), ative as notificações e marque os eventos: <strong>Pagamento Recebido (PAYMENT_RECEIVED)</strong> e <strong>Pagamento Confirmado (PAYMENT_CONFIRMED)</strong>.
+          </p>
+        </div>
+
+        <div class="pt-2 border-t border-slate-800 flex items-center justify-between gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="testarConexaoAsaasClick()" class="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 border border-blue-500/30 font-bold px-3.5 py-2 rounded-xl transition">
+              🔍 Testar Conexão
+            </button>
+            <button type="button" onclick="simularWebhookRecebidoClick()" class="bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 font-bold px-3.5 py-2 rounded-xl transition">
+              🧪 Simular Pagamento PIX (Teste)
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="fecharModalConfigAsaas()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl transition">
+              Cancelar
+            </button>
+            <button type="submit" class="bg-amber-400 hover:bg-amber-300 text-slate-950 font-black px-5 py-2 rounded-xl transition shadow">
+              Salvar Credenciais
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Scripts -->
   <script src="js/db.js"></script>
+  <script src="js/asaas-service.js"></script>
   <script src="js/master.js"></script>
 </body>
 </html>

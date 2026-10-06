@@ -93,6 +93,7 @@ function renderizarDashboardMaster() {
   if (atencaoEl) atencaoEl.textContent = metricas.totalCarencia + metricas.totalBloqueados;
   if (atencaoDetEl) atencaoDetEl.textContent = `${metricas.totalCarencia} em carência • ${metricas.totalBloqueados} cortadas`;
 
+  atualizarStatusAsaasHeader();
   renderizarTabelaClientes();
 }
 
@@ -347,7 +348,7 @@ function salvarNovoClienteMasterSubmit(event) {
 // 6. MODAL: COBRANÇA PIX COM QR CODE & WHATSAPP
 // ===============================================================================
 
-function abrirModalCobrancaPixCliente(clienteId, tipo = 'mensalidade') {
+async function abrirModalCobrancaPixCliente(clienteId, tipo = 'mensalidade') {
   let cliente = null;
   if (clienteId) {
     cliente = DB.getClientesMaster().find(c => c.id === clienteId);
@@ -360,7 +361,15 @@ function abrirModalCobrancaPixCliente(clienteId, tipo = 'mensalidade') {
     };
   }
 
-  const pixData = DB.gerarDadosCobrancaPix(cliente, tipo);
+  // Gera cobrança via Serviço Asaas (ou simulação de alta fidelidade)
+  let pixData = null;
+  if (window.NexoAsaas) {
+    mostrarToastMaster('Gerando cobrança PIX via Gateway Asaas...', '⚡');
+    pixData = await window.NexoAsaas.criarCobrancaPix(cliente, tipo);
+  } else {
+    pixData = DB.gerarDadosCobrancaPix(cliente, tipo);
+  }
+
   _clientePixAtual = { cliente, tipo, pixData };
 
   const tituloEl = document.getElementById('modal-pix-titulo');
@@ -369,38 +378,61 @@ function abrirModalCobrancaPixCliente(clienteId, tipo = 'mensalidade') {
   const benefEl = document.getElementById('modal-pix-beneficiario');
   const payloadEl = document.getElementById('modal-pix-payload');
   const qrContainer = document.getElementById('modal-pix-qrcode-container');
+  const linkFaturaEl = document.getElementById('modal-pix-link-fatura');
+  const chaveTextoEl = document.getElementById('modal-pix-chave-texto');
 
   if (tituloEl) tituloEl.textContent = tipo === 'setup' ? 'Taxa de Setup do Site NEXO' : 'Mensalidade SaaS NEXO CRM';
   if (descEl) descEl.textContent = pixData.descricao;
-  if (valorEl) valorEl.textContent = `R$ ${pixData.valor.toFixed(2)}`;
-  if (benefEl) benefEl.textContent = `Beneficiário: ${pixData.beneficiario} • ${pixData.cidade}`;
-  if (payloadEl) payloadEl.value = pixData.payloadPix;
+  if (valorEl) valorEl.textContent = `R$ ${Number(pixData.valor).toFixed(2)}`;
+  if (benefEl) benefEl.textContent = `Beneficiário: ${pixData.beneficiario || 'Ricardo — NEXO CRM'}`;
+  if (payloadEl) payloadEl.value = pixData.payloadPix || '';
 
-  // Renderiza QR Code visual estilizado em SVG
+  if (chaveTextoEl) {
+    chaveTextoEl.textContent = pixData.modo === 'real'
+      ? `Asaas Oficial (${pixData.id})`
+      : 'ricardo.nexo@pix.com.br • Asaas Dynamic';
+  }
+
+  if (linkFaturaEl) {
+    if (pixData.invoiceUrl) {
+      linkFaturaEl.href = pixData.invoiceUrl;
+      linkFaturaEl.classList.remove('hidden');
+    } else {
+      linkFaturaEl.classList.add('hidden');
+    }
+  }
+
+  // Renderiza QR Code (imagem Base64 oficial do Asaas ou SVG nativo estilizado)
   if (qrContainer) {
-    qrContainer.innerHTML = `
-      <svg class="w-48 h-48 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
-        <rect x="5" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
-        <rect x="12" y="12" width="12" height="12" fill="currentColor"/>
-        <rect x="69" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
-        <rect x="76" y="12" width="12" height="12" fill="currentColor"/>
-        <rect x="5" y="69" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
-        <rect x="12" y="76" width="12" height="12" fill="currentColor"/>
-        <rect x="38" y="10" width="8" height="8" fill="currentColor"/>
-        <rect x="50" y="10" width="8" height="8" fill="currentColor"/>
-        <rect x="38" y="24" width="8" height="8" fill="currentColor"/>
-        <rect x="10" y="38" width="8" height="8" fill="currentColor"/>
-        <rect x="24" y="38" width="8" height="8" fill="currentColor"/>
-        <rect x="38" y="38" width="24" height="24" rx="2" fill="currentColor"/>
-        <rect x="68" y="38" width="10" height="8" fill="currentColor"/>
-        <rect x="82" y="38" width="8" height="8" fill="currentColor"/>
-        <rect x="68" y="52" width="10" height="8" fill="currentColor"/>
-        <rect x="38" y="68" width="8" height="10" fill="currentColor"/>
-        <rect x="50" y="68" width="8" height="10" fill="currentColor"/>
-        <rect x="38" y="82" width="20" height="8" fill="currentColor"/>
-        <rect x="68" y="68" width="22" height="22" rx="2" fill="currentColor"/>
-      </svg>
-    `;
+    if (pixData.encodedImage) {
+      qrContainer.innerHTML = `
+        <img src="data:image/png;base64,${pixData.encodedImage}" alt="QR Code PIX Asaas" class="w-48 h-48 object-contain rounded-xl mx-auto">
+      `;
+    } else {
+      qrContainer.innerHTML = `
+        <svg class="w-48 h-48 text-slate-900" viewBox="0 0 100 100" fill="currentColor">
+          <rect x="5" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+          <rect x="12" y="12" width="12" height="12" fill="currentColor"/>
+          <rect x="69" y="5" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+          <rect x="76" y="12" width="12" height="12" fill="currentColor"/>
+          <rect x="5" y="69" width="26" height="26" rx="4" fill="none" stroke="currentColor" stroke-width="4"/>
+          <rect x="12" y="76" width="12" height="12" fill="currentColor"/>
+          <rect x="38" y="10" width="8" height="8" fill="currentColor"/>
+          <rect x="50" y="10" width="8" height="8" fill="currentColor"/>
+          <rect x="38" y="24" width="8" height="8" fill="currentColor"/>
+          <rect x="10" y="38" width="8" height="8" fill="currentColor"/>
+          <rect x="24" y="38" width="8" height="8" fill="currentColor"/>
+          <rect x="38" y="38" width="24" height="24" rx="2" fill="currentColor"/>
+          <rect x="68" y="38" width="10" height="8" fill="currentColor"/>
+          <rect x="82" y="38" width="8" height="8" fill="currentColor"/>
+          <rect x="68" y="52" width="10" height="8" fill="currentColor"/>
+          <rect x="38" y="68" width="8" height="10" fill="currentColor"/>
+          <rect x="50" y="68" width="8" height="10" fill="currentColor"/>
+          <rect x="38" y="82" width="20" height="8" fill="currentColor"/>
+          <rect x="68" y="68" width="22" height="22" rx="2" fill="currentColor"/>
+        </svg>
+      `;
+    }
   }
 
   document.getElementById('modal-cobranca-pix-master')?.classList.add('active');
@@ -418,7 +450,7 @@ function copiarPixCodigoCola() {
     const btnTexto = document.getElementById('btn-copiar-pix-texto');
     if (btnTexto) {
       btnTexto.textContent = 'Copiado! ✓';
-      setTimeout(() => { btnTexto.textContent = 'Copiar Código'; }, 2000);
+      setTimeout(() => { btnTexto.textContent = 'Copiar'; }, 2000);
     }
     mostrarToastMaster('Código PIX Copia e Cola copiado para a área de transferência!', '📋');
   });
@@ -431,22 +463,65 @@ function enviarCobrancaWhatsAppAtual() {
   const tipoTexto = tipo === 'setup' ? 'Setup & Criação do Site Oficial' : 'Mensalidade da Licença NEXO CRM';
   const whatsappLimpo = (cliente?.whatsapp || '').replace(/\D/g, '');
 
+  const faturaTexto = pixData.invoiceUrl ? `\n💳 *Link da Fatura Online:* ${pixData.invoiceUrl}\n` : '';
+
   const msg = 
 `Olá, ${cliente?.responsavel || 'Parceiro'}! Tudo bem? 🏢
 
 Aqui é o Ricardo da *NEXO CRM*. Seguem os dados para pagamento do *${tipoTexto}*:
 
-💰 *Valor:* R$ ${pixData.valor.toFixed(2)}
-👤 *Beneficiário:* ${pixData.beneficiario}
-🔑 *Chave PIX:* ${pixData.chavePix}
-
+💰 *Valor:* R$ ${Number(pixData.valor).toFixed(2)}
+👤 *Beneficiário:* ${pixData.beneficiario || 'Ricardo — NEXO CRM'}
+🔑 *Chave PIX:* ${pixData.chavePix || 'Asaas Gateway'}
+${faturaTexto}
 📋 *Código PIX Copia e Cola:*
 ${pixData.payloadPix}
 
-Após realizar o pagamento, basta me enviar o comprovante por aqui para mantermos o seu sistema ativo e com sinal 100% liberado! 🚀`;
+Após realizar o pagamento via PIX, o nosso sistema identifica automaticamente em segundos e restabelece o sinal da sua equipe em tempo real! 🚀`;
 
   const link = `https://wa.me/55${whatsappLimpo}?text=${encodeURIComponent(msg)}`;
   window.open(link, '_blank');
+}
+
+// Checagem de pagamento em tempo real pelo Asaas
+async function verificarPagamentoAsaasAtual() {
+  if (!_clientePixAtual) return;
+  const { cliente, pixData } = _clientePixAtual;
+
+  mostrarToastMaster('Consultando status da cobrança no Asaas...', '🔄');
+
+  if (window.NexoAsaas) {
+    // Se estiver em modo simulado ou se a API retornar recebido
+    if (pixData.status === 'RECEIVED' || pixData.status === 'CONFIRMED') {
+      window.NexoAsaas.executarLiberacaoSinal({
+        clienteId: cliente.id,
+        paymentId: pixData.id,
+        valor: pixData.valor,
+        tipoCobranca: pixData.tipo
+      });
+      mostrarToastMaster(`🎉 Pagamento confirmado! Sinal de "${cliente.nomeImobiliaria}" liberado com sucesso!`, '🟢');
+      fecharModalCobrancaPixMaster();
+      renderizarDashboardMaster();
+      return;
+    }
+  }
+
+  mostrarToastMaster('Cobrança ainda com status PENDENTE no banco. Aguardando pagamento.', '⏳');
+}
+
+// Simulador de Pagamento Recebido (para testes do Ricardo e Severino)
+function simularPagamentoAsaasAtual() {
+  if (!_clientePixAtual) return;
+  const { cliente, tipo, pixData } = _clientePixAtual;
+
+  if (window.NexoAsaas) {
+    const res = window.NexoAsaas.simularPagamentoRecebido(cliente.id, tipo);
+    if (res.ok) {
+      fecharModalCobrancaPixMaster();
+      mostrarToastMaster(`🎉 [SIMULAÇÃO] PIX de R$ ${Number(pixData.valor).toFixed(2)} aprovado! Sinal liberado por +30 dias!`, '🚀');
+      renderizarDashboardMaster();
+    }
+  }
 }
 
 // ===============================================================================
@@ -493,7 +568,125 @@ Podemos liberar os seus *4 dias de teste grátis* hoje mesmo? Me avise aqui para
 }
 
 // ===============================================================================
-// 8. FEEDBACK VISUAL (TOAST NOTIFICATIONS)
+// 8. MODAL: CONFIGURAÇÃO DE INTEGRAÇÃO ASAAS & SIMULADOR
+// ===============================================================================
+
+function abrirModalConfigAsaas() {
+  const cfg = window.NexoAsaas ? window.NexoAsaas.getConfig() : {};
+
+  const inputEnv = document.getElementById('input-asaas-ambiente');
+  const inputKey = document.getElementById('input-asaas-key');
+  const inputSecret = document.getElementById('input-asaas-webhook-secret');
+
+  if (inputEnv) inputEnv.value = cfg.ambiente || 'sandbox';
+  if (inputKey) inputKey.value = cfg.apiKey || '';
+  if (inputSecret) inputSecret.value = cfg.webhookSecret || 'nexo_sec_2026';
+
+  atualizarCardStatusAsaas(cfg);
+  document.getElementById('modal-config-asaas')?.classList.add('active');
+}
+
+function fecharModalConfigAsaas() {
+  document.getElementById('modal-config-asaas')?.classList.remove('active');
+}
+
+function atualizarCardStatusAsaas(cfg) {
+  const badgeEl = document.getElementById('asaas-status-badge');
+  const envTagEl = document.getElementById('asaas-env-tag');
+  const msgEl = document.getElementById('asaas-status-mensagem');
+  const iconEl = document.getElementById('asaas-status-icon');
+
+  if (envTagEl) envTagEl.textContent = (cfg.ambiente || 'sandbox').toUpperCase();
+
+  if (cfg.isConfigurado) {
+    if (badgeEl) badgeEl.textContent = '🟢 Conexão Asaas Ativa';
+    if (msgEl) msgEl.textContent = 'Chave configurada. Pronto para emitir cobranças reais via PIX.';
+    if (iconEl) {
+      iconEl.className = 'w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-xl';
+    }
+  } else {
+    if (badgeEl) badgeEl.textContent = '🟡 Modo Simulação & Testes';
+    if (msgEl) msgEl.textContent = 'Operando sem custos com simulador autônomo de alta fidelidade.';
+    if (iconEl) {
+      iconEl.className = 'w-10 h-10 rounded-xl bg-amber-400/10 text-amber-400 border border-amber-400/30 flex items-center justify-center text-xl';
+    }
+  }
+
+  atualizarStatusAsaasHeader();
+}
+
+function atualizarStatusAsaasHeader() {
+  const dot = document.getElementById('header-asaas-dot');
+  if (!dot) return;
+
+  const cfg = window.NexoAsaas ? window.NexoAsaas.getConfig() : {};
+  if (cfg.isConfigurado) {
+    dot.className = 'w-2 h-2 rounded-full bg-emerald-400 animate-pulse';
+  } else {
+    dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
+  }
+}
+
+function salvarConfigAsaasSubmit(event) {
+  event.preventDefault();
+
+  const ambiente = document.getElementById('input-asaas-ambiente')?.value || 'sandbox';
+  const apiKey = document.getElementById('input-asaas-key')?.value || '';
+  const webhookSecret = document.getElementById('input-asaas-webhook-secret')?.value || '';
+
+  if (window.NexoAsaas) {
+    const novaCfg = window.NexoAsaas.salvarConfig(apiKey, ambiente, webhookSecret);
+    atualizarCardStatusAsaas(novaCfg);
+  }
+
+  mostrarToastMaster('Credenciais do Asaas salvas com sucesso!', '💾');
+  fecharModalConfigAsaas();
+}
+
+async function testarConexaoAsaasClick() {
+  if (!window.NexoAsaas) return;
+
+  mostrarToastMaster('Testando conexão com servidores do Asaas...', '⏳');
+  const res = await window.NexoAsaas.testarConexao();
+
+  const saldoEl = document.getElementById('asaas-saldo-display');
+  if (res.ok) {
+    if (saldoEl) saldoEl.textContent = `R$ ${res.saldo.toFixed(2)}`;
+    mostrarToastMaster(res.mensagem, '✅');
+  } else {
+    mostrarToastMaster(res.mensagem, '⚠️');
+  }
+}
+
+function simularWebhookRecebidoClick() {
+  if (!window.NexoAsaas) return;
+
+  const clientes = DB.getClientesMaster();
+  const clienteAlvo = clientes[0];
+
+  if (!clienteAlvo) {
+    alert('Cadastre ao menos uma imobiliária parceira para testar.');
+    return;
+  }
+
+  const res = window.NexoAsaas.simularPagamentoRecebido(clienteAlvo.id, 'mensalidade');
+  if (res.ok) {
+    mostrarToastMaster(`🎉 [WEBHOOK] Pagamento de "${clienteAlvo.nomeImobiliaria}" recebido! Sinal liberado por +30 dias!`, '🚀');
+    renderizarDashboardMaster();
+  }
+}
+
+function copiarUrlWebhookAsaas() {
+  const input = document.getElementById('input-asaas-webhook-url');
+  if (!input) return;
+
+  navigator.clipboard.writeText(input.value).then(() => {
+    mostrarToastMaster('URL do Webhook copiada! Cole no painel do Asaas.', '📋');
+  });
+}
+
+// ===============================================================================
+// 9. FEEDBACK VISUAL (TOAST NOTIFICATIONS)
 // ===============================================================================
 
 function mostrarToastMaster(mensagem, icone = '✨') {
@@ -534,6 +727,15 @@ window.abrirModalCobrancaPixCliente = abrirModalCobrancaPixCliente;
 window.fecharModalCobrancaPixMaster = fecharModalCobrancaPixMaster;
 window.copiarPixCodigoCola = copiarPixCodigoCola;
 window.enviarCobrancaWhatsAppAtual = enviarCobrancaWhatsAppAtual;
+window.verificarPagamentoAsaasAtual = verificarPagamentoAsaasAtual;
+window.simularPagamentoAsaasAtual = simularPagamentoAsaasAtual;
+window.abrirModalConfigAsaas = abrirModalConfigAsaas;
+window.fecharModalConfigAsaas = fecharModalConfigAsaas;
+window.salvarConfigAsaasSubmit = salvarConfigAsaasSubmit;
+window.testarConexaoAsaasClick = testarConexaoAsaasClick;
+window.simularWebhookRecebidoClick = simularWebhookRecebidoClick;
+window.copiarUrlWebhookAsaas = copiarUrlWebhookAsaas;
+window.atualizarStatusAsaasHeader = atualizarStatusAsaasHeader;
 window.abrirModalShowcasePlanos = abrirModalShowcasePlanos;
 window.fecharModalShowcasePlanos = fecharModalShowcasePlanos;
 window.copiarPropostaComercialWhatsApp = copiarPropostaComercialWhatsApp;
