@@ -85,6 +85,8 @@ function initAdminSaaS() {
   configurarSofiaIA();
   configurarAbaSeguranca();
   configurarModaisGlobais();
+  iniciarRelogioSistemaNexo();
+  inicializarMdiJanelasFlutuantes();
 }
 
 /**
@@ -392,6 +394,10 @@ function exibirPainelPrincipal() {
   atualizarBadgeLicencaHeader();
   verificarTravaLicenca();
   verificarAcoesUrlShortcut();
+  // Padrão NEXO Enterprise ERP
+  atualizarBadgesContadoresAbas();
+  iniciarRelogioSistemaNexo();
+  inicializarMdiJanelasFlutuantes();
 }
 
 function configurarEventosLogin() {
@@ -512,6 +518,25 @@ function configurarNavegacaoAbas() {
       });
       btn.classList.add('bg-blue-600', 'text-white', 'shadow-sm');
       btn.classList.remove('text-slate-600', 'hover:bg-slate-100');
+
+      // Atualiza trilha (breadcrumb) do NEXO Enterprise ERP
+      const breadcrumbsMap = {
+        'aba-dashboard': 'Dashboard & Indicadores Globais',
+        'aba-imoveis': 'Cadastro & Carteira de Imóveis',
+        'aba-portais': 'Integração & Multi-Portais Imobiliários',
+        'aba-leads': 'Pipeline de Vendas (Kanban) & Roleta de Leads',
+        'aba-locacao': 'Gestão de Contratos de Locação & DIMOB',
+        'aba-vistorias': 'Vistorias Digitais & Termos de Visita',
+        'aba-sofia': 'Inteligência Artificial Sofia (Atendimento 24h)',
+        'aba-seguranca': 'Controle de Acessos RBAC & Auditoria LGPD',
+        'aba-config': 'Configurações da Imobiliária & Pixels',
+        'aba-backup': 'Auditoria de Dados, Backup & Restauração'
+      };
+      const breadcrumbEl = document.getElementById('nexo-breadcrumb-modulo');
+      if (breadcrumbEl && breadcrumbsMap[targetId]) {
+        breadcrumbEl.textContent = breadcrumbsMap[targetId];
+      }
+      atualizarBadgesContadoresAbas();
 
       // Atualiza painéis
       document.querySelectorAll('.painel-aba-conteudo').forEach(painel => {
@@ -5032,3 +5057,195 @@ window.salvarPrimeiroAcessoSubmit = salvarPrimeiroAcessoSubmit;
 window.abrirModalEsqueciSenha = abrirModalEsqueciSenha;
 window.fecharModalEsqueciSenha = fecharModalEsqueciSenha;
 window.redefinirSenhaSubmit = redefinirSenhaSubmit;
+
+/* ============================================================================
+ * PADRÃO OFICIAL NEXO ENTERPRISE ERP — SISTEMA MDI & AUDITORIA OPERACIONAL
+ * ============================================================================ */
+
+/**
+ * Atualiza os contadores das abas operacionais do NEXO Enterprise ERP
+ */
+function atualizarBadgesContadoresAbas() {
+  try {
+    const imoveis = (typeof DB !== 'undefined' && DB.getImoveis) ? DB.getImoveis() : [];
+    const leads = (typeof DB !== 'undefined' && DB.getLeads) ? DB.getLeads() : [];
+    const contratos = (typeof DB !== 'undefined' && DB.getContratosLocacao) ? DB.getContratosLocacao() : [];
+    const vistorias = (typeof DB !== 'undefined' && DB.getVistorias) ? DB.getVistorias() : [];
+    const termos = (typeof DB !== 'undefined' && DB.getTermosVisita) ? DB.getTermosVisita() : [];
+
+    const badgeImoveis = document.getElementById('badge-tab-imoveis');
+    if (badgeImoveis) badgeImoveis.textContent = imoveis.length;
+
+    const badgePortais = document.getElementById('badge-tab-portais');
+    if (badgePortais) {
+      const imoveisAtivos = imoveis.filter(im => im.status === 'disponivel').length;
+      badgePortais.textContent = imoveisAtivos > 0 ? imoveisAtivos : '6';
+    }
+
+    const badgeLeads = document.getElementById('badge-tab-leads');
+    if (badgeLeads) {
+      const novosLeads = leads.filter(l => l.etapa === 'novo' || l.status === 'novo').length;
+      badgeLeads.textContent = novosLeads > 0 ? `${novosLeads} novos` : leads.length;
+    }
+
+    const badgeLocacao = document.getElementById('badge-tab-locacao');
+    if (badgeLocacao) badgeLocacao.textContent = contratos.length;
+
+    const badgeVistorias = document.getElementById('badge-tab-vistorias');
+    if (badgeVistorias) badgeVistorias.textContent = vistorias.length + termos.length;
+  } catch (e) {
+    console.warn('[NEXO ERP] Falha ao atualizar badges:', e);
+  }
+}
+
+/**
+ * Relógio Corporativo de Auditoria do NEXO Enterprise ERP
+ */
+let relogioNexoIntervalId = null;
+function iniciarRelogioSistemaNexo() {
+  const el = document.getElementById('nexo-relogio-sistema');
+  if (!el) return;
+  if (relogioNexoIntervalId) clearInterval(relogioNexoIntervalId);
+
+  const atualizarHora = () => {
+    const agora = new Date();
+    const horaFormatada = agora.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour12: false });
+    el.innerHTML = `🕒 ${horaFormatada} (Brasília)`;
+  };
+  atualizarHora();
+  relogioNexoIntervalId = setInterval(atualizarHora, 1000);
+}
+
+/**
+ * Gerenciador MDI de Janelas Flutuantes e Modais Corporativos
+ */
+let nexoMaxZIndex = 1100;
+
+function inicializarMdiJanelasFlutuantes() {
+  const overlays = document.querySelectorAll('.modal-overlay');
+
+  overlays.forEach(overlay => {
+    const content = overlay.querySelector('.modal-content');
+    if (!content) return;
+
+    // Elevação de Z-Index ao clicar em qualquer ponto da janela
+    content.addEventListener('mousedown', () => {
+      nexoMaxZIndex += 1;
+      overlay.style.zIndex = nexoMaxZIndex;
+    });
+
+    // Se já foi inicializada, não duplica a barra de título
+    if (content.querySelector('.nexo-window-titlebar')) return;
+
+    // Detectar título da janela
+    const heading = content.querySelector('h3, h2, h4, .text-xl, .text-lg');
+    let tituloJanela = 'NEXO ENTERPRISE // DOCUMENTO OPERACIONAL';
+    if (heading && heading.textContent.trim()) {
+      tituloJanela = `NEXO ERP // ${heading.textContent.trim().toUpperCase()}`;
+    }
+
+    // Criar a barra de título executiva
+    const titlebar = document.createElement('div');
+    titlebar.className = 'nexo-window-titlebar';
+    titlebar.innerHTML = `
+      <div class="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap pointer-events-none">
+        <span class="text-xs">🗂️</span>
+        <span class="font-bold text-[11px] uppercase tracking-wider text-slate-100 nexo-window-title-text truncate">${tituloJanela}</span>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button type="button" class="nexo-window-ctrl-btn nexo-btn-min" title="Minimizar / Colapsar janela">_</button>
+        <button type="button" class="nexo-window-ctrl-btn nexo-btn-max" title="Maximizar / Restaurar tela cheia">🗖</button>
+        <button type="button" class="nexo-window-ctrl-btn nexo-window-ctrl-close nexo-btn-close" title="Fechar janela">✕</button>
+      </div>
+    `;
+
+    // Inserir titlebar no topo do modal-content
+    content.insertBefore(titlebar, content.firstChild);
+
+    // Ocultar botão de fechar "✕" flutuante antigo se existir (para evitar botão duplicado)
+    const oldCloseBtn = content.querySelector('button.absolute.top-4.right-4');
+    if (oldCloseBtn && oldCloseBtn !== titlebar.querySelector('.nexo-btn-close')) {
+      oldCloseBtn.style.display = 'none';
+    }
+
+    // Ações dos botões da barra de controle
+    const btnClose = titlebar.querySelector('.nexo-btn-close');
+    btnClose.addEventListener('click', (e) => {
+      e.stopPropagation();
+      overlay.classList.remove('active');
+      content.classList.remove('nexo-window-minimized', 'nexo-window-maximized');
+      content.style.position = '';
+      content.style.left = '';
+      content.style.top = '';
+    });
+
+    const btnMin = titlebar.querySelector('.nexo-btn-min');
+    btnMin.addEventListener('click', (e) => {
+      e.stopPropagation();
+      content.classList.toggle('nexo-window-minimized');
+      if (content.classList.contains('nexo-window-minimized')) {
+        content.classList.remove('nexo-window-maximized');
+      }
+    });
+
+    const btnMax = titlebar.querySelector('.nexo-btn-max');
+    btnMax.addEventListener('click', (e) => {
+      e.stopPropagation();
+      content.classList.toggle('nexo-window-maximized');
+      if (content.classList.contains('nexo-window-maximized')) {
+        content.classList.remove('nexo-window-minimized');
+        content.style.position = '';
+        content.style.left = '';
+        content.style.top = '';
+      }
+    });
+
+    // Arrastar e Soltar (Drag & Drop) da Janela no Computador (Desktop)
+    titlebar.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.nexo-window-ctrl-btn')) return;
+      if (window.innerWidth < 1024) return;
+      if (content.classList.contains('nexo-window-maximized')) return;
+
+      e.preventDefault();
+
+      nexoMaxZIndex += 1;
+      overlay.style.zIndex = nexoMaxZIndex;
+
+      const rect = content.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+
+      content.style.position = 'fixed';
+      content.style.margin = '0';
+      content.style.left = `${rect.left}px`;
+      content.style.top = `${rect.top}px`;
+
+      const onMouseMove = (moveEvent) => {
+        let newLeft = moveEvent.clientX - offsetX;
+        let newTop = moveEvent.clientY - offsetY;
+
+        const maxLeft = window.innerWidth - 80;
+        const maxTop = window.innerHeight - 40;
+        if (newLeft < 10) newLeft = 10;
+        if (newLeft > maxLeft) newLeft = maxLeft;
+        if (newTop < 10) newTop = 10;
+        if (newTop > maxTop) newTop = maxTop;
+
+        content.style.left = `${newLeft}px`;
+        content.style.top = `${newTop}px`;
+      };
+
+      const onMouseUp = () => {
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+    });
+  });
+}
+
+window.atualizarBadgesContadoresAbas = atualizarBadgesContadoresAbas;
+window.iniciarRelogioSistemaNexo = iniciarRelogioSistemaNexo;
+window.inicializarMdiJanelasFlutuantes = inicializarMdiJanelasFlutuantes;

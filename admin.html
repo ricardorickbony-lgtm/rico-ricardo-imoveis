@@ -235,29 +235,61 @@
       </div>
     </header>
 
-    <!-- Navegação de Abas do SaaS -->
+    <!-- BARRA DE AUDITORIA E SISTEMA OPERACIONAL (PADRÃO NEXO ENTERPRISE ERP) -->
+    <div class="nexo-system-bar" id="nexo-barra-sistema">
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-1.5 text-emerald-400 font-bold text-[10.5px]">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span>NEXO NÚCLEO v3.4 [OPERACIONAL]</span>
+        </span>
+        <span class="text-slate-600 hidden md:inline">|</span>
+        <div class="hidden sm:flex items-center gap-1.5 text-slate-300 text-[11px]">
+          <span class="text-slate-400">Trilha:</span>
+          <span class="text-slate-200 font-bold">Início</span>
+          <span class="text-slate-400">›</span>
+          <span class="text-blue-400 font-bold" id="nexo-breadcrumb-modulo">Dashboard & Indicadores Globais</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 text-[10.5px]">
+        <span class="hidden md:inline-flex items-center gap-1.5 text-slate-300">
+          <span class="text-blue-400">🛡️ Conexão Segura:</span> Supabase Cloud TLS 1.3
+        </span>
+        <span class="text-slate-600 hidden md:inline">|</span>
+        <span class="text-amber-300 font-mono font-bold flex items-center gap-1" id="nexo-relogio-sistema" title="Horário Oficial de Brasília">
+          🕒 00:00:00 (Brasília)
+        </span>
+      </div>
+    </div>
+
+    <!-- Navegação de Abas do SaaS (Padrão NEXO Enterprise ERP) -->
     <div class="bg-white border-b border-slate-200 px-4 sm:px-8">
-      <nav class="flex items-center gap-1 overflow-x-auto py-2">
+      <nav class="flex items-center gap-1.5 overflow-x-auto py-2.5">
         <button data-tab="aba-dashboard" class="tab-admin-nav bg-blue-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-sm whitespace-nowrap">
           <span>📊 Dashboard</span>
         </button>
         <button data-tab="aba-imoveis" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
           <span>🏢 Imóveis</span>
+          <span id="badge-tab-imoveis" class="nexo-tab-badge bg-slate-200 text-slate-700">0</span>
         </button>
         <button data-tab="aba-portais" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <span>🌐 Multi-Portais (ZAP, OLX...)</span>
+          <span>🌐 Portais</span>
+          <span id="badge-tab-portais" class="nexo-tab-badge bg-blue-100 text-blue-700">6</span>
         </button>
         <button data-tab="aba-leads" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <span>🎯 Pipeline Kanban & Roleta</span>
+          <span>🎯 Pipeline & Leads</span>
+          <span id="badge-tab-leads" class="nexo-tab-badge bg-amber-100 text-amber-800">0</span>
         </button>
         <button data-tab="aba-locacao" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
           <span>🔑 Locação & DIMOB</span>
+          <span id="badge-tab-locacao" class="nexo-tab-badge bg-emerald-100 text-emerald-800">0</span>
         </button>
         <button data-tab="aba-vistorias" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <span>📋 Vistorias Digitais</span>
+          <span>📋 Vistorias</span>
+          <span id="badge-tab-vistorias" class="nexo-tab-badge bg-slate-200 text-slate-700">0</span>
         </button>
         <button data-tab="aba-sofia" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <span>🤖 Sofia IA (24h)</span>
+          <span>🤖 Sofia IA</span>
+          <span class="inline-flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sofia Ativa 24h"></span>
         </button>
         <button data-tab="aba-seguranca" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
           <span>🔐 Segurança & LGPD</span>
@@ -376,7 +408,7 @@
         <!-- Tabela de Imóveis -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="nexo-datagrid">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th class="py-3 px-4">Foto</th>
@@ -602,7 +634,7 @@
           </div>
 
           <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="nexo-datagrid">
               <thead class="bg-slate-50 text-slate-500 font-bold uppercase text-[10px] tracking-wider border-b border-slate-200">
                 <tr>
                   <th class="py-3 px-4">Código / Imóvel</th>
@@ -864,7 +896,7 @@
         <!-- Tabela de Contratos Ativos -->
         <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
           <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table class="nexo-datagrid">
               <thead>
                 <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
                   <th class="py-3 px-4">Contrato / Imóvel</th>
@@ -1825,7 +1857,7 @@
 
           <!-- Tabela de Logs de Auditoria -->
           <div class="overflow-x-auto rounded-2xl border border-slate-200">
-            <table class="w-full text-left text-xs">
+            <table class="nexo-datagrid">
               <thead class="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 text-[11px] uppercase tracking-wider">
                 <tr>
                   <th class="py-3 px-4">Data / Hora</th>

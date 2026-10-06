@@ -3,7 +3,7 @@
  * Permite funcionamento offline, instalação nativa PWA no celular e carregamento instantâneo.
  */
 
-const CACHE_NAME = 'nexo-crm-cache-v3';
+const CACHE_NAME = 'nexo-crm-cache-v4';
 const ASSETS_TO_CACHE = [
   './',
   './admin.html',
