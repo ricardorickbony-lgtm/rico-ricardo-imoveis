@@ -1116,6 +1116,45 @@ const DB = {
     return imovel;
   },
 
+  adicionarImoveisEmLote(novosImoveis, modo = 'mesclar') {
+    if (!Array.isArray(novosImoveis) || novosImoveis.length === 0) return [];
+    
+    // Assegura campos essenciais e IDs únicos
+    const normalizados = novosImoveis.map((im, idx) => {
+      const obj = { ...im };
+      if (!obj.id) obj.id = 'imob-mig-' + Date.now() + '-' + idx;
+      if (!obj.portaisSincronizados) {
+        obj.portaisSincronizados = ['zap', 'vivareal', 'olx', 'imovelweb', 'chavesnamao'];
+      }
+      return obj;
+    });
+
+    let resultadoFinal = [];
+    if (modo === 'substituir') {
+      resultadoFinal = normalizados;
+    } else {
+      // Mesclar: adiciona novos sem duplicar códigos existentes
+      const existentes = this.getImoveis();
+      const codigosExistentes = new Set(existentes.map(im => (im.codigo || '').trim().toLowerCase()).filter(Boolean));
+      const novosFiltrados = normalizados.filter(im => {
+        const cod = (im.codigo || '').trim().toLowerCase();
+        return !cod || !codigosExistentes.has(cod);
+      });
+      resultadoFinal = [...novosFiltrados, ...existentes];
+    }
+
+    this.salvarImoveis(resultadoFinal);
+
+    // Sincronização em nuvem via Supabase (em segundo plano)
+    if (window.NexoSupabase && window.NexoSupabase.isConfigured()) {
+      normalizados.forEach(im => {
+        this.enviarImovelSupabase(im).catch(e => console.warn('[Supabase] Falha ao sincronizar lote:', e));
+      });
+    }
+
+    return resultadoFinal;
+  },
+
   atualizarImovel(id, dadosAtualizados) {
     let imoveis = this.getImoveis();
     const index = imoveis.findIndex(im => im.id === id);

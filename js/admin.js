@@ -4375,7 +4375,239 @@ function desbloquearSinalMasterEmergencia() {
   }
 }
 
-// Exportações Globais do Módulo Master
+// ===============================================================================
+// 22. MÓDULO DE PORTABILIDADE & IMPORTAÇÃO EM MASSA DE IMÓVEIS (PADRÃO 2026)
+// ===============================================================================
+
+function abrirModalPortabilidadeImoveis() {
+  const modal = document.getElementById('modal-portabilidade-imoveis');
+  if (!modal) return;
+  modal.classList.add('active');
+
+  // Reseta inputs e estado
+  const inXml = document.getElementById('input-arquivo-xml');
+  const inCsv = document.getElementById('input-arquivo-csv');
+  const inJson = document.getElementById('input-arquivo-json');
+  const urlInput = document.getElementById('input-url-xml-import');
+  if (inXml) inXml.value = '';
+  if (inCsv) inCsv.value = '';
+  if (inJson) inJson.value = '';
+  if (urlInput) urlInput.value = '';
+
+  // Esconde preview e barra de progresso
+  document.getElementById('box-preview-portabilidade')?.classList.add('hidden');
+  document.getElementById('barra-progresso-portabilidade')?.classList.add('hidden');
+
+  // Ativa a primeira aba (XML)
+  trocarAbaPortabilidade('xml');
+}
+
+function fecharModalPortabilidadeImoveis() {
+  document.getElementById('modal-portabilidade-imoveis')?.classList.remove('active');
+}
+
+function trocarAbaPortabilidade(aba) {
+  const abas = ['xml', 'csv', 'json', 'demo'];
+  abas.forEach(a => {
+    const btn = document.getElementById(`tab-btn-port-${a}`);
+    const conteiner = document.getElementById(`aba-port-${a}`);
+    if (a === aba) {
+      btn?.classList.remove('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+      btn?.classList.add('bg-purple-600', 'text-white', 'shadow-sm');
+      conteiner?.classList.remove('hidden');
+    } else {
+      btn?.classList.remove('bg-purple-600', 'text-white', 'shadow-sm');
+      btn?.classList.add('bg-slate-100', 'text-slate-600', 'hover:bg-slate-200');
+      conteiner?.classList.add('hidden');
+    }
+  });
+}
+
+function processarUploadArquivoXml(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const conteudo = e.target.result;
+      const resumo = window.NexoPortabilidade.parseXmlVivaReal(conteudo);
+      renderizarPreviewPortabilidade(resumo);
+      mostrarToastFeedback(`XML analisado com sucesso! ${resumo.totalImoveis} imóveis encontrados.`, '✨');
+    } catch (err) {
+      alert('Erro ao processar arquivo XML: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+async function carregarFeedXmlPorUrl() {
+  const input = document.getElementById('input-url-xml-import');
+  const url = input?.value.trim();
+  if (!url) {
+    alert('Por favor, informe a URL do Feed XML.');
+    return;
+  }
+
+  mostrarToastFeedback('Baixando e processando Feed XML da web...', '🌐');
+
+  try {
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`HTTP status ${resp.status}`);
+    const xmlText = await resp.text();
+    const resumo = window.NexoPortabilidade.parseXmlVivaReal(xmlText);
+    renderizarPreviewPortabilidade(resumo);
+    mostrarToastFeedback(`Feed carregado! ${resumo.totalImoveis} imóveis identificados.`, '🎉');
+  } catch (err) {
+    console.warn('Erro CORS ou rede ao carregar XML direto:', err);
+    alert('Aviso de Segurança do Navegador (CORS):\nO servidor onde o XML está hospedado bloqueou a leitura direta via navegador.\n\nSolução Simples: Abra o link do XML no seu navegador, clique em "Salvar Página Como..." (.xml) e use a Opção A (Upload de Arquivo XML) nesta mesma tela!');
+  }
+}
+
+function processarUploadArquivoCsv(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const conteudo = e.target.result;
+      const resumo = window.NexoPortabilidade.parseCsvPlanilha(conteudo);
+      renderizarPreviewPortabilidade(resumo);
+      mostrarToastFeedback(`Planilha processada! ${resumo.totalImoveis} imóveis identificados.`, '📊');
+    } catch (err) {
+      alert('Erro ao processar planilha CSV: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function processarUploadArquivoJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const conteudo = e.target.result;
+      const resumo = window.NexoPortabilidade.parseJson(conteudo);
+      renderizarPreviewPortabilidade(resumo);
+      mostrarToastFeedback(`Backup JSON processado! ${resumo.totalImoveis} imóveis encontrados.`, '💾');
+    } catch (err) {
+      alert('Erro ao processar arquivo JSON: ' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+function carregarDemoShowroomPortabilidade() {
+  try {
+    const resumo = window.NexoPortabilidade.gerarCarteiraDemonstracao(30);
+    renderizarPreviewPortabilidade(resumo);
+    mostrarToastFeedback('Carteira de demonstração com 30 imóveis de luxo gerada com sucesso!', '🪄');
+  } catch (err) {
+    alert('Erro ao gerar demonstração: ' + err.message);
+  }
+}
+
+function renderizarPreviewPortabilidade(resumo) {
+  const box = document.getElementById('box-preview-portabilidade');
+  if (!box) return;
+
+  box.classList.remove('hidden');
+
+  const badge = document.getElementById('badge-port-origem');
+  if (badge) badge.textContent = resumo.origem;
+
+  const elTot = document.getElementById('stat-port-total-imoveis');
+  const elFot = document.getElementById('stat-port-total-fotos');
+  const elVgv = document.getElementById('stat-port-vgv');
+
+  if (elTot) elTot.textContent = resumo.totalImoveis;
+  if (elFot) elFot.textContent = resumo.totalFotos;
+  if (elVgv) elVgv.textContent = (resumo.vgvTotal > 0)
+    ? `R$ ${(resumo.vgvTotal / 1000000).toFixed(1)} Mi`
+    : 'Sob Consulta';
+
+  const corpo = document.getElementById('tabela-port-amostra-corpo');
+  if (corpo) {
+    corpo.innerHTML = resumo.amostra.map(im => `
+      <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+        <td class="py-2 px-3">
+          <img src="${im.fotoPrincipal}" alt="Foto" class="w-10 h-8 object-cover rounded-lg border border-slate-200">
+        </td>
+        <td class="py-2 px-3 font-mono font-bold text-slate-800 text-[11px]">${im.codigo}</td>
+        <td class="py-2 px-3 font-bold text-slate-900 max-w-xs truncate">${im.titulo}</td>
+        <td class="py-2 px-3 capitalize text-slate-600">${im.tipo}</td>
+        <td class="py-2 px-3 font-black text-slate-900">
+          ${im.preco > 0 ? `R$ ${Number(im.preco).toLocaleString('pt-BR')}` : (im.precoAluguel > 0 ? `R$ ${Number(im.precoAluguel).toLocaleString('pt-BR')}/mês` : 'Consulte')}
+        </td>
+        <td class="py-2 px-3 text-slate-500">${im.bairro}, ${im.cidade}</td>
+      </tr>
+    `).join('');
+  }
+
+  box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function confirmarExecucaoPortabilidade() {
+  const modoRadio = document.querySelector('input[name="modo_portabilidade"]:checked');
+  const modo = modoRadio ? modoRadio.value : 'mesclar';
+
+  const btnExecutar = document.getElementById('btn-executar-portabilidade');
+  const barraProgresso = document.getElementById('barra-progresso-portabilidade');
+  const barraPreenchimento = document.getElementById('barra-preenchimento-port');
+  const textoProgresso = document.getElementById('texto-progresso-port');
+  const pctProgresso = document.getElementById('porcentagem-progresso-port');
+
+  if (btnExecutar) btnExecutar.disabled = true;
+  if (barraProgresso) barraProgresso.classList.remove('hidden');
+
+  let pct = 0;
+  const timer = setInterval(() => {
+    pct += 20;
+    if (pct > 90) {
+      clearInterval(timer);
+
+      try {
+        const resultado = window.NexoPortabilidade.executarImportacao(modo);
+
+        if (barraPreenchimento) barraPreenchimento.style.width = '100%';
+        if (pctProgresso) pctProgresso.textContent = '100%';
+        if (textoProgresso) textoProgresso.textContent = 'Concluído com sucesso!';
+
+        setTimeout(() => {
+          if (typeof renderizarTabelaImoveis === 'function') renderizarTabelaImoveis();
+          if (typeof carregarMetricasDashboard === 'function') carregarMetricasDashboard();
+          if (typeof atualizarStatusPortaisNaTela === 'function') atualizarStatusPortaisNaTela();
+
+          fecharModalPortabilidadeImoveis();
+
+          if (btnExecutar) btnExecutar.disabled = false;
+          if (barraProgresso) barraProgresso.classList.add('hidden');
+          if (barraPreenchimento) barraPreenchimento.style.width = '0%';
+
+          if (resultado.avisoLimite) {
+            alert(`🎉 Portabilidade Realizada!\n\n${resultado.importados} imóveis foram importados com sucesso para o catálogo!\n\nℹ️ Atenção: ${resultado.avisoLimite}`);
+          } else {
+            mostrarToastFeedback(`🎉 Portabilidade concluída! ${resultado.importados} imóveis importados com fotos e valores atualizados!`, '🚀');
+          }
+        }, 500);
+
+      } catch (err) {
+        clearInterval(timer);
+        if (btnExecutar) btnExecutar.disabled = false;
+        if (barraProgresso) barraProgresso.classList.add('hidden');
+        alert('Erro ao gravar imóveis: ' + err.message);
+      }
+    } else {
+      if (barraPreenchimento) barraPreenchimento.style.width = pct + '%';
+      if (pctProgresso) pctProgresso.textContent = pct + '%';
+    }
+  }, 90);
+}
+
+// Exportações Globais do Módulo Master e Portabilidade
 window.atualizarBadgeLicencaHeader = atualizarBadgeLicencaHeader;
 window.verificarTravaLicenca = verificarTravaLicenca;
 window.abrirModalStatusLicenca = abrirModalStatusLicenca;
@@ -4394,6 +4626,16 @@ window.copiarPropostaComercialWhatsApp = copiarPropostaComercialWhatsApp;
 window.abrirModalShowcasePlanos = abrirModalShowcasePlanos;
 window.copiarPixBloqueio = copiarPixBloqueio;
 window.desbloquearSinalMasterEmergencia = desbloquearSinalMasterEmergencia;
+window.abrirModalPortabilidadeImoveis = abrirModalPortabilidadeImoveis;
+window.fecharModalPortabilidadeImoveis = fecharModalPortabilidadeImoveis;
+window.trocarAbaPortabilidade = trocarAbaPortabilidade;
+window.processarUploadArquivoXml = processarUploadArquivoXml;
+window.carregarFeedXmlPorUrl = carregarFeedXmlPorUrl;
+window.processarUploadArquivoCsv = processarUploadArquivoCsv;
+window.processarUploadArquivoJson = processarUploadArquivoJson;
+window.carregarDemoShowroomPortabilidade = carregarDemoShowroomPortabilidade;
+window.confirmarExecucaoPortabilidade = confirmarExecucaoPortabilidade;
+
 
 
 

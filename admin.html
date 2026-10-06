@@ -304,6 +304,9 @@
             <button onclick="abrirModalTermoVisita()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
               <span>📝 Termo de Visita</span>
             </button>
+            <button id="btn-abrir-modal-portabilidade" onclick="abrirModalPortabilidadeImoveis()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Portabilidade em Massa de Imóveis (Feed XML Zap/VivaReal ou Planilha Excel/CSV)">
+              <span>📥 Portabilidade em Massa</span>
+            </button>
             <button id="btn-abrir-modal-novo-imovel" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition shadow flex items-center gap-1.5">
               <span>+ Novo Imóvel</span>
             </button>
@@ -383,6 +386,20 @@
           <p class="text-[11px] text-slate-400">
             💡 <strong>Instrução para a Imobiliária:</strong> Copie este link e envie para o seu gerente de contas do ZAP, VivaReal, OLX ou Imovelweb. O robô deles acessará este link a cada hora e manterá seu estoque sincronizado automaticamente.
           </p>
+        </div>
+
+        <!-- Card de Portabilidade de Entrada (Migração de Carteira) -->
+        <div class="bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-slate-900 border border-purple-500/30 rounded-3xl p-6 sm:p-7 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-lg">
+          <div class="space-y-1">
+            <span class="text-[10px] font-black uppercase tracking-wider bg-purple-500/30 text-purple-300 border border-purple-400/40 px-3 py-0.5 rounded-full inline-block">
+              📥 Migração de Entrada
+            </span>
+            <h3 class="text-lg font-black text-white">Importar Imóveis do seu Sistema Antigo (Feed XML ou Planilha)</h3>
+            <p class="text-xs text-slate-300">Migre toda a carteira de imóveis de sistemas como Vista, Kenlo, Superlógica, DWV ou ZAP sem redigitar nada na mão.</p>
+          </div>
+          <button onclick="abrirModalPortabilidadeImoveis()" class="bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-400 hover:to-indigo-500 text-white font-black text-xs px-6 py-3.5 rounded-xl transition shadow flex items-center justify-center gap-2 whitespace-nowrap self-start sm:self-auto">
+            <span>📥 Iniciar Portabilidade Agora</span>
+          </button>
         </div>
 
         <!-- Grade de Portais Conectados -->
@@ -1223,19 +1240,36 @@
           <div id="supabase-feedback-box" class="hidden text-xs p-3.5 rounded-xl border"></div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3">
-            <h3 class="font-bold text-slate-900 text-base">Exportar Backup JSON</h3>
-            <p class="text-xs text-slate-500">Baixe um arquivo contendo todos os imóveis, configurações e leads do CRM para salvar no seu computador.</p>
-            <button id="btn-exportar-backup" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-3xl border border-purple-200 shadow-sm space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-bold uppercase">
+                ⚡ Entrada em Massa
+              </span>
+              <h3 class="font-bold text-slate-900 text-base">Portabilidade de Imóveis</h3>
+              <p class="text-xs text-slate-600">Importe centenas de imóveis de outros sistemas via feed XML (VivaReal/Zap), planilha Excel/CSV ou backup JSON.</p>
+            </div>
+            <button onclick="abrirModalPortabilidadeImoveis()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs py-2.5 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+              <span>📥 Iniciar Portabilidade</span>
+            </button>
+          </div>
+
+          <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <h3 class="font-bold text-slate-900 text-base">Exportar Backup JSON</h3>
+              <p class="text-xs text-slate-500">Baixe um arquivo contendo todos os imóveis, configurações e leads do CRM para salvar no seu computador.</p>
+            </div>
+            <button id="btn-exportar-backup" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition">
               Baixar Backup Completo
             </button>
           </div>
 
-          <div class="bg-white p-6 rounded-3xl border border-rose-200 shadow-sm space-y-3">
-            <h3 class="font-bold text-rose-700 text-base">Restaurar Catálogo de Demonstração</h3>
-            <p class="text-xs text-slate-500">Restaura a base padrão com as fotos de alto luxo, coberturas e leads de exemplo caso você queira demonstrar a um novo cliente.</p>
-            <button id="btn-restaurar-padroes" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition">
+          <div class="bg-white p-6 rounded-3xl border border-rose-200 shadow-sm space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <h3 class="font-bold text-rose-700 text-base">Restaurar Catálogo de Demonstração</h3>
+              <p class="text-xs text-slate-500">Restaura a base padrão com as fotos de alto luxo, coberturas e leads de exemplo caso você queira demonstrar a um novo cliente.</p>
+            </div>
+            <button id="btn-restaurar-padroes" class="w-full bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2.5 rounded-xl transition">
               Restaurar Base de Demonstração
             </button>
           </div>
@@ -2815,6 +2849,221 @@
 
 
   <!-- ========================================================================= -->
+  <!-- MODAL: PORTABILIDADE & IMPORTAÇÃO EM MASSA DE IMÓVEIS (PADRÃO 2026)        -->
+  <!-- ========================================================================= -->
+  <div id="modal-portabilidade-imoveis" class="modal-overlay">
+    <div class="modal-content relative !max-w-4xl p-6 sm:p-8 space-y-6">
+      <button onclick="fecharModalPortabilidadeImoveis()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <!-- Cabeçalho -->
+      <div class="flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg shrink-0">
+          📥
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 text-[10px] font-black uppercase tracking-wider mb-1">
+            <span>⚡ Migração Inteligente de Estoque</span>
+          </div>
+          <h3 class="text-xl font-black text-slate-900">Portabilidade & Importação em Massa de Imóveis</h3>
+          <p class="text-xs text-slate-500">Transfira centenas de imóveis de outro sistema para o NEXO CRM sem digitar um único anúncio na mão.</p>
+        </div>
+      </div>
+
+      <!-- Abas de Origem de Dados -->
+      <div class="flex border-b border-slate-200 gap-2 overflow-x-auto pb-1 text-xs font-bold">
+        <button type="button" onclick="trocarAbaPortabilidade('xml')" id="tab-btn-port-xml" class="tab-portabilidade-nav px-4 py-2 rounded-xl transition bg-purple-600 text-white shadow-sm flex items-center gap-1.5 whitespace-nowrap">
+          <span>🌐 Feed XML (VivaReal / ZAP / OLX)</span>
+        </button>
+        <button type="button" onclick="trocarAbaPortabilidade('csv')" id="tab-btn-port-csv" class="tab-portabilidade-nav px-4 py-2 rounded-xl transition bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+          <span>📊 Planilha Excel (.CSV)</span>
+        </button>
+        <button type="button" onclick="trocarAbaPortabilidade('json')" id="tab-btn-port-json" class="tab-portabilidade-nav px-4 py-2 rounded-xl transition bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+          <span>💾 Backup JSON</span>
+        </button>
+        <button type="button" onclick="trocarAbaPortabilidade('demo')" id="tab-btn-port-demo" class="tab-portabilidade-nav px-4 py-2 rounded-xl transition bg-slate-100 text-slate-600 hover:bg-slate-200 flex items-center gap-1.5 whitespace-nowrap">
+          <span>🪄 Showroom 1-Clique (Demo)</span>
+        </button>
+      </div>
+
+      <!-- CONTEÚDO DA ABA 1: FEED XML -->
+      <div id="aba-port-xml" class="aba-port-conteudo space-y-4 text-xs">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800 uppercase text-[11px]">Opção A: Upload de Arquivo XML (Padrão VR-Sync)</span>
+            <span class="text-[10px] text-purple-700 bg-purple-50 px-2 py-0.5 rounded font-bold">Mais Rápido</span>
+          </div>
+          <div class="border-2 border-dashed border-slate-300 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer transition bg-white" onclick="document.getElementById('input-arquivo-xml').click()">
+            <input type="file" id="input-arquivo-xml" accept=".xml" class="hidden" onchange="processarUploadArquivoXml(event)">
+            <span class="text-3xl block mb-2">📁</span>
+            <span class="font-bold text-slate-700 block">Clique para selecionar seu arquivo .XML</span>
+            <span class="text-slate-400 text-[11px] block mt-0.5">Suporta feeds gerados por Vista, Kenlo, Superlógica, DWV, InGaia ou portais</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <span class="font-bold text-slate-800 uppercase text-[11px] block">Opção B: Puxar direto por URL do Feed XML</span>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input type="url" id="input-url-xml-import" placeholder="Cole o link do Feed XML (ex: https://imobiliaria.com.br/feed.xml)" class="flex-grow bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 font-mono">
+            <button type="button" onclick="carregarFeedXmlPorUrl()" class="bg-purple-600 hover:bg-purple-500 text-white font-bold px-5 py-2.5 rounded-xl transition shadow whitespace-nowrap flex items-center justify-center gap-1.5">
+              <span>🔍 Carregar Feed</span>
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-500">
+            Dica: Se o servidor da imobiliária antiga bloquear o acesso direto (CORS), salve o arquivo .xml no computador e use a Opção A.
+          </p>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO DA ABA 2: PLANILHA EXCEL / CSV -->
+      <div id="aba-port-csv" class="aba-port-conteudo hidden space-y-4 text-xs">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="font-bold text-slate-800 uppercase text-[11px] block">Importar Planilha de Imóveis (.CSV)</span>
+              <span class="text-[11px] text-slate-500">Reconhece colunas de código, título, tipo, preço, metragem, quartos, bairro e fotos.</span>
+            </div>
+            <button type="button" onclick="window.NexoPortabilidade.baixarPlanilhaModelo()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5">
+              <span>📥 Baixar Planilha Modelo (.CSV)</span>
+            </button>
+          </div>
+
+          <div class="border-2 border-dashed border-slate-300 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer transition bg-white" onclick="document.getElementById('input-arquivo-csv').click()">
+            <input type="file" id="input-arquivo-csv" accept=".csv,.txt" class="hidden" onchange="processarUploadArquivoCsv(event)">
+            <span class="text-3xl block mb-2">📊</span>
+            <span class="font-bold text-slate-700 block">Clique para selecionar sua Planilha CSV</span>
+            <span class="text-slate-400 text-[11px] block mt-0.5">Compatível com Excel (separador ';' ou ',') com codificação UTF-8</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO DA ABA 3: BACKUP JSON -->
+      <div id="aba-port-json" class="aba-port-conteudo hidden space-y-4 text-xs">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-3">
+          <span class="font-bold text-slate-800 uppercase text-[11px] block">Importar Arquivo JSON de Backup</span>
+          <div class="border-2 border-dashed border-slate-300 hover:border-purple-500 rounded-2xl p-6 text-center cursor-pointer transition bg-white" onclick="document.getElementById('input-arquivo-json').click()">
+            <input type="file" id="input-arquivo-json" accept=".json" class="hidden" onchange="processarUploadArquivoJson(event)">
+            <span class="text-3xl block mb-2">💾</span>
+            <span class="font-bold text-slate-700 block">Clique para selecionar seu arquivo .JSON</span>
+            <span class="text-slate-400 text-[11px] block mt-0.5">Importa estrutura completa de imóveis exportada de qualquer NEXO CRM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTEÚDO DA ABA 4: SHOWROOM 1-CLIQUE (DEMO DE VENDAS) -->
+      <div id="aba-port-demo" class="aba-port-conteudo hidden space-y-4 text-xs">
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-200 space-y-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">🪄</span>
+            <div>
+              <h4 class="font-black text-amber-950 text-sm">Carregamento Instantâneo de Showroom (Para Vendas)</h4>
+              <p class="text-[11px] text-amber-800">Ideal para demonstrar a plataforma para um cliente na hora, sem precisar de nenhum arquivo externo.</p>
+            </div>
+          </div>
+          <p class="text-slate-600 text-xs">
+            Gera na hora uma carteira realista de <strong>30 imóveis de alto padrão</strong> (apartamentos, sobrados, coberturas e comerciais) com fotos em alta definição do Unsplash, valores, metragens e descrições completas.
+          </p>
+          <button type="button" onclick="carregarDemoShowroomPortabilidade()" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black px-6 py-3 rounded-xl transition shadow flex items-center justify-center gap-2">
+            <span>⚡ Gerar 30 Imóveis de Demonstração Agora</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ÁREA DE PRÉ-VISUALIZAÇÃO & DIAGNÓSTICO (PREVIEW) -->
+      <div id="box-preview-portabilidade" class="hidden border-t border-slate-200 pt-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-black uppercase text-purple-800 tracking-wider flex items-center gap-1.5">
+            <span>✨</span> <span>Diagnóstico da Carteira Identificada</span>
+          </span>
+          <span id="badge-port-origem" class="text-[10px] font-bold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">
+            Feed XML
+          </span>
+        </div>
+
+        <!-- Indicadores Rápidos -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Imóveis Localizados</span>
+            <span id="stat-port-total-imoveis" class="text-lg font-black text-slate-900 block mt-0.5">0</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Total de Fotos</span>
+            <span id="stat-port-total-fotos" class="text-lg font-black text-blue-600 block mt-0.5">0</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">VGV Estimado</span>
+            <span id="stat-port-vgv" class="text-lg font-black text-emerald-600 block mt-0.5">R$ 0</span>
+          </div>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Qualidade dos Dados</span>
+            <span class="text-lg font-black text-amber-500 block mt-0.5">100% OK</span>
+          </div>
+        </div>
+
+        <!-- Tabela de Amostra dos Primeiros 5 Imóveis -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-slate-100 px-4 py-2 border-b border-slate-200 flex items-center justify-between text-[11px] font-bold text-slate-600">
+            <span>Amostra Visual dos Primeiros Imóveis</span>
+            <span class="text-[10px] text-slate-400">Exibindo até 5 registros para conferência</span>
+          </div>
+          <div class="overflow-x-auto max-h-48">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-bold text-slate-500 uppercase">
+                  <th class="py-2 px-3">Foto</th>
+                  <th class="py-2 px-3">Código</th>
+                  <th class="py-2 px-3">Título</th>
+                  <th class="py-2 px-3">Tipo</th>
+                  <th class="py-2 px-3">Valor</th>
+                  <th class="py-2 px-3">Localização</th>
+                </tr>
+              </thead>
+              <tbody id="tabela-port-amostra-corpo">
+                <!-- Populado dinamicamente -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Opções de Mesclagem / Substituição -->
+        <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-200 space-y-2 text-xs">
+          <span class="font-bold text-purple-900 block">Como deseja gravar os imóveis no seu catálogo?</span>
+          <div class="space-y-1.5">
+            <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+              <input type="radio" name="modo_portabilidade" value="mesclar" checked class="text-purple-600">
+              <span><strong>🟢 Mesclar com os imóveis existentes</strong> (Recomendado — mantém os que você já tem e adiciona os novos)</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer font-medium text-slate-800">
+              <input type="radio" name="modo_portabilidade" value="substituir" class="text-purple-600">
+              <span><strong>🔴 Substituir todo o catálogo atual</strong> (Apaga os imóveis atuais e deixa somente a nova carteira)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Barra de Progresso Animada -->
+        <div id="barra-progresso-portabilidade" class="hidden space-y-1.5">
+          <div class="flex items-center justify-between text-xs font-bold text-purple-900">
+            <span id="texto-progresso-port">Gravando imóveis e vinculando fotos...</span>
+            <span id="porcentagem-progresso-port">0%</span>
+          </div>
+          <div class="w-full h-3 bg-slate-200 rounded-full overflow-hidden">
+            <div id="barra-preenchimento-port" class="h-full bg-gradient-to-r from-purple-600 to-indigo-600 transition-all duration-300 w-0"></div>
+          </div>
+        </div>
+
+        <!-- Botão Final de Execução -->
+        <div class="flex items-center justify-end gap-3 pt-2">
+          <button type="button" onclick="fecharModalPortabilidadeImoveis()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-3 rounded-xl transition text-xs">
+            Cancelar
+          </button>
+          <button type="button" id="btn-executar-portabilidade" onclick="confirmarExecucaoPortabilidade()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black text-xs px-8 py-3.5 rounded-xl transition shadow-lg flex items-center gap-2">
+            <span>🚀 Confirmar e Importar Carteira Agora</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
   <!-- MODAL: COBRANÇA PIX INSTANTÂNEA COM QR CODE & WHATSAPP                    -->
   <!-- ========================================================================= -->
   <div id="modal-cobranca-pix-master" class="modal-overlay">
@@ -3004,6 +3253,7 @@
 
   <!-- Scripts -->
   <script src="js/db.js"></script>
+  <script src="js/portabilidade-service.js"></script>
   <script src="js/admin.js"></script>
 </body>
 </html>
