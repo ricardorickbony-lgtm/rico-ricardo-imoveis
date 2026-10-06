@@ -57,28 +57,69 @@
         <p class="text-xs text-slate-500 mt-1">Plataforma Inteligente de Gestão Imobiliária, Portais & Leads</p>
       </div>
 
-      <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-left text-xs text-blue-900 space-y-1">
+      <div id="login-info-box" class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-left text-xs text-blue-900 space-y-1">
         <span class="font-bold flex items-center gap-1.5 text-blue-700">
           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-          Modo Demonstração (Impacto Digital):
+          Autenticação Segura &amp; Primeiro Acesso
         </span>
-        <p class="text-[11px] text-blue-800">Senha padrão para teste do cliente: <strong class="font-mono bg-blue-100 px-1 py-0.5 rounded">admin123</strong></p>
+        <p class="text-[11px] text-blue-800 leading-relaxed" id="login-instrucao-texto">
+          Digite seu <strong>e-mail corporativo</strong> e <strong>senha</strong>. Se você é um cliente novo, clique no botão <strong>Primeiro Acesso</strong> abaixo para criar sua senha.
+        </p>
       </div>
 
-      <form id="form-login-admin" class="space-y-4 text-left">
+      <form id="form-login-admin" class="space-y-3.5 text-left">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Senha de Acesso</label>
-          <input 
-            type="password" 
-            id="input-senha-admin" 
-            placeholder="Digite a senha..." 
-            required 
-            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white"
-          >
+          <label class="block text-xs font-bold text-slate-700 uppercase mb-1">E-mail de Acesso</label>
+          <div class="relative">
+            <input 
+              type="email" 
+              id="input-email-admin" 
+              placeholder="seu-email@imobiliaria.com.br" 
+              required 
+              value="admin@nexocrm.com.br"
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-slate-900 font-medium"
+            >
+            <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">✉️</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-slate-700 uppercase">Senha</label>
+            <button type="button" onclick="abrirModalEsqueciSenha()" class="text-[11px] font-bold text-blue-600 hover:underline">
+              Esqueci a senha
+            </button>
+          </div>
+          <div class="relative">
+            <input 
+              type="password" 
+              id="input-senha-admin" 
+              placeholder="Digite sua senha..." 
+              required 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium text-slate-900"
+            >
+            <button 
+              type="button" 
+              id="btn-toggle-senha-visivel" 
+              onclick="alternarVisibilidadeSenhaLogin()" 
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 rounded transition text-sm"
+              title="Mostrar / Ocultar Senha"
+            >
+              👁️
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between text-xs text-slate-600 pt-0.5">
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="check-lembrar-acesso" checked class="w-3.5 h-3.5 text-blue-600 rounded">
+            <span>Lembrar meu acesso</span>
+          </label>
+          <span class="text-[10px] text-slate-400 font-mono">Padrão demo: admin123</span>
         </div>
 
         <div id="login-erro" class="hidden text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center space-y-0.5">
-          <div>Senha incorreta! Digite <code class="font-mono">admin123</code>.</div>
+          <div id="login-erro-mensagem">E-mail ou senha incorretos!</div>
           <div id="login-tentativas-restantes" class="font-normal text-[11px] text-rose-500"></div>
         </div>
 
@@ -96,10 +137,20 @@
           </div>
         </div>
 
-        <button type="submit" id="btn-submit-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed">
-          Entrar no Painel NEXO CRM
+        <button type="submit" id="btn-submit-login" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm py-3 px-4 rounded-xl transition shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+          <span>Entrar no NEXO CRM</span>
+          <span>→</span>
         </button>
       </form>
+
+      <!-- Botão de Primeiro Acesso (Ativação de Conta) -->
+      <div class="p-3 bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border border-purple-200/80 rounded-2xl text-center space-y-1.5">
+        <span class="text-[10px] font-extrabold uppercase tracking-wider text-purple-700 block">Cliente Novo?</span>
+        <button type="button" onclick="abrirModalPrimeiroAcesso()" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs py-2.5 px-3 rounded-xl transition shadow flex items-center justify-center gap-1.5">
+          <span>✨ Primeiro Acesso: Criar Minha Senha</span>
+        </button>
+        <span class="text-[10px] text-slate-500 block">Ative sua conta e crie sua senha em menos de 1 minuto</span>
+      </div>
 
       <!-- Botão de Instalar App no Login -->
       <div class="pt-2 border-t border-slate-100">
@@ -2847,6 +2898,163 @@
   </div>
 
 
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: PRIMEIRO ACESSO & ATIVAÇÃO DE CONTA DO CLIENTE                     -->
+  <!-- ========================================================================= -->
+  <div id="modal-primeiro-acesso" class="modal-overlay">
+    <div class="modal-content relative !max-w-lg p-6 sm:p-8 space-y-5 text-left">
+      <button onclick="fecharModalPrimeiroAcesso()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white flex items-center justify-center text-2xl shadow-lg mx-auto mb-2">
+          ✨
+        </div>
+        <span class="text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-3 py-0.5 rounded-full inline-block">
+          Ativação Oficial da Assinatura
+        </span>
+        <h3 class="text-xl font-black text-slate-900">Primeiro Acesso ao NEXO CRM</h3>
+        <p class="text-xs text-slate-500">Defina seus dados e crie sua senha de Diretor para assumir o controle do seu sistema.</p>
+      </div>
+
+      <form id="form-primeiro-acesso" onsubmit="salvarPrimeiroAcessoSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Seu Nome Completo (Diretor / Responsável)</label>
+          <input 
+            type="text" 
+            id="input-primeiro-nome" 
+            required 
+            placeholder="Ex: Carlos Eduardo Silveira" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Nome da sua Imobiliária / Empresa</label>
+          <input 
+            type="text" 
+            id="input-primeiro-empresa" 
+            required 
+            placeholder="Ex: Alfa Imóveis &amp; Consultoria" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">E-mail de Login</label>
+            <input 
+              type="email" 
+              id="input-primeiro-email" 
+              required 
+              placeholder="diretoria@imobiliaria.com.br" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">WhatsApp para Notificações</label>
+            <input 
+              type="tel" 
+              id="input-primeiro-whatsapp" 
+              required 
+              placeholder="(11) 99999-8888" 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Criar Senha de Acesso</label>
+            <input 
+              type="password" 
+              id="input-primeiro-senha" 
+              required 
+              minlength="4" 
+              placeholder="Mínimo 4 dígitos..." 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Confirmar Senha</label>
+            <input 
+              type="password" 
+              id="input-primeiro-senha-conf" 
+              required 
+              minlength="4" 
+              placeholder="Repita a senha..." 
+              class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+          </div>
+        </div>
+
+        <div class="p-3 bg-purple-50 border border-purple-200 rounded-xl text-[11px] text-purple-900 flex items-start gap-2">
+          <span>🔒</span>
+          <span>Suas credenciais são criptografadas e restritas ao seu ambiente exclusivo. Você poderá alterar sua senha sempre que quiser dentro das configurações.</span>
+        </div>
+
+        <div class="pt-2 flex justify-end gap-2">
+          <button type="button" onclick="fecharModalPrimeiroAcesso()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition text-xs">
+            Cancelar
+          </button>
+          <button type="submit" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-2.5 rounded-xl transition shadow flex items-center gap-1.5 text-xs">
+            <span>🚀 Concluir Cadastro &amp; Entrar</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: RECUPERAÇÃO DE SENHA / ESQUECI MINHA SENHA                         -->
+  <!-- ========================================================================= -->
+  <div id="modal-esqueci-senha" class="modal-overlay">
+    <div class="modal-content relative !max-w-md p-6 sm:p-8 space-y-5 text-left">
+      <button onclick="fecharModalEsqueciSenha()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">✕</button>
+
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex items-center justify-center text-2xl mx-auto mb-2">
+          🔑
+        </div>
+        <h3 class="text-xl font-black text-slate-900">Recuperação de Senha</h3>
+        <p class="text-xs text-slate-500">Informe seu e-mail ou WhatsApp cadastrado para redefinir seu acesso.</p>
+      </div>
+
+      <form id="form-esqueci-senha" onsubmit="redefinirSenhaSubmit(event)" class="space-y-3.5 text-xs">
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">E-mail ou WhatsApp Cadastrado</label>
+          <input 
+            type="text" 
+            id="input-esqueci-identificador" 
+            required 
+            placeholder="Ex: seu-email@imobiliaria.com.br ou (11) 99999-8888" 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 uppercase mb-1">Nova Senha Desejada</label>
+          <input 
+            type="password" 
+            id="input-esqueci-nova-senha" 
+            required 
+            minlength="4" 
+            placeholder="Digite a nova senha..." 
+            class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+        </div>
+
+        <div class="pt-1 flex flex-col gap-2">
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs py-3 rounded-xl transition shadow">
+            Redefinir Senha e Entrar
+          </button>
+          <a href="https://wa.me/5511914879393?text=Ol%C3%A1%20Ricardo,%20esqueci%20minha%20senha%20de%20acesso%20do%20NEXO%20CRM%20e%20preciso%20de%20ajuda" target="_blank" class="w-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-1.5">
+            <span>📲</span> <span>Solicitar Redefinição no Suporte (WhatsApp)</span>
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
 
   <!-- ========================================================================= -->
   <!-- MODAL: PORTABILIDADE & IMPORTAÇÃO EM MASSA DE IMÓVEIS (PADRÃO 2026)        -->

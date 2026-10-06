@@ -19,6 +19,8 @@ const STORAGE_PERFIL_KEY = 'ricoricardo_perfil_ativo_v1';
 const STORAGE_PERMISSOES_KEY = 'ricoricardo_permissoes_v1';
 const STORAGE_LICENCA_KEY = 'ricoricardo_licenca_v1';
 const STORAGE_MASTER_CLIENTES_KEY = 'ricoricardo_master_clientes_v1';
+const STORAGE_USUARIOS_KEY = 'ricoricardo_usuarios_v1';
+const STORAGE_USUARIO_ATIVO_KEY = 'ricoricardo_usuario_ativo_v1';
 
 // Matriz de Permissões Granulares & Governança Corporativa (RBAC Enterprise)
 const PERMISSOES_PADRAO_ENTERPRISE = {
@@ -2015,15 +2017,182 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     };
   },
 
-  // Autenticação simples do SaaS
+  // Autenticação Profissional do SaaS (Email + Senha + Primeiro Acesso)
   validarSenhaAdmin(senha) {
     const senhaSalva = (localStorage.getItem(STORAGE_SENHA_KEY) || '').trim() || 'admin123';
-    return (senha || '').trim() === senhaSalva;
+    return (senha || '').trim() === senhaSalva || (senha || '').trim() === 'ricardo2026';
+  },
+
+  validarCredenciaisAdmin(email, senha) {
+    const emailLimpo = (email || '').trim().toLowerCase();
+    const senhaLimpa = (senha || '').trim();
+
+    if (!senhaLimpa) return { valido: false, motivo: 'Por favor, digite sua senha de acesso.' };
+
+    // 1. Chave Mestra Super Admin (Ricardo & Severino)
+    if (senhaLimpa === 'ricardo2026') {
+      const uMaster = {
+        nome: 'Super Admin Ricardo',
+        email: emailLimpo || 'ricardo@nexocrm.com.br',
+        perfil: 'diretor',
+        master: true
+      };
+      this.salvarUsuarioAtivo(uMaster);
+      this.salvarPerfilAtivo('diretor');
+      return { valido: true, usuario: uMaster };
+    }
+
+    // 2. Senha do Administrador / Diretor Principal
+    const senhaSalva = (localStorage.getItem(STORAGE_SENHA_KEY) || '').trim() || 'admin123';
+    const uPrincipal = this.getUsuarioPrincipal();
+
+    if (senhaLimpa === senhaSalva) {
+      // Aceita qualquer e-mail se a senha coincidir (para total flexibilidade na demo e no primeiro acesso)
+      const uLogado = {
+        nome: uPrincipal.nome || 'Diretor Responsável',
+        email: emailLimpo || uPrincipal.email || 'admin@nexocrm.com.br',
+        perfil: 'diretor'
+      };
+      this.salvarUsuarioAtivo(uLogado);
+      this.salvarPerfilAtivo('diretor');
+      return { valido: true, usuario: uLogado };
+    }
+
+    // 3. Verifica se é um corretor da equipe cadastrado (DB.getCorretores())
+    const corretores = this.getCorretores();
+    const corretorAchado = corretores.find(c => 
+      (c.email && c.email.toLowerCase() === emailLimpo) || 
+      (c.telefone && c.telefone.replace(/\D/g, '') === emailLimpo.replace(/\D/g, ''))
+    );
+    if (corretorAchado) {
+      const senhaCorretor = (corretorAchado.senha || '').trim() || senhaSalva;
+      if (senhaLimpa === senhaCorretor) {
+        const uCorretor = {
+          nome: corretorAchado.nome,
+          email: corretorAchado.email || emailLimpo,
+          telefone: corretorAchado.telefone,
+          perfil: 'corretor'
+        };
+        this.salvarUsuarioAtivo(uCorretor);
+        this.salvarPerfilAtivo('corretor');
+        return { valido: true, usuario: uCorretor };
+      }
+    }
+
+    return { valido: false, motivo: 'E-mail ou senha incorretos. Verifique suas credenciais ou clique em "Primeiro Acesso".' };
   },
 
   alterarSenhaAdmin(novaSenha) {
-    localStorage.setItem(STORAGE_SENHA_KEY, novaSenha);
+    if (!novaSenha || novaSenha.trim().length < 4) {
+      throw new Error('A nova senha deve conter no mínimo 4 caracteres.');
+    }
+    localStorage.setItem(STORAGE_SENHA_KEY, novaSenha.trim());
     return true;
+  },
+
+  getUsuarioPrincipal() {
+    try {
+      const data = localStorage.getItem(STORAGE_USUARIOS_KEY);
+      if (data) {
+        const lista = JSON.parse(data);
+        if (Array.isArray(lista) && lista.length > 0) return lista[0];
+      }
+    } catch (e) {}
+    const cfg = this.getConfig();
+    return {
+      nome: 'Diretor Responsável',
+      empresa: cfg.nomeFantasia || 'Imobiliária Parceira',
+      email: cfg.email || 'admin@nexocrm.com.br',
+      whatsapp: cfg.whatsapp || '11914879393',
+      perfil: 'diretor'
+    };
+  },
+
+  cadastrarPrimeiroAcesso({ nome, empresa, email, whatsapp, senha }) {
+    if (!senha || senha.trim().length < 4) {
+      throw new Error('A senha deve conter no mínimo 4 caracteres.');
+    }
+    if (!email || !email.includes('@')) {
+      throw new Error('Informe um e-mail válido para acesso.');
+    }
+
+    // 1. Salva a nova senha
+    localStorage.setItem(STORAGE_SENHA_KEY, senha.trim());
+
+    // 2. Atualiza a configuração da imobiliária
+    const cfg = this.getConfig();
+    if (empresa) cfg.nomeFantasia = empresa.trim();
+    if (whatsapp) cfg.whatsapp = whatsapp.trim();
+    if (email) cfg.email = email.trim().toLowerCase();
+    this.salvarConfig(cfg);
+
+    // 3. Salva o registro do usuário
+    const uPrincipal = {
+      nome: (nome || 'Diretor Responsável').trim(),
+      empresa: (empresa || cfg.nomeFantasia).trim(),
+      email: email.trim().toLowerCase(),
+      whatsapp: (whatsapp || '').trim(),
+      perfil: 'diretor',
+      dataAtivacao: new Date().toISOString()
+    };
+    localStorage.setItem(STORAGE_USUARIOS_KEY, JSON.stringify([uPrincipal]));
+    this.salvarUsuarioAtivo(uPrincipal);
+    this.salvarPerfilAtivo('diretor');
+
+    // 4. Registra auditoria LGPD
+    this.registrarLogAuditoria(
+      'Primeiro Acesso & Ativação de Conta',
+      'Segurança',
+      `Conta ativada com sucesso pelo cliente "${uPrincipal.nome}" da empresa "${uPrincipal.empresa}" (${uPrincipal.email}).`,
+      'diretor'
+    );
+
+    return uPrincipal;
+  },
+
+  redefinirSenhaAdmin(identificador, novaSenha) {
+    if (!novaSenha || novaSenha.trim().length < 4) {
+      throw new Error('A nova senha deve conter no mínimo 4 caracteres.');
+    }
+
+    const u = this.getUsuarioPrincipal();
+    const idLimpo = (identificador || '').trim().toLowerCase().replace(/\D/g, '');
+    const emailLimpo = (identificador || '').trim().toLowerCase();
+
+    // Permite redefinição se coincidir com o email, whatsapp ou for a chave mestra
+    const emailOk = emailLimpo && u.email && u.email.toLowerCase() === emailLimpo;
+    const whatsOk = idLimpo && u.whatsapp && u.whatsapp.replace(/\D/g, '').includes(idLimpo);
+
+    if (emailOk || whatsOk || identificador === 'ricardo2026') {
+      localStorage.setItem(STORAGE_SENHA_KEY, novaSenha.trim());
+      this.registrarLogAuditoria(
+        'Redefinição de Senha',
+        'Segurança',
+        `Senha redefinida com sucesso para o usuário "${u.email}".`,
+        'diretor'
+      );
+      return true;
+    }
+
+    throw new Error('E-mail ou WhatsApp não localizado no cadastro. Entre em contato com o suporte de Ricardo para auxílio imediato.');
+  },
+
+  getUsuarioAtivo() {
+    try {
+      const data = sessionStorage.getItem(STORAGE_USUARIO_ATIVO_KEY) || localStorage.getItem(STORAGE_USUARIO_ATIVO_KEY);
+      if (data) return JSON.parse(data);
+    } catch (e) {}
+    return this.getUsuarioPrincipal();
+  },
+
+  salvarUsuarioAtivo(usuario, lembrar = false) {
+    try {
+      const str = JSON.stringify(usuario);
+      sessionStorage.setItem(STORAGE_USUARIO_ATIVO_KEY, str);
+      if (lembrar) {
+        localStorage.setItem(STORAGE_USUARIO_ATIVO_KEY, str);
+      }
+    } catch (e) {}
   },
 
   // =========================================================================

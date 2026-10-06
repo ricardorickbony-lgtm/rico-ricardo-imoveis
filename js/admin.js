@@ -230,7 +230,7 @@ function resetarTimerInatividade() {
 });
 
 function verificarSessao() {
-  const logado = sessionStorage.getItem('imob_admin_logado');
+  const logado = sessionStorage.getItem('imob_admin_logado') || localStorage.getItem('imob_admin_logado');
   if (logado === 'true') {
     sessaoAutenticada = true;
     resetarTimerInatividade();
@@ -241,14 +241,111 @@ function verificarSessao() {
 }
 
 function exibirTelaLogin() {
-  document.getElementById('secao-login').classList.remove('hidden');
-  document.getElementById('painel-admin-conteudo').classList.add('hidden');
+  document.getElementById('secao-login')?.classList.remove('hidden');
+  document.getElementById('painel-admin-conteudo')?.classList.add('hidden');
+  
+  // Preenche e-mail se houver usuário cadastrado
+  const inputEmail = document.getElementById('input-email-admin');
+  if (inputEmail && DB.getUsuarioPrincipal) {
+    const u = DB.getUsuarioPrincipal();
+    if (u && u.email) inputEmail.value = u.email;
+  }
+  
   verificarBloqueioLogin();
 }
 
+function alternarVisibilidadeSenhaLogin() {
+  const input = document.getElementById('input-senha-admin');
+  const btn = document.getElementById('btn-toggle-senha-visivel');
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (btn) btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    if (btn) btn.textContent = '👁️';
+  }
+}
+
+function abrirModalPrimeiroAcesso() {
+  const modal = document.getElementById('modal-primeiro-acesso');
+  if (!modal) return;
+  modal.classList.add('active');
+  const cfg = DB.getConfig ? DB.getConfig() : {};
+  if (document.getElementById('input-primeiro-empresa') && cfg.nomeFantasia) {
+    document.getElementById('input-primeiro-empresa').value = cfg.nomeFantasia;
+  }
+  if (document.getElementById('input-primeiro-whatsapp') && cfg.whatsapp) {
+    document.getElementById('input-primeiro-whatsapp').value = cfg.whatsapp;
+  }
+}
+
+function fecharModalPrimeiroAcesso() {
+  document.getElementById('modal-primeiro-acesso')?.classList.remove('active');
+}
+
+function salvarPrimeiroAcessoSubmit(event) {
+  event.preventDefault();
+
+  const nome = document.getElementById('input-primeiro-nome')?.value.trim();
+  const empresa = document.getElementById('input-primeiro-empresa')?.value.trim();
+  const email = document.getElementById('input-primeiro-email')?.value.trim();
+  const whatsapp = document.getElementById('input-primeiro-whatsapp')?.value.trim();
+  const senha = document.getElementById('input-primeiro-senha')?.value;
+  const senhaConf = document.getElementById('input-primeiro-senha-conf')?.value;
+
+  if (senha !== senhaConf) {
+    alert('As senhas digitadas não coincidem. Por favor, confira e tente novamente.');
+    return;
+  }
+
+  try {
+    const usuario = DB.cadastrarPrimeiroAcesso({ nome, empresa, email, whatsapp, senha });
+    fecharModalPrimeiroAcesso();
+
+    // Loga automaticamente após a ativação
+    sessionStorage.setItem('imob_admin_logado', 'true');
+    localStorage.setItem('imob_admin_logado', 'true');
+    sessaoAutenticada = true;
+
+    mostrarToastFeedback(`🎉 Parabéns, ${usuario.nome}! Sua conta foi ativada com sucesso. Bem-vindo ao NEXO CRM!`, '🚀');
+    exibirPainelPrincipal();
+  } catch (err) {
+    alert('Erro ao ativar conta: ' + err.message);
+  }
+}
+
+function abrirModalEsqueciSenha() {
+  document.getElementById('modal-esqueci-senha')?.classList.add('active');
+}
+
+function fecharModalEsqueciSenha() {
+  document.getElementById('modal-esqueci-senha')?.classList.remove('active');
+}
+
+function redefinirSenhaSubmit(event) {
+  event.preventDefault();
+
+  const id = document.getElementById('input-esqueci-identificador')?.value.trim();
+  const novaSenha = document.getElementById('input-esqueci-nova-senha')?.value;
+
+  try {
+    DB.redefinirSenhaAdmin(id, novaSenha);
+    fecharModalEsqueciSenha();
+    mostrarToastFeedback('Sua nova senha foi gravada com sucesso! Você já pode entrar.', '🔑');
+    const inputSenha = document.getElementById('input-senha-admin');
+    if (inputSenha) {
+      inputSenha.value = novaSenha;
+      inputSenha.focus();
+    }
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 function exibirPainelPrincipal() {
-  document.getElementById('secao-login').classList.add('hidden');
-  document.getElementById('painel-admin-conteudo').classList.remove('hidden');
+  document.getElementById('secao-login')?.classList.add('hidden');
+  document.getElementById('painel-admin-conteudo')?.classList.remove('hidden');
   aplicarPerfilSeguranca(DB.getPerfilAtivo());
   carregarMetricasDashboard();
   renderizarTabelaImoveis();
@@ -270,8 +367,11 @@ function exibirPainelPrincipal() {
 
 function configurarEventosLogin() {
   const formLogin = document.getElementById('form-login-admin');
+  const inputEmail = document.getElementById('input-email-admin');
   const inputSenha = document.getElementById('input-senha-admin');
+  const checkLembrar = document.getElementById('check-lembrar-acesso');
   const erroLogin = document.getElementById('login-erro');
+  const msgErro = document.getElementById('login-erro-mensagem');
 
   verificarBloqueioLogin();
 
@@ -283,15 +383,31 @@ function configurarEventosLogin() {
       return;
     }
 
-    const senha = inputSenha.value.trim();
+    const email = inputEmail?.value.trim() || '';
+    const senha = inputSenha?.value.trim() || '';
 
-    if (DB.validarSenhaAdmin(senha)) {
+    const resultado = DB.validarCredenciaisAdmin(email, senha);
+
+    if (resultado.valido) {
       salvarEstadoBruteForce({ falhas: 0, bloqueadoAte: 0 });
       sessionStorage.setItem('imob_admin_logado', 'true');
+      if (checkLembrar && checkLembrar.checked) {
+        localStorage.setItem('imob_admin_logado', 'true');
+      }
+
       sessaoAutenticada = true;
       erroLogin?.classList.add('hidden');
       resetarTimerInatividade();
-      DB.registrarLogAuditoria('Login Administrativo Efetuado', 'Autenticação', `Acesso autorizado ao painel SaaS com perfil ${DB.getPerfilAtivo().toUpperCase()}`, DB.getPerfilAtivo());
+
+      const u = resultado.usuario || {};
+      DB.registrarLogAuditoria(
+        'Login Efetuado',
+        'Autenticação',
+        `Acesso autorizado para "${u.nome}" (${u.email}) com perfil ${DB.getPerfilAtivo().toUpperCase()}.`,
+        DB.getPerfilAtivo()
+      );
+
+      mostrarToastFeedback(`Bem-vindo, ${u.nome || 'Diretor'}!`, '👋');
       exibirPainelPrincipal();
     } else {
       const estado = obterEstadoBruteForce();
@@ -316,6 +432,9 @@ function configurarEventosLogin() {
         if (msgRestantes) {
           msgRestantes.textContent = `Atenção: ${estado.falhas} de ${MAX_FALHAS_LOGIN} tentativas. Restam ${restantes} tentativa(s) antes do bloqueio por 15 minutos.`;
         }
+        if (msgErro) {
+          msgErro.textContent = resultado.motivo || 'E-mail ou senha incorretos!';
+        }
         erroLogin?.classList.remove('hidden');
         inputSenha.value = '';
         inputSenha.focus();
@@ -323,7 +442,7 @@ function configurarEventosLogin() {
         DB.registrarLogAuditoria(
           'Falha de Login',
           'Autenticação',
-          `Tentativa de senha incorreta (${estado.falhas}/${MAX_FALHAS_LOGIN}).`,
+          `Tentativa de login inválida para o e-mail "${email}" (${estado.falhas}/${MAX_FALHAS_LOGIN}).`,
           'Desconhecido'
         );
       }
@@ -333,6 +452,7 @@ function configurarEventosLogin() {
   document.getElementById('btn-logout')?.addEventListener('click', () => {
     DB.registrarLogAuditoria('Logout de Sessão', 'Autenticação', 'Sessão administrativa encerrada pelo usuário.', DB.getPerfilAtivo());
     sessionStorage.removeItem('imob_admin_logado');
+    localStorage.removeItem('imob_admin_logado');
     location.reload();
   });
 }
@@ -4635,7 +4755,10 @@ window.processarUploadArquivoCsv = processarUploadArquivoCsv;
 window.processarUploadArquivoJson = processarUploadArquivoJson;
 window.carregarDemoShowroomPortabilidade = carregarDemoShowroomPortabilidade;
 window.confirmarExecucaoPortabilidade = confirmarExecucaoPortabilidade;
-
-
-
-
+window.alternarVisibilidadeSenhaLogin = alternarVisibilidadeSenhaLogin;
+window.abrirModalPrimeiroAcesso = abrirModalPrimeiroAcesso;
+window.fecharModalPrimeiroAcesso = fecharModalPrimeiroAcesso;
+window.salvarPrimeiroAcessoSubmit = salvarPrimeiroAcessoSubmit;
+window.abrirModalEsqueciSenha = abrirModalEsqueciSenha;
+window.fecharModalEsqueciSenha = fecharModalEsqueciSenha;
+window.redefinirSenhaSubmit = redefinirSenhaSubmit;
