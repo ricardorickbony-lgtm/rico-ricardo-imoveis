@@ -637,25 +637,57 @@ function carregarMetricasDashboard() {
 }
 
 /**
- * 4. Gestão e Tabela de Imóveis (CRUD)
+ * 4. Gestão e Tabela de Imóveis (Padrão Delphi / DBGrid NEXO Enterprise ERP)
  */
 function renderizarTabelaImoveis() {
   const container = document.getElementById('tabela-imoveis-corpo');
   if (!container) return;
 
-  const imoveis = DB.getImoveis();
+  const imoveis = DB.getImoveis() || [];
   const termoFiltro = (document.getElementById('busca-admin-imoveis')?.value || '').toLowerCase().trim();
+  const filtroFinalidade = document.getElementById('filtro-imob-finalidade')?.value || '';
+  const filtroStatus = document.getElementById('filtro-imob-status')?.value || '';
+  const filtroTipo = document.getElementById('filtro-imob-tipo')?.value || '';
 
   const filtrados = imoveis.filter(im => {
-    if (!termoFiltro) return true;
-    return `${im.codigo} ${im.titulo} ${im.bairro} ${im.tipo}`.toLowerCase().includes(termoFiltro);
+    if (termoFiltro) {
+      const texto = `${im.codigo || ''} ${im.titulo || ''} ${im.bairro || ''} ${im.tipo || ''} ${im.proprietarioNome || ''}`.toLowerCase();
+      if (!texto.includes(termoFiltro)) return false;
+    }
+    if (filtroFinalidade && im.finalidade !== filtroFinalidade) return false;
+    if (filtroStatus && im.status !== filtroStatus) return false;
+    if (filtroTipo && (im.tipo || '').toLowerCase() !== filtroTipo.toLowerCase()) return false;
+    return true;
   });
+
+  // Cálculo de Métricas Técnicas do Grid ERP
+  const totalGeral = imoveis.length;
+  const totalFiltrados = filtrados.length;
+  const totalDisponiveis = imoveis.filter(im => im.status === 'disponivel').length;
+  const totalNegociados = imoveis.filter(im => im.status === 'vendido' || im.status === 'alugado').length;
+  const vgvTotal = imoveis.reduce((acc, curr) => acc + (Number(curr.preco) || 0), 0);
+
+  // Atualizar Barra de Título e Barra de Status do ERP
+  const pillStats = document.getElementById('nexo-imob-stats-pill');
+  if (pillStats) {
+    pillStats.textContent = `${totalGeral} REGISTROS NO ESTOQUE // VGV R$ ${vgvTotal.toLocaleString('pt-BR')}`;
+  }
+  const statTotal = document.getElementById('nexo-stat-total-registros');
+  if (statTotal) statTotal.textContent = `Registros: ${totalGeral}`;
+  const statFiltrados = document.getElementById('nexo-stat-filtrados');
+  if (statFiltrados) statFiltrados.textContent = `Exibindo: ${totalFiltrados}`;
+  const statDisponiveis = document.getElementById('nexo-stat-disponiveis');
+  if (statDisponiveis) statDisponiveis.textContent = `Disponíveis: ${totalDisponiveis}`;
+  const statNegociados = document.getElementById('nexo-stat-negociados');
+  if (statNegociados) statNegociados.textContent = `Negociados: ${totalNegociados}`;
+  const statVgv = document.getElementById('nexo-stat-vgv-total');
+  if (statVgv) statVgv.textContent = `VGV Total: R$ ${vgvTotal.toLocaleString('pt-BR')}`;
 
   if (filtrados.length === 0) {
     container.innerHTML = `
       <tr>
-        <td colspan="7" class="py-8 text-center text-slate-400 text-sm">
-          Nenhum imóvel encontrado.
+        <td colspan="8" class="py-8 text-center text-slate-400 font-mono text-xs bg-slate-50">
+          Nenhum registro localizado para os filtros informados.
         </td>
       </tr>
     `;
@@ -664,63 +696,61 @@ function renderizarTabelaImoveis() {
 
   container.innerHTML = filtrados.map(im => {
     let precoExibicao = im.finalidade === 'aluguel' 
-      ? `R$ ${(im.precoAluguel || 0).toLocaleString('pt-BR')}/mês` 
-      : `R$ ${(im.preco || 0).toLocaleString('pt-BR')}`;
+      ? `R$ ${(Number(im.precoAluguel) || 0).toLocaleString('pt-BR')}/mês` 
+      : `R$ ${(Number(im.preco) || 0).toLocaleString('pt-BR')}`;
 
-    let statusBadgeClass = 'bg-emerald-100 text-emerald-800';
-    if (im.status === 'reservado') statusBadgeClass = 'bg-amber-100 text-amber-800';
-    if (im.status === 'vendido' || im.status === 'alugado') statusBadgeClass = 'bg-slate-200 text-slate-700';
+    let statusBadgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-300';
+    if (im.status === 'reservado') statusBadgeClass = 'bg-amber-100 text-amber-800 border-amber-300';
+    if (im.status === 'vendido' || im.status === 'alugado') statusBadgeClass = 'bg-slate-200 text-slate-700 border-slate-300';
+
+    const finalidadeUpper = (im.finalidade || 'venda').toUpperCase();
+    const finalidadeBadgeClass = im.finalidade === 'aluguel' 
+      ? 'bg-emerald-100 text-emerald-800 border-emerald-300' 
+      : (im.finalidade === 'lancamento' ? 'bg-purple-100 text-purple-800 border-purple-300' : 'bg-blue-100 text-blue-800 border-blue-300');
 
     return `
-      <tr class="hover:bg-slate-50/80 transition border-b border-slate-100">
-        <td class="py-3 px-4">
-          <div class="w-14 h-11 rounded-lg overflow-hidden bg-slate-900 flex-shrink-0">
+      <tr class="nexo-grid-row hover:bg-blue-50/80 transition" data-id="${im.id}">
+        <td class="text-center">
+          <input type="checkbox" class="nexo-row-checkbox w-3.5 h-3.5 rounded border-slate-300 text-blue-600 cursor-pointer" value="${im.id}">
+        </td>
+        <td class="text-center">
+          <div class="w-10 h-7 rounded border border-slate-300 overflow-hidden bg-slate-900 mx-auto">
             <img src="${im.fotoPrincipal || (im.fotos && im.fotos[0]) || 'assets/images/logo.png'}" class="w-full h-full object-cover">
           </div>
         </td>
-        <td class="py-3 px-4 font-bold text-xs text-blue-600">
-          ${im.codigo}
+        <td class="font-mono font-bold text-xs text-blue-700">
+          ${im.codigo || 'S/CÓD'}
         </td>
-        <td class="py-3 px-4">
-          <div class="font-bold text-slate-800 text-sm line-clamp-1">${im.titulo}</div>
-          <div class="text-[11px] text-slate-500">${im.bairro} • ${im.areaUtil} m² • ${im.quartos} qtos</div>
+        <td>
+          <div class="font-bold text-slate-900 text-xs truncate max-w-md">${im.titulo}</div>
+          <div class="text-[10px] text-slate-500 font-mono">${im.bairro || 'Sem Bairro'} • ${im.areaUtil || 0} m² • ${im.quartos || 0} qtos • ${im.tipo || 'Imóvel'}</div>
         </td>
-        <td class="py-3 px-4">
-          <span class="text-xs uppercase font-bold px-2 py-0.5 rounded ${im.finalidade === 'aluguel' ? 'bg-emerald-50 text-emerald-700' : (im.finalidade === 'lancamento' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700')}">
-            ${im.finalidade}
+        <td>
+          <span class="text-[10px] font-bold px-1.5 py-0.5 rounded border ${finalidadeBadgeClass}">
+            ${finalidadeUpper}
           </span>
         </td>
-        <td class="py-3 px-4 font-bold text-sm text-slate-900">
+        <td class="text-right font-mono font-bold text-xs text-slate-900">
           ${precoExibicao}
         </td>
-        <td class="py-3 px-4">
-          <select onchange="alterarStatusImovelRapido('${im.id}', this.value)" class="text-xs font-semibold rounded-lg px-2 py-1 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500 ${statusBadgeClass}">
+        <td class="text-center">
+          <select onchange="alterarStatusImovelRapido('${im.id}', this.value)" class="text-[11px] font-bold rounded px-1.5 py-0.5 border cursor-pointer ${statusBadgeClass}">
             <option value="disponivel" ${im.status === 'disponivel' ? 'selected' : ''}>Disponível</option>
             <option value="reservado" ${im.status === 'reservado' ? 'selected' : ''}>Reservado</option>
             <option value="vendido" ${im.status === 'vendido' ? 'selected' : ''}>Vendido</option>
             <option value="alugado" ${im.status === 'alugado' ? 'selected' : ''}>Alugado</option>
           </select>
         </td>
-        <td class="py-3 px-4 text-right">
-          <div class="flex items-center justify-end gap-1.5">
-            <button onclick="abrirModalSimuladorFinanciamento('${im.id}')" class="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg transition" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
-              🏦
-            </button>
-            <button onclick="abrirModalTermoVisita('${im.id}')" class="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded-lg transition" title="Emitir Termo de Reconhecimento de Visita com Assinatura Digital">
-              📝
-            </button>
-            <button onclick="gerarCopySocialImovel('${im.id}')" class="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg transition" title="Gerar Copy para Redes Sociais e WhatsApp com IA">
-              ✨
-            </button>
-            ${DB.usuarioTemPermissao('editarValoresImoveis') ? `
-              <button onclick="editarImovel('${im.id}')" class="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Editar Imóvel">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              </button>
+        <td class="text-center">
+          <div class="flex items-center justify-center gap-1">
+            <button onclick="abrirModalSimuladorFinanciamento('${im.id}')" class="p-1 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded text-xs transition" title="Simulador Caixa">🏦</button>
+            <button onclick="abrirModalTermoVisita('${im.id}')" class="p-1 text-slate-600 hover:text-indigo-700 hover:bg-indigo-100 rounded text-xs transition" title="Termo de Visita">📝</button>
+            <button onclick="gerarCopySocialImovel('${im.id}')" class="p-1 text-slate-600 hover:text-purple-700 hover:bg-purple-100 rounded text-xs transition" title="Copy IA">✨</button>
+            ${(!DB.usuarioTemPermissao || DB.usuarioTemPermissao('editarValoresImoveis')) ? `
+              <button onclick="editarImovel('${im.id}')" class="p-1 text-slate-600 hover:text-blue-700 hover:bg-blue-100 rounded text-xs transition" title="Editar Imóvel">✏️</button>
             ` : ''}
-            ${DB.usuarioTemPermissao('excluirImoveisLeads') ? `
-              <button onclick="excluirImovel('${im.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition" title="Excluir Imóvel">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-              </button>
+            ${(!DB.usuarioTemPermissao || DB.usuarioTemPermissao('excluirImoveisLeads')) ? `
+              <button onclick="excluirImovel('${im.id}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded text-xs transition" title="Excluir Imóvel">🗑️</button>
             ` : ''}
           </div>
         </td>
@@ -728,6 +758,107 @@ function renderizarTabelaImoveis() {
     `;
   }).join('');
 }
+
+/**
+ * Operações Técnicas do Toolbar do DataGrid
+ */
+function limparFiltrosImoveis() {
+  const busca = document.getElementById('busca-admin-imoveis');
+  const fin = document.getElementById('filtro-imob-finalidade');
+  const st = document.getElementById('filtro-imob-status');
+  const tp = document.getElementById('filtro-imob-tipo');
+  if (busca) busca.value = '';
+  if (fin) fin.value = '';
+  if (st) st.value = '';
+  if (tp) tp.value = '';
+  renderizarTabelaImoveis();
+}
+
+function alternarSelecaoTodosImoveis(checked) {
+  document.querySelectorAll('.nexo-row-checkbox').forEach(cb => {
+    cb.checked = checked;
+    const tr = cb.closest('tr');
+    if (tr) {
+      if (checked) tr.classList.add('nexo-row-selected');
+      else tr.classList.remove('nexo-row-selected');
+    }
+  });
+}
+
+function obterImoveisSelecionadosIds() {
+  const selecionados = [];
+  document.querySelectorAll('.nexo-row-checkbox:checked').forEach(cb => {
+    if (cb.value) selecionados.push(cb.value);
+  });
+  return selecionados;
+}
+
+function editarImovelPrimeiroSelecionado() {
+  if (DB.usuarioTemPermissao && !DB.usuarioTemPermissao('editarValoresImoveis')) {
+    alert('Acesso negado: seu perfil não possui permissão para editar imóveis.');
+    return;
+  }
+  const ids = obterImoveisSelecionadosIds();
+  if (ids.length === 0) {
+    alert('Selecione ao menos um imóvel na grade para editar.');
+    return;
+  }
+  editarImovel(ids[0]);
+}
+
+function excluirImovelPrimeiroSelecionado() {
+  if (DB.usuarioTemPermissao && !DB.usuarioTemPermissao('excluirImoveisLeads')) {
+    alert('Acesso negado: seu perfil não possui permissão para excluir registros.');
+    return;
+  }
+  const ids = obterImoveisSelecionadosIds();
+  if (ids.length === 0) {
+    alert('Selecione ao menos um imóvel na grade para excluir.');
+    return;
+  }
+  if (confirm(`Confirma a exclusão de ${ids.length} imóvel(is) selecionado(s)?`)) {
+    ids.forEach(id => DB.excluirImovel(id));
+    renderizarTabelaImoveis();
+    atualizarBadgesContadoresAbas();
+    carregarMetricasDashboard();
+  }
+}
+
+function imprimirGridImoveis() {
+  window.print();
+}
+
+function exportarImoveisCSV() {
+  try {
+    const imoveis = DB.getImoveis() || [];
+    if (imoveis.length === 0) {
+      alert('Nenhum imóvel disponível para exportação.');
+      return;
+    }
+    const header = ['Codigo', 'Titulo', 'Finalidade', 'Tipo', 'Bairro', 'Preco', 'PrecoAluguel', 'Status', 'AreaUtil', 'Quartos'];
+    const rows = imoveis.map(im => [
+      `"${im.codigo || ''}"`,
+      `"${(im.titulo || '').replace(/"/g, '""')}"`,
+      `"${im.finalidade || ''}"`,
+      `"${im.tipo || ''}"`,
+      `"${im.bairro || ''}"`,
+      im.preco || 0,
+      im.precoAluguel || 0,
+      `"${im.status || ''}"`,
+      im.areaUtil || 0,
+      im.quartos || 0
+    ]);
+    const csvContent = '\uFEFF' + [header.join(';'), ...rows.map(r => r.join(';'))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `estoque-imoveis-nexo-erp-${new Date().toISOString().slice(0, 10)}.csv`;
+    link.click();
+  } catch (e) {
+    alert('Erro ao exportar CSV: ' + e.message);
+  }
+}
+
 
 function alterarStatusImovelRapido(id, novoStatus) {
   const im = DB.atualizarImovel(id, { status: novoStatus });
@@ -5249,3 +5380,11 @@ function inicializarMdiJanelasFlutuantes() {
 window.atualizarBadgesContadoresAbas = atualizarBadgesContadoresAbas;
 window.iniciarRelogioSistemaNexo = iniciarRelogioSistemaNexo;
 window.inicializarMdiJanelasFlutuantes = inicializarMdiJanelasFlutuantes;
+window.limparFiltrosImoveis = limparFiltrosImoveis;
+window.alternarSelecaoTodosImoveis = alternarSelecaoTodosImoveis;
+window.obterImoveisSelecionadosIds = obterImoveisSelecionadosIds;
+window.editarImovelPrimeiroSelecionado = editarImovelPrimeiroSelecionado;
+window.excluirImovelPrimeiroSelecionado = excluirImovelPrimeiroSelecionado;
+window.imprimirGridImoveis = imprimirGridImoveis;
+window.exportarImoveisCSV = exportarImoveisCSV;
+

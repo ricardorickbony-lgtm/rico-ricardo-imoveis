@@ -262,42 +262,42 @@
     </div>
 
     <!-- Navegação de Abas do SaaS (Padrão NEXO Enterprise ERP) -->
-    <div class="bg-white border-b border-slate-200 px-4 sm:px-8">
-      <nav class="flex items-center gap-1.5 overflow-x-auto py-2.5">
-        <button data-tab="aba-dashboard" class="tab-admin-nav bg-blue-600 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 shadow-sm whitespace-nowrap">
+    <div class="nexo-tabs-container">
+      <nav class="flex items-center gap-1 overflow-x-auto py-1">
+        <button data-tab="aba-dashboard" class="tab-admin-nav bg-blue-600 text-white font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>📊 Dashboard</span>
         </button>
-        <button data-tab="aba-imoveis" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-imoveis" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🏢 Imóveis</span>
           <span id="badge-tab-imoveis" class="nexo-tab-badge bg-slate-200 text-slate-700">0</span>
         </button>
-        <button data-tab="aba-portais" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-portais" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🌐 Portais</span>
           <span id="badge-tab-portais" class="nexo-tab-badge bg-blue-100 text-blue-700">6</span>
         </button>
-        <button data-tab="aba-leads" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-leads" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🎯 Pipeline & Leads</span>
           <span id="badge-tab-leads" class="nexo-tab-badge bg-amber-100 text-amber-800">0</span>
         </button>
-        <button data-tab="aba-locacao" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-locacao" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🔑 Locação & DIMOB</span>
           <span id="badge-tab-locacao" class="nexo-tab-badge bg-emerald-100 text-emerald-800">0</span>
         </button>
-        <button data-tab="aba-vistorias" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-vistorias" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>📋 Vistorias</span>
           <span id="badge-tab-vistorias" class="nexo-tab-badge bg-slate-200 text-slate-700">0</span>
         </button>
-        <button data-tab="aba-sofia" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-sofia" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🤖 Sofia IA</span>
           <span class="inline-flex w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sofia Ativa 24h"></span>
         </button>
-        <button data-tab="aba-seguranca" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-seguranca" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>🔐 Segurança & LGPD</span>
         </button>
-        <button data-tab="aba-config" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-config" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>⚙️ Config & Pixel</span>
         </button>
-        <button data-tab="aba-backup" class="tab-admin-nav text-slate-600 hover:bg-slate-100 font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+        <button data-tab="aba-backup" class="tab-admin-nav text-slate-600 font-bold text-xs sm:text-sm px-4 py-2 transition flex items-center gap-2 whitespace-nowrap">
           <span>💾 Backup & Reset</span>
         </button>
       </nav>
@@ -316,8 +316,8 @@
       </div>
     </div>
 
-    <!-- Conteúdo Principal do SaaS -->
-    <main class="flex-grow p-4 sm:p-8 max-w-[1560px] mx-auto w-full space-y-8">
+    <!-- Conteúdo Principal do SaaS (Área de Trabalho ERP) -->
+    <main class="nexo-erp-workbench flex-grow p-3 sm:p-5 max-w-[1720px] mx-auto w-full space-y-4">
       
       <!-- ===================================================================== -->
       <!-- ABA 1: DASHBOARD & MÉTRICAS EM TEMPO REAL                             -->
@@ -373,58 +373,174 @@
       </section>
 
       <!-- ===================================================================== -->
-      <!-- ABA 2: GERENCIAR IMÓVEIS (CRUD COMPLETO)                              -->
+      <!-- ABA 2: GERENCIAR IMÓVEIS (PADRÃO OFICIAL NEXO ENTERPRISE ERP)        -->
       <!-- ===================================================================== -->
-      <section id="aba-imoveis" class="painel-aba-conteudo hidden space-y-6">
+      <section id="aba-imoveis" class="painel-aba-conteudo hidden space-y-4">
         
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h2 class="text-xl font-bold text-slate-900">Catálogo de Imóveis</h2>
-            <p class="text-xs text-slate-500">Cadastre, edite fotos, altere valores ou pause imóveis já vendidos</p>
+        <!-- JANELA DE MÓDULO ERP: CADASTRO E CONTROLE DE ESTOQUE -->
+        <div class="nexo-erp-window">
+          
+          <!-- BARRA DE TÍTULO DA JANELA EXECUTIVA -->
+          <div class="nexo-erp-titlebar">
+            <div class="flex items-center gap-2.5">
+              <span class="nexo-erp-title-icon">🏢</span>
+              <span class="nexo-erp-title-text">MÓDULO OPERACIONAL: CADASTRO E CONTROLE DE ESTOQUE // NEXO CRM ENTERPRISE [v3.4]</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="nexo-erp-badge-pill" id="nexo-imob-stats-pill">CARREGANDO ESTOQUE...</span>
+              <div class="flex items-center gap-1">
+                <button type="button" class="nexo-window-ctrl-btn" title="Minimizar painel">_</button>
+                <button type="button" class="nexo-window-ctrl-btn" title="Expandir painel">🗖</button>
+              </div>
+            </div>
           </div>
 
-          <div class="flex items-center gap-3">
-            <input 
-              type="text" 
-              id="busca-admin-imoveis" 
-              placeholder="Buscar por código, título ou bairro..." 
-              class="bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 w-64 shadow-sm"
-            >
-            <button onclick="abrirModalSimuladorFinanciamento()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
-              <span>🏦 Simulador Caixa</span>
-            </button>
-            <button onclick="abrirModalTermoVisita()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
-              <span>📝 Termo de Visita</span>
-            </button>
-            <button id="btn-abrir-modal-portabilidade" onclick="abrirModalPortabilidadeImoveis()" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs sm:text-sm px-3.5 py-2 rounded-xl transition shadow flex items-center gap-1.5" title="Portabilidade em Massa de Imóveis (Feed XML Zap/VivaReal ou Planilha Excel/CSV)">
-              <span>📥 Portabilidade em Massa</span>
-            </button>
-            <button id="btn-abrir-modal-novo-imovel" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm px-4 py-2 rounded-xl transition shadow flex items-center gap-1.5">
-              <span>+ Novo Imóvel</span>
+          <!-- BARRA DE FERRAMENTAS / COMMAND RIBBON DO ERP -->
+          <div class="nexo-erp-toolbar">
+            <div class="nexo-toolbar-group">
+              <button id="btn-abrir-modal-novo-imovel" class="nexo-btn-erp nexo-btn-primary" title="Cadastrar Novo Imóvel no Sistema">
+                <span>➕</span>
+                <span>Novo Imóvel (F2)</span>
+              </button>
+              <button onclick="editarImovelPrimeiroSelecionado()" class="nexo-btn-erp" title="Editar Imóvel Selecionado">
+                <span>✏️</span>
+                <span>Editar</span>
+              </button>
+              <button onclick="excluirImovelPrimeiroSelecionado()" class="nexo-btn-erp text-rose-600 hover:text-rose-700" title="Excluir Imóvel Selecionado">
+                <span>🗑️</span>
+                <span>Excluir</span>
+              </button>
+            </div>
+
+            <div class="nexo-toolbar-separator"></div>
+
+            <div class="nexo-toolbar-group">
+              <button id="btn-abrir-modal-portabilidade" onclick="abrirModalPortabilidadeImoveis()" class="nexo-btn-erp" title="Portabilidade em Massa de Imóveis (Feed XML Zap/VivaReal ou Planilha Excel/CSV)">
+                <span>📥</span>
+                <span>Importar / Portabilidade</span>
+              </button>
+              <button onclick="abrirModalSimuladorFinanciamento()" class="nexo-btn-erp" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
+                <span>🏦</span>
+                <span>Simulador Caixa</span>
+              </button>
+              <button onclick="abrirModalTermoVisita()" class="nexo-btn-erp" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
+                <span>📝</span>
+                <span>Termo de Visita</span>
+              </button>
+              <button onclick="document.querySelector('.tab-admin-nav[data-tab=\'aba-portais\']').click()" class="nexo-btn-erp" title="Feed XML e Sincronização com Portais">
+                <span>📡</span>
+                <span>Sincronizar Portais</span>
+              </button>
+            </div>
+
+            <div class="nexo-toolbar-separator"></div>
+
+            <div class="nexo-toolbar-group">
+              <button onclick="imprimirGridImoveis()" class="nexo-btn-erp" title="Imprimir Relatório do Estoque">
+                <span>🖨️</span>
+                <span>Imprimir</span>
+              </button>
+              <button onclick="exportarImoveisCSV()" class="nexo-btn-erp" title="Exportar Tabela para Planilha CSV / Excel">
+                <span>📊</span>
+                <span>Exportar CSV</span>
+              </button>
+              <button onclick="renderizarTabelaImoveis()" class="nexo-btn-erp" title="Atualizar Grade de Dados">
+                <span>🔄</span>
+                <span>Atualizar</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- BARRA DE FILTROS RÁPIDOS DO DATA GRID -->
+          <div class="nexo-erp-filterbar">
+            <div class="flex items-center gap-2 flex-grow max-w-sm">
+              <span class="nexo-filter-label">🔍 Localizar:</span>
+              <input 
+                type="text" 
+                id="busca-admin-imoveis" 
+                placeholder="Código, título, bairro ou características..." 
+                class="nexo-filter-input"
+                oninput="renderizarTabelaImoveis()"
+              >
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="nexo-filter-label">Finalidade:</span>
+              <select id="filtro-imob-finalidade" onchange="renderizarTabelaImoveis()" class="nexo-filter-select">
+                <option value="">Todas as Finalidades</option>
+                <option value="venda">Venda</option>
+                <option value="aluguel">Locação</option>
+                <option value="lancamento">Lançamento</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="nexo-filter-label">Status:</span>
+              <select id="filtro-imob-status" onchange="renderizarTabelaImoveis()" class="nexo-filter-select">
+                <option value="">Todos os Status</option>
+                <option value="disponivel">Disponível</option>
+                <option value="reservado">Reservado</option>
+                <option value="vendido">Vendido</option>
+                <option value="alugado">Alugado</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <span class="nexo-filter-label">Tipo:</span>
+              <select id="filtro-imob-tipo" onchange="renderizarTabelaImoveis()" class="nexo-filter-select">
+                <option value="">Todos os Tipos</option>
+                <option value="casa">Casa</option>
+                <option value="apartamento">Apartamento</option>
+                <option value="cobertura">Cobertura</option>
+                <option value="terreno">Terreno</option>
+                <option value="comercial">Comercial</option>
+              </select>
+            </div>
+
+            <button onclick="limparFiltrosImoveis()" class="nexo-btn-clear-filter" title="Limpar todos os filtros">
+              ✕ Limpar
             </button>
           </div>
-        </div>
 
-        <!-- Tabela de Imóveis -->
-        <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-          <div class="overflow-x-auto">
-            <table class="nexo-datagrid">
+          <!-- O DATA GRID CORPORATIVO (ESTILO DELPHI / DBGRID) -->
+          <div class="nexo-grid-viewport">
+            <table class="nexo-datagrid" id="tabela-imoveis-grid">
               <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-                  <th class="py-3 px-4">Foto</th>
-                  <th class="py-3 px-4">Código</th>
-                  <th class="py-3 px-4">Título / Características</th>
-                  <th class="py-3 px-4">Finalidade</th>
-                  <th class="py-3 px-4">Valor</th>
-                  <th class="py-3 px-4">Status</th>
-                  <th class="py-3 px-4 text-right">Ações</th>
+                <tr>
+                  <th class="w-10 text-center"><input type="checkbox" id="check-todos-imoveis" onclick="alternarSelecaoTodosImoveis(this.checked)"></th>
+                  <th class="w-16 text-center">Foto</th>
+                  <th class="w-24">Código ↕</th>
+                  <th>Título / Especificações do Imóvel ↕</th>
+                  <th class="w-24">Finalidade ↕</th>
+                  <th class="w-32 text-right">Valor Oficial (R$) ↕</th>
+                  <th class="w-28 text-center">Status ↕</th>
+                  <th class="w-40 text-center">Ações Operacionais</th>
                 </tr>
               </thead>
-              <tbody id="tabela-imoveis-corpo" class="text-xs">
-                <!-- Populado dinamicamente -->
+              <tbody id="tabela-imoveis-corpo">
+                <!-- Populado dinamicamente com estilo Delphi/DBGrid -->
               </tbody>
             </table>
           </div>
+
+          <!-- BARRA DE STATUS / RODAPÉ TÉCNICO DO ERP -->
+          <div class="nexo-erp-statusbar">
+            <div class="flex items-center gap-3">
+              <span id="nexo-stat-total-registros">Registros: 33</span>
+              <span>|</span>
+              <span id="nexo-stat-filtrados">Exibindo: 33</span>
+              <span>|</span>
+              <span id="nexo-stat-disponiveis" class="text-emerald-700 font-bold">Disponíveis: 28</span>
+              <span>|</span>
+              <span id="nexo-stat-negociados" class="text-slate-600">Negociados: 5</span>
+            </div>
+            <div class="flex items-center gap-4">
+              <span id="nexo-stat-vgv-total" class="font-bold text-slate-800">VGV Total: R$ 0</span>
+              <span>|</span>
+              <span class="text-emerald-600 font-bold">● Sincronizado</span>
+            </div>
+          </div>
+
         </div>
 
       </section>
