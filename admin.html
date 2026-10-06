@@ -193,11 +193,20 @@
         </div>
       </div>
 
-      <!-- Seletor de Perfil RBAC (Segurança Multi-Nível) e Links de Navegação -->
+      <!-- Seletor de Perfil RBAC (Segurança Multi-Nível) e Identificação do Usuário -->
       <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
         
-        <!-- Seletor de Perfil RBAC -->
-        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+        <!-- Identificação do Usuário Ativo Logado -->
+        <div id="usuario-logado-badge" class="flex items-center gap-2 bg-slate-50 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs shadow-xs">
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px]" id="header-avatar-sigla">RR</div>
+          <div class="leading-tight text-left">
+            <span class="font-bold text-slate-800 block text-[11px] truncate max-w-[120px] sm:max-w-[160px]" id="header-usuario-nome">Rico Ricardo</span>
+            <span class="text-[9px] text-blue-700 font-bold block" id="header-usuario-cargo">👑 Diretor</span>
+          </div>
+        </div>
+
+        <!-- Seletor de Perfil RBAC (Visível para Direção / Simulação) -->
+        <div id="container-seletor-rbac" class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
           <span class="text-[10px] font-bold text-slate-500 pl-2 hidden lg:inline">Perfil:</span>
           <button id="btn-perfil-diretor" onclick="trocarPerfilSeguranca('diretor')" class="btn-perfil-toggle px-2.5 py-1 rounded-lg text-xs font-bold transition bg-white text-blue-700 shadow-sm" title="Acesso Irrestrito (Dono / Diretor)">
             👑 Diretor
@@ -774,21 +783,25 @@
           </div>
         </div>
 
-        <!-- SEÇÃO: ROLETA DE DISTRIBUIÇÃO DE LEADS (ROUND-ROBIN) -->
+        <!-- SEÇÃO: GESTÃO DE EQUIPE, CARGOS & ROLETA DE DISTRIBUIÇÃO DE LEADS -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-[10px] font-bold uppercase tracking-wider mb-1 border border-blue-100">
+                <span>👥 Governança &amp; RBAC</span>
+              </div>
               <h3 class="font-bold text-slate-900 text-base flex items-center gap-2">
-                <span>🔄 Roleta de Corretores (Distribuição Automática de Leads)</span>
+                <span>Gestão da Equipe &amp; Roleta Inteligente de Leads</span>
               </h3>
-              <p class="text-xs text-slate-500">Os leads recebidos pelo site e WhatsApp são direcionados em rodízio justo e transparente</p>
+              <p class="text-xs text-slate-500">Distribuição automática de clientes, controle de cargos e envio de convites de acesso via WhatsApp</p>
             </div>
-            <button id="btn-cadastrar-corretor" class="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm">
-              + Cadastrar Corretor na Roleta
+            <button id="btn-cadastrar-corretor" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow-sm flex items-center gap-2 self-start sm:self-auto">
+              <span>+</span>
+              <span>Cadastrar Membro na Equipe</span>
             </button>
           </div>
 
-          <div id="grid-corretores-roleta" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div id="grid-corretores-roleta" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
             <!-- Populado via JS -->
           </div>
         </div>
@@ -2118,47 +2131,75 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- MODAL DE NOVO CORRETOR NA ROLETA                                          -->
+  <!-- MODAL DE NOVO CORRETOR / MEMBRO DA EQUIPE COM CARGO & LOGIN               -->
   <!-- ========================================================================= -->
   <div id="modal-novo-corretor" class="modal-overlay">
-    <div class="modal-content relative !max-w-md p-6 sm:p-8 space-y-5">
+    <div class="modal-content relative !max-w-lg p-6 sm:p-8 space-y-5 text-left">
       <button onclick="document.getElementById('modal-novo-corretor').classList.remove('active')" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">
         ✕
       </button>
 
       <div>
-        <h3 class="text-lg font-black text-slate-900">Cadastrar Corretor na Roleta</h3>
-        <p class="text-xs text-slate-500">Adicione um profissional para receber leads automaticamente</p>
+        <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 text-[10px] font-bold uppercase tracking-wider mb-1">
+          <span>👥 Gestão de Equipe &amp; Governança</span>
+        </div>
+        <h3 class="text-lg font-black text-slate-900">Cadastrar Profissional na Equipe</h3>
+        <p class="text-xs text-slate-500">Defina os dados, o cargo de acesso e a senha de login do corretor no CRM.</p>
       </div>
 
-      <form id="form-salvar-corretor" class="space-y-4 text-xs">
+      <form id="form-salvar-corretor" class="space-y-3.5 text-xs">
         <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Nome do Corretor</label>
-          <input type="text" id="input-corretor-nome" required placeholder="Ex: Roberto Silva" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+          <label class="block font-bold text-slate-700 uppercase mb-1">Nome Completo do Profissional</label>
+          <input type="text" id="input-corretor-nome" required placeholder="Ex: Roberto Silva" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Cargo / Nível de Acesso (RBAC)</label>
+            <select id="input-corretor-perfil" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-bold focus:outline-none focus:ring-2 focus:ring-blue-600">
+              <option value="corretor">💼 Corretor (Carteira Própria &amp; Sigilo)</option>
+              <option value="gerente">👔 Gerente (Supervisão &amp; Relatórios)</option>
+              <option value="diretor">👑 Diretor (Acesso Total &amp; Financeiro)</option>
+            </select>
+          </div>
           <div>
             <label class="block font-bold text-slate-700 uppercase mb-1">CRECI</label>
-            <input type="text" id="input-corretor-creci" required placeholder="Ex: 215.890-F" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+            <input type="text" id="input-corretor-creci" required placeholder="Ex: 215.890-F" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">E-mail para Login no CRM</label>
+            <input type="email" id="input-corretor-email" required placeholder="roberto@imobiliaria.com.br" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 uppercase mb-1">WhatsApp</label>
-            <input type="text" id="input-corretor-wa" required placeholder="5511970558412" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+            <label class="block font-bold text-slate-700 uppercase mb-1">WhatsApp com DDD</label>
+            <input type="tel" id="input-corretor-wa" required placeholder="(11) 97055-8412" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
           </div>
         </div>
 
-        <div>
-          <label class="block font-bold text-slate-700 uppercase mb-1">Especialidade / Foco</label>
-          <input type="text" id="input-corretor-especialidade" placeholder="Ex: Lançamentos & Médio Padrão" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Senha Inicial de Acesso</label>
+            <input type="password" id="input-corretor-senha" required minlength="4" value="123456" placeholder="Mínimo 4 dígitos..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 uppercase mb-1">Especialidade / Foco</label>
+            <input type="text" id="input-corretor-especialidade" placeholder="Ex: Lançamentos &amp; Alto Padrão" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-600">
+          </div>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
-          <button type="button" onclick="document.getElementById('modal-novo-corretor').classList.remove('active')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2 rounded-xl transition">
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-xl text-[11px] text-blue-900">
+          💡 <strong>Blindagem Automática:</strong> O corretor receberá os leads da roleta e só poderá ver os clientes dele. Dados de faturamento, download de planilhas e contato do proprietário ficarão ocultos.
+        </div>
+
+        <div class="pt-2 border-t border-slate-200 flex justify-end gap-2">
+          <button type="button" onclick="document.getElementById('modal-novo-corretor').classList.remove('active')" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-4 py-2.5 rounded-xl transition">
             Cancelar
           </button>
-          <button type="submit" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-2 rounded-xl transition shadow">
-            Ativar na Roleta
+          <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition shadow flex items-center gap-1.5">
+            <span>💾 Salvar e Ativar Acesso</span>
           </button>
         </div>
       </form>

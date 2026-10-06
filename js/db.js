@@ -666,14 +666,17 @@ const IMOVEIS_INICIAIS = [
   }
 ];
 
-// Equipe de Corretores da Imobiliária (Roleta de Leads / Round-Robin)
+// Equipe de Corretores da Imobiliária (Roleta de Leads / Round-Robin com RBAC)
 const CORRETORES_INICIAIS = [
   {
     id: 'corretor-1',
     nome: 'Rico Ricardo',
     creci: '038613-J',
     whatsapp: '5511914879393',
+    telefone: '5511914879393',
     email: 'contato@ricoricardoimoveis.com.br',
+    perfil: 'diretor',
+    senha: 'admin',
     especialidade: 'Direção Geral & Vendas',
     leadsAtendidos: 18,
     ativo: true,
@@ -681,10 +684,13 @@ const CORRETORES_INICIAIS = [
   },
   {
     id: 'corretor-2',
-    nome: 'Atendimento & Vendas',
-    creci: '038613-J',
-    whatsapp: '5511914879393',
-    email: 'contato@ricoricardoimoveis.com.br',
+    nome: 'Carlos Prado',
+    creci: '215.890-F',
+    whatsapp: '5511970558412',
+    telefone: '5511970558412',
+    email: 'carlos@ricoricardoimoveis.com.br',
+    perfil: 'corretor',
+    senha: '123456',
     especialidade: 'Casas, Sobrados & Apartamentos em Santo André',
     leadsAtendidos: 14,
     ativo: true,
@@ -692,14 +698,17 @@ const CORRETORES_INICIAIS = [
   },
   {
     id: 'corretor-3',
-    nome: 'Plantão de Locação',
-    creci: '038613-J',
-    whatsapp: '5511914879393',
-    email: 'contato@ricoricardoimoveis.com.br',
-    especialidade: 'Administração de Locações e Contratos',
+    nome: 'Mariana Alves',
+    creci: '189.442-F',
+    whatsapp: '5511988443322',
+    telefone: '5511988443322',
+    email: 'mariana@ricoricardoimoveis.com.br',
+    perfil: 'gerente',
+    senha: '123456',
+    especialidade: 'Supervisão de Vendas & Locações',
     leadsAtendidos: 9,
     ativo: true,
-    foto: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=256&q=80'
+    foto: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=256&q=80'
   }
 ];
 
@@ -1473,9 +1482,18 @@ const DB = {
     if (!corretor.id) corretor.id = 'corretor-' + Date.now();
     if (!corretor.leadsAtendidos) corretor.leadsAtendidos = 0;
     if (corretor.ativo === undefined) corretor.ativo = true;
+    if (!corretor.perfil) corretor.perfil = 'corretor';
+    if (!corretor.senha) corretor.senha = '123456';
+    if (!corretor.telefone && corretor.whatsapp) corretor.telefone = corretor.whatsapp;
     corretores.push(corretor);
     this.salvarCorretores(corretores);
     return corretor;
+  },
+
+  excluirCorretor(id) {
+    const corretores = this.getCorretores().filter(c => c.id !== id);
+    this.salvarCorretores(corretores);
+    return corretores;
   },
 
   obterProximoCorretorRoleta() {
@@ -2042,12 +2060,38 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       return { valido: true, usuario: uMaster };
     }
 
-    // 2. Senha do Administrador / Diretor Principal
+    // 2. Verifica se é um membro da equipe (Corretor, Gerente ou Diretor na Roleta)
+    const corretores = this.getCorretores();
+    const corretorAchado = corretores.find(c => 
+      (c.email && c.email.toLowerCase() === emailLimpo) || 
+      (c.telefone && c.telefone.replace(/\D/g, '') === emailLimpo.replace(/\D/g, '')) ||
+      (c.whatsapp && c.whatsapp.replace(/\D/g, '') === emailLimpo.replace(/\D/g, ''))
+    );
+    if (corretorAchado) {
+      const senhaCorretor = (corretorAchado.senha || '').trim() || '123456';
+      if (senhaLimpa === senhaCorretor) {
+        const perfilMembro = corretorAchado.perfil || 'corretor';
+        const uCorretor = {
+          id: corretorAchado.id,
+          nome: corretorAchado.nome,
+          email: corretorAchado.email || emailLimpo,
+          telefone: corretorAchado.telefone || corretorAchado.whatsapp,
+          whatsapp: corretorAchado.whatsapp,
+          perfil: perfilMembro
+        };
+        this.salvarUsuarioAtivo(uCorretor);
+        this.salvarPerfilAtivo(perfilMembro);
+        return { valido: true, usuario: uCorretor };
+      } else {
+        return { valido: false, motivo: `Senha incorreta para ${corretorAchado.nome}. Por favor, confira ou solicite a senha ao Diretor.` };
+      }
+    }
+
+    // 3. Senha do Administrador / Diretor Principal
     const senhaSalva = (localStorage.getItem(STORAGE_SENHA_KEY) || '').trim() || 'admin123';
     const uPrincipal = this.getUsuarioPrincipal();
 
     if (senhaLimpa === senhaSalva) {
-      // Aceita qualquer e-mail se a senha coincidir (para total flexibilidade na demo e no primeiro acesso)
       const uLogado = {
         nome: uPrincipal.nome || 'Diretor Responsável',
         email: emailLimpo || uPrincipal.email || 'admin@nexocrm.com.br',
@@ -2056,27 +2100,6 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       this.salvarUsuarioAtivo(uLogado);
       this.salvarPerfilAtivo('diretor');
       return { valido: true, usuario: uLogado };
-    }
-
-    // 3. Verifica se é um corretor da equipe cadastrado (DB.getCorretores())
-    const corretores = this.getCorretores();
-    const corretorAchado = corretores.find(c => 
-      (c.email && c.email.toLowerCase() === emailLimpo) || 
-      (c.telefone && c.telefone.replace(/\D/g, '') === emailLimpo.replace(/\D/g, ''))
-    );
-    if (corretorAchado) {
-      const senhaCorretor = (corretorAchado.senha || '').trim() || senhaSalva;
-      if (senhaLimpa === senhaCorretor) {
-        const uCorretor = {
-          nome: corretorAchado.nome,
-          email: corretorAchado.email || emailLimpo,
-          telefone: corretorAchado.telefone,
-          perfil: 'corretor'
-        };
-        this.salvarUsuarioAtivo(uCorretor);
-        this.salvarPerfilAtivo('corretor');
-        return { valido: true, usuario: uCorretor };
-      }
     }
 
     return { valido: false, motivo: 'E-mail ou senha incorretos. Verifique suas credenciais ou clique em "Primeiro Acesso".' };

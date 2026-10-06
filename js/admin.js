@@ -343,9 +343,38 @@ function redefinirSenhaSubmit(event) {
   }
 }
 
+function atualizarHeaderUsuarioLogado() {
+  const usuario = DB.getUsuarioAtivo ? DB.getUsuarioAtivo() : null;
+  const perfil = DB.getPerfilAtivo ? DB.getPerfilAtivo() : 'diretor';
+  const nomeEl = document.getElementById('header-usuario-nome');
+  const cargoEl = document.getElementById('header-usuario-cargo');
+  const siglaEl = document.getElementById('header-avatar-sigla');
+  const rbacContainer = document.getElementById('container-seletor-rbac');
+
+  if (usuario) {
+    if (nomeEl) nomeEl.textContent = usuario.nome || 'Administrador';
+    const cargoFormatado = usuario.perfil === 'diretor' ? '👑 Diretor' : (usuario.perfil === 'gerente' ? '👔 Gerente' : '💼 Corretor');
+    if (cargoEl) cargoEl.textContent = cargoFormatado;
+    if (siglaEl) {
+      const parts = (usuario.nome || 'Admin').trim().split(/\s+/);
+      const s = (parts[0]?.[0] || 'A') + (parts.length > 1 ? (parts[parts.length - 1]?.[0] || '') : (parts[0]?.[1] || ''));
+      siglaEl.textContent = s.toUpperCase();
+    }
+    // Trava de governança: Corretores têm o seletor oculto para impedir auto-promoção
+    if (rbacContainer) {
+      if (usuario.perfil === 'corretor') {
+        rbacContainer.style.display = 'none';
+      } else {
+        rbacContainer.style.display = 'flex';
+      }
+    }
+  }
+}
+
 function exibirPainelPrincipal() {
   document.getElementById('secao-login')?.classList.add('hidden');
   document.getElementById('painel-admin-conteudo')?.classList.remove('hidden');
+  atualizarHeaderUsuarioLogado();
   aplicarPerfilSeguranca(DB.getPerfilAtivo());
   carregarMetricasDashboard();
   renderizarTabelaImoveis();
@@ -453,6 +482,8 @@ function configurarEventosLogin() {
     DB.registrarLogAuditoria('Logout de Sessão', 'Autenticação', 'Sessão administrativa encerrada pelo usuário.', DB.getPerfilAtivo());
     sessionStorage.removeItem('imob_admin_logado');
     localStorage.removeItem('imob_admin_logado');
+    sessionStorage.removeItem('ricoricardo_usuario_ativo_v1');
+    localStorage.removeItem('ricoricardo_usuario_ativo_v1');
     location.reload();
   });
 }
@@ -931,7 +962,13 @@ function renderizarTabelaLeads() {
 
   let leads = DB.getLeads();
   if (!DB.usuarioTemPermissao('verLeadsOutrosCorretores')) {
-    leads = leads.filter(l => !l.corretor || l.corretor === 'Plantão' || l.corretor.includes('Corretor') || l.corretor === 'Carlos Prado');
+    const usuarioAtivo = DB.getUsuarioAtivo ? DB.getUsuarioAtivo() : null;
+    const nomeCorretor = (usuarioAtivo?.nome || '').toLowerCase().trim();
+    leads = leads.filter(l => {
+      if (!l.corretor || l.corretor === 'Plantão') return true;
+      if (!nomeCorretor) return true;
+      return l.corretor.toLowerCase().includes(nomeCorretor);
+    });
   }
 
   if (leads.length === 0) {
@@ -1067,7 +1104,13 @@ function excluirLead(id) {
 function renderizarPipelineKanban() {
   let leads = DB.getLeads();
   if (!DB.usuarioTemPermissao('verLeadsOutrosCorretores')) {
-    leads = leads.filter(l => !l.corretor || l.corretor === 'Plantão' || l.corretor.includes('Corretor') || l.corretor === 'Carlos Prado');
+    const usuarioAtivo = DB.getUsuarioAtivo ? DB.getUsuarioAtivo() : null;
+    const nomeCorretor = (usuarioAtivo?.nome || '').toLowerCase().trim();
+    leads = leads.filter(l => {
+      if (!l.corretor || l.corretor === 'Plantão') return true;
+      if (!nomeCorretor) return true;
+      return l.corretor.toLowerCase().includes(nomeCorretor);
+    });
   }
   const metricas = DB.calcularMetricasPipeline();
 
@@ -1603,30 +1646,71 @@ function configurarPipelineKanbanERoleta() {
     carregarMetricasDashboard();
   });
 
-  // Modal Novo Corretor
+  // Modal Novo Corretor / Membro da Equipe
   document.getElementById('btn-cadastrar-corretor')?.addEventListener('click', () => {
+    document.getElementById('form-salvar-corretor')?.reset();
+    const selPerfil = document.getElementById('input-corretor-perfil');
+    if (selPerfil) selPerfil.value = 'corretor';
+    const pwdInput = document.getElementById('input-corretor-senha');
+    if (pwdInput) pwdInput.value = '123456';
     document.getElementById('modal-novo-corretor')?.classList.add('active');
   });
 
   document.getElementById('form-salvar-corretor')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const nome = document.getElementById('input-corretor-nome')?.value.trim();
+    const perfil = document.getElementById('input-corretor-perfil')?.value || 'corretor';
     const creci = document.getElementById('input-corretor-creci')?.value.trim();
+    const email = document.getElementById('input-corretor-email')?.value.trim().toLowerCase();
     const whatsapp = document.getElementById('input-corretor-wa')?.value.trim();
+    const senha = document.getElementById('input-corretor-senha')?.value.trim() || '123456';
     const especialidade = document.getElementById('input-corretor-especialidade')?.value.trim();
 
-    DB.adicionarCorretor({
+    if (!nome || !email || !whatsapp) {
+      alert('Por favor, preencha os campos obrigatórios (Nome, E-mail e WhatsApp).');
+      return;
+    }
+
+    const corretores = DB.getCorretores();
+    const jaExiste = corretores.find(c => c.email && c.email.toLowerCase() === email);
+    if (jaExiste) {
+      alert(`Já existe um profissional cadastrado com o e-mail "${email}". Por favor, utilize outro endereço.`);
+      return;
+    }
+
+    const novoMembro = DB.adicionarCorretor({
       nome,
+      perfil,
       creci,
+      email,
       whatsapp,
+      telefone: whatsapp,
+      senha,
       especialidade: especialidade || 'Atendimento Geral',
       ativo: true,
       leadsAtendidos: 0
     });
 
+    DB.registrarLogAuditoria(
+      'Membro de Equipe Cadastrado',
+      'Governança & RBAC',
+      `${nome} cadastrado com cargo ${perfil.toUpperCase()} e login ${email}.`,
+      DB.getPerfilAtivo()
+    );
+
     document.getElementById('modal-novo-corretor')?.classList.remove('active');
     document.getElementById('form-salvar-corretor')?.reset();
     renderizarRoletaCorretores();
+    renderizarPipelineKanban();
+
+    const perfilNome = perfil === 'diretor' ? 'Diretor' : (perfil === 'gerente' ? 'Gerente' : 'Corretor');
+    mostrarToastFeedback(`✅ ${nome} adicionado com sucesso como ${perfilNome}!`, '👥');
+
+    setTimeout(() => {
+      if (confirm(`Deseja enviar agora os dados de login e senha para ${nome} via WhatsApp?`)) {
+        enviarConviteCorretorWhatsApp(novoMembro.id);
+      }
+    }, 350);
   });
 }
 
@@ -1635,26 +1719,72 @@ function renderizarRoletaCorretores() {
   if (!container) return;
 
   const corretores = DB.getCorretores();
-  container.innerHTML = corretores.map(c => `
-    <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
-        <img src="${c.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}" class="w-11 h-11 rounded-full object-cover border border-slate-300">
-        <div>
-          <h5 class="font-bold text-slate-900 text-xs">${c.nome}</h5>
-          <div class="text-[11px] text-slate-500 font-semibold">${c.creci} • ${c.especialidade}</div>
-          <span class="text-[10px] text-blue-700 font-bold">🎯 ${c.leadsAtendidos || 0} leads recebidos</span>
+  const perfilAtivo = DB.getPerfilAtivo();
+  const podeGerenciar = perfilAtivo === 'diretor' || perfilAtivo === 'gerente';
+
+  if (corretores.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-8 text-center text-slate-400 text-xs">
+        Nenhum profissional cadastrado na equipe. Clique em "+ Cadastrar Membro na Equipe" para adicionar.
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = corretores.map(c => {
+    const isDiretor = c.perfil === 'diretor';
+    const isGerente = c.perfil === 'gerente';
+    const badgeCargo = isDiretor 
+      ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-200">👑 Diretor</span>'
+      : (isGerente 
+          ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-200">👔 Gerente</span>'
+          : '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-200">💼 Corretor</span>');
+
+    const foto = c.foto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80';
+
+    return `
+      <div class="p-4 bg-white border border-slate-200 rounded-2xl shadow-xs hover:shadow-md transition flex flex-col justify-between gap-3 text-left">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <img src="${foto}" alt="${c.nome}" class="w-12 h-12 rounded-full object-cover border-2 border-slate-200 shrink-0">
+            <div>
+              <div class="flex items-center gap-1.5 flex-wrap mb-0.5">
+                <h5 class="font-bold text-slate-900 text-xs">${c.nome}</h5>
+                ${badgeCargo}
+              </div>
+              <div class="text-[11px] text-slate-500 font-medium">CRECI: ${c.creci || 'S/N'} • ${c.especialidade || 'Geral'}</div>
+              <div class="text-[11px] text-slate-700 font-semibold mt-0.5 flex items-center gap-1">
+                <span>📧</span> <span class="truncate max-w-[140px] sm:max-w-[170px]" title="${c.email || ''}">${c.email || 'Sem e-mail'}</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${c.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
+            ${c.ativo ? '● Ativo' : '○ Pausado'}
+          </span>
+        </div>
+
+        <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 flex-wrap">
+          <span class="text-[10px] text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded-md">
+            🎯 ${c.leadsAtendidos || 0} leads na roleta
+          </span>
+          <div class="flex items-center gap-1.5">
+            <button onclick="enviarConviteCorretorWhatsApp('${c.id}')" class="inline-flex items-center gap-1 text-[11px] font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded-lg transition shadow-xs" title="Enviar dados de acesso via WhatsApp">
+              <span>📲</span>
+              <span>Acesso</span>
+            </button>
+            ${podeGerenciar ? `
+              <button onclick="alternarStatusCorretor('${c.id}')" class="text-[11px] text-slate-500 hover:text-slate-800 font-bold px-2 py-1 rounded-lg border border-slate-200 hover:bg-slate-50 transition" title="${c.ativo ? 'Pausar da roleta' : 'Ativar na roleta'}">
+                ${c.ativo ? 'Pausar' : 'Ativar'}
+              </button>
+              <button onclick="removerCorretorDaEquipe('${c.id}')" class="text-[11px] text-rose-500 hover:text-rose-700 font-bold px-2 py-1 rounded-lg border border-rose-100 hover:bg-rose-50 transition" title="Remover da equipe">
+                🗑️
+              </button>
+            ` : ''}
+          </div>
         </div>
       </div>
-      <div class="flex flex-col items-end gap-1.5">
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${c.ativo ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
-          ${c.ativo ? '● Na Roleta' : '○ Pausado'}
-        </span>
-        <button onclick="alternarStatusCorretor('${c.id}')" class="text-[10px] text-slate-400 hover:text-slate-700 font-semibold underline">
-          ${c.ativo ? 'Pausar' : 'Ativar'}
-        </button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function alternarStatusCorretor(id) {
@@ -1666,6 +1796,91 @@ function alternarStatusCorretor(id) {
     renderizarRoletaCorretores();
     renderizarPipelineKanban();
   }
+}
+
+function enviarConviteCorretorWhatsApp(id) {
+  const corretores = DB.getCorretores();
+  const c = corretores.find(item => item.id === id);
+  if (!c) {
+    alert('Profissional não encontrado na equipe.');
+    return;
+  }
+
+  const tel = (c.whatsapp || c.telefone || '').replace(/\D/g, '');
+  if (!tel) {
+    alert(`O profissional ${c.nome} não possui telefone cadastrado.`);
+    return;
+  }
+
+  const cfg = DB.getConfig ? DB.getConfig() : {};
+  const empresaNome = cfg.nomeFantasia || 'NEXO CRM Imobiliária';
+
+  // Monta URL de acesso ao painel
+  let linkAcesso = window.location.href.split('?')[0].split('#')[0];
+  if (!linkAcesso.endsWith('.html')) {
+    if (!linkAcesso.endsWith('/')) linkAcesso += '/';
+    linkAcesso += 'admin.html';
+  } else {
+    linkAcesso = linkAcesso.replace(/index\.html$/, 'admin.html');
+  }
+
+  const cargoFormatado = c.perfil === 'diretor' ? '👑 Diretor' : (c.perfil === 'gerente' ? '👔 Gerente' : '💼 Corretor');
+  const senhaAcesso = c.senha || '123456';
+  const emailAcesso = c.email || 'contato@imobiliaria.com.br';
+
+  const msg = 
+`Olá, *${c.nome}*! 👋
+
+Seu acesso ao sistema *NEXO CRM* da *${empresaNome}* está liberado com sucesso!
+
+🔑 *Seus dados de acesso:*
+• *Cargo:* ${cargoFormatado}
+• *Link do Sistema:* ${linkAcesso}
+• *Seu E-mail:* ${emailAcesso}
+• *Sua Senha:* ${senhaAcesso}
+
+🎯 *Dicas de utilização:*
+1. Acesse pelo computador ou pelo celular no link acima.
+2. Seus novos clientes da roleta chegarão direto no seu Kanban.
+3. Se quiser, salve o CRM na tela de início do seu celular (App PWA).
+
+Boas vendas e ótimos negócios! 🚀`;
+
+  const numeroFinal = tel.startsWith('55') ? tel : ('55' + tel);
+  const waUrl = `https://wa.me/${numeroFinal}?text=${encodeURIComponent(msg)}`;
+
+  DB.registrarLogAuditoria(
+    'Envio de Acesso WhatsApp',
+    'Segurança & Equipe',
+    `Convite de login para ${c.nome} (${c.email}) enviado via WhatsApp.`,
+    DB.getPerfilAtivo()
+  );
+
+  window.open(waUrl, '_blank');
+  mostrarToastFeedback(`WhatsApp aberto com credenciais para ${c.nome}!`, '📲');
+}
+
+function removerCorretorDaEquipe(id) {
+  const corretores = DB.getCorretores();
+  const c = corretores.find(item => item.id === id);
+  if (!c) return;
+
+  const perfilNome = c.perfil === 'diretor' ? 'Diretor' : (c.perfil === 'gerente' ? 'Gerente' : 'Corretor');
+  if (!confirm(`⚠️ Confirmar Remoção:\n\nDeseja realmente remover ${c.nome} (${perfilNome}) da equipe?\n\nEle não receberá novos leads na roleta e seu acesso ao CRM será desativado.`)) {
+    return;
+  }
+
+  DB.excluirCorretor(id);
+  DB.registrarLogAuditoria(
+    'Membro Removido da Equipe',
+    'Governança & RBAC',
+    `${c.nome} (${c.email}) foi removido da equipe e da roleta.`,
+    DB.getPerfilAtivo()
+  );
+
+  mostrarToastFeedback(`${c.nome} foi removido da equipe.`, '🗑️');
+  renderizarRoletaCorretores();
+  renderizarPipelineKanban();
 }
 
 /**
@@ -2669,6 +2884,16 @@ function restaurarPadraoPerfilMatriz() {
 }
 
 function trocarPerfilSeguranca(novoPerfil) {
+  const usuario = DB.getUsuarioAtivo ? DB.getUsuarioAtivo() : null;
+  if (usuario && usuario.perfil === 'corretor' && novoPerfil !== 'corretor') {
+    alert('⛔ Acesso Negado: Seu login é de Corretor. Apenas a Diretoria pode alterar níveis de governança.');
+    return;
+  }
+  if (usuario && usuario.perfil === 'gerente' && novoPerfil === 'diretor') {
+    alert('⛔ Acesso Negado: Seu login é de Gerência. Apenas a Diretoria tem acesso irrestrito.');
+    return;
+  }
+
   DB.salvarPerfilAtivo(novoPerfil);
   DB.registrarLogAuditoria(
     'Alternância de Perfil RBAC',
@@ -2677,6 +2902,7 @@ function trocarPerfilSeguranca(novoPerfil) {
     novoPerfil
   );
   aplicarPerfilSeguranca(novoPerfil);
+  atualizarHeaderUsuarioLogado();
   const icones = { diretor: '👑', gerente: '👔', corretor: '💼' };
   mostrarToastFeedback(`Perfil ativo: ${novoPerfil.toUpperCase()} (Nível de Acesso Aplicado)`, icones[novoPerfil] || '🔐');
 }
@@ -2707,6 +2933,7 @@ function aplicarPermissoesNaInterface() {
   const podeExportar = DB.usuarioTemPermissao('exportarRelatoriosPlanilhas');
   const podePortais = DB.usuarioTemPermissao('configurarPortais');
   const podeEditarImoveis = DB.usuarioTemPermissao('editarValoresImoveis');
+  const pAtivo = DB.getPerfilAtivo();
 
   // 1. Botão Novo Imóvel
   const btnNovoImovel = document.getElementById('btn-abrir-modal-novo-imovel');
@@ -2714,7 +2941,13 @@ function aplicarPermissoesNaInterface() {
     btnNovoImovel.style.display = podeEditarImoveis ? 'inline-flex' : 'none';
   }
 
-  // 2. Botões de exportação (Leads CSV, DIMOB, Backup, Auditoria)
+  // 2. Botão Cadastrar Membro da Equipe
+  const btnCadCorretor = document.getElementById('btn-cadastrar-corretor');
+  if (btnCadCorretor) {
+    btnCadCorretor.style.display = (pAtivo === 'diretor' || pAtivo === 'gerente') ? 'inline-flex' : 'none';
+  }
+
+  // 3. Botões de exportação (Leads CSV, DIMOB, Backup, Auditoria)
   const btnExpLeads = document.getElementById('btn-exportar-leads-csv');
   if (btnExpLeads) {
     btnExpLeads.style.display = podeExportar ? 'inline-flex' : 'none';
@@ -2735,7 +2968,7 @@ function aplicarPermissoesNaInterface() {
     btnExpAudit.style.display = podeExportar ? 'inline-flex' : 'none';
   }
 
-  // 3. Abas com restrição de acesso
+  // 4. Abas com restrição de acesso
   const navPortais = document.querySelector('button[data-tab="aba-portais"]');
   if (navPortais) {
     if (!podePortais) {
@@ -2758,7 +2991,31 @@ function aplicarPermissoesNaInterface() {
     }
   }
 
-  // 4. Re-renderiza tabelas e pipelines para refletir as permissões instantaneamente
+  const navSeguranca = document.querySelector('button[data-tab="aba-seguranca"]');
+  if (navSeguranca) {
+    const podeSeguranca = (pAtivo === 'diretor');
+    if (!podeSeguranca) {
+      navSeguranca.classList.add('opacity-40');
+      navSeguranca.title = 'Acesso restrito à Diretoria';
+    } else {
+      navSeguranca.classList.remove('opacity-40');
+      navSeguranca.title = '';
+    }
+  }
+
+  const navConfig = document.querySelector('button[data-tab="aba-config"]');
+  if (navConfig) {
+    const podeConfig = (pAtivo === 'diretor');
+    if (!podeConfig) {
+      navConfig.classList.add('opacity-40');
+      navConfig.title = 'Acesso restrito à Diretoria';
+    } else {
+      navConfig.classList.remove('opacity-40');
+      navConfig.title = '';
+    }
+  }
+
+  // 5. Re-renderiza tabelas e pipelines para refletir as permissões instantaneamente
   renderizarTabelaImoveis();
   renderizarPipelineKanban();
   renderizarTabelaLeads();
@@ -3062,6 +3319,10 @@ window.alterarStatusLeadRapido = alterarStatusLeadRapido;
 window.alterarEtapaLeadRapido = alterarEtapaLeadRapido;
 window.avancarEtapaLeadRapido = avancarEtapaLeadRapido;
 window.alternarStatusCorretor = alternarStatusCorretor;
+window.enviarConviteCorretorWhatsApp = enviarConviteCorretorWhatsApp;
+window.removerCorretorDaEquipe = removerCorretorDaEquipe;
+window.renderizarRoletaCorretores = renderizarRoletaCorretores;
+window.atualizarHeaderUsuarioLogado = atualizarHeaderUsuarioLogado;
 window.abrirReciboInquilino = abrirReciboInquilino;
 window.abrirExtratoProprietario = abrirExtratoProprietario;
 window.abrirNfseContrato = abrirNfseContrato;
