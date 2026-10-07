@@ -71,22 +71,22 @@ function comprimirImagem(file, maxWidth = 1280, maxHeight = 960, qualidade = 0.8
 }
 
 function initAdminSaaS() {
-  verificarSessao();
-  configurarEventosLogin();
-  configurarNavegacaoAbas();
-  configurarFormularioImovel();
-  configurarFormularioConfiguracoes();
-  configurarExportacaoImportacao();
-  configurarAbaPortais();
-  configurarBotoesIA();
-  configurarPipelineKanbanERoleta();
-  configurarGestaoLocacao();
-  configurarVistoriasDigitais();
-  configurarSofiaIA();
-  configurarAbaSeguranca();
-  configurarModaisGlobais();
-  iniciarRelogioSistemaNexo();
-  inicializarMdiJanelasFlutuantes();
+  try { configurarNavegacaoAbas(); } catch(e) { console.warn(e); }
+  try { verificarSessao(); } catch(e) { console.warn(e); }
+  try { configurarEventosLogin(); } catch(e) { console.warn(e); }
+  try { configurarFormularioImovel(); } catch(e) { console.warn(e); }
+  try { configurarFormularioConfiguracoes(); } catch(e) { console.warn(e); }
+  try { configurarExportacaoImportacao(); } catch(e) { console.warn(e); }
+  try { configurarAbaPortais(); } catch(e) { console.warn(e); }
+  try { configurarBotoesIA(); } catch(e) { console.warn(e); }
+  try { configurarPipelineKanbanERoleta(); } catch(e) { console.warn(e); }
+  try { configurarGestaoLocacao(); } catch(e) { console.warn(e); }
+  try { configurarVistoriasDigitais(); } catch(e) { console.warn(e); }
+  try { configurarSofiaIA(); } catch(e) { console.warn(e); }
+  try { configurarAbaSeguranca(); } catch(e) { console.warn(e); }
+  try { configurarModaisGlobais(); } catch(e) { console.warn(e); }
+  try { iniciarRelogioSistemaNexo(); } catch(e) { console.warn(e); }
+  try { inicializarMdiJanelasFlutuantes(); } catch(e) { console.warn(e); }
 }
 
 /**
@@ -391,28 +391,38 @@ function atualizarHeaderUsuarioLogado() {
 function exibirPainelPrincipal() {
   document.getElementById('secao-login')?.classList.add('hidden');
   document.getElementById('painel-admin-conteudo')?.classList.remove('hidden');
-  atualizarHeaderUsuarioLogado();
-  aplicarPerfilSeguranca(DB.getPerfilAtivo());
-  carregarMetricasDashboard();
-  renderizarTabelaImoveis();
-  renderizarPipelineKanban();
-  renderizarTabelaLeads();
-  renderizarRoletaCorretores();
-  renderizarGestaoLocacao();
-  renderizarVistoriasDigitais();
-  renderizarTermosVisita();
-  renderizarTabelaPortaisSincronizacao();
-  carregarSofiaConfigNoPainel();
-  carregarFormularioConfig();
-  atualizarStatusPortaisNaTela();
-  renderizarAbaSeguranca();
-  atualizarBadgeLicencaHeader();
-  verificarTravaLicenca();
-  verificarAcoesUrlShortcut();
-  // Padrão NEXO Enterprise ERP
-  atualizarBadgesContadoresAbas();
-  iniciarRelogioSistemaNexo();
-  inicializarMdiJanelasFlutuantes();
+
+  const rotinas = [
+    atualizarHeaderUsuarioLogado,
+    () => aplicarPerfilSeguranca(DB.getPerfilAtivo()),
+    carregarMetricasDashboard,
+    renderizarTabelaImoveis,
+    renderizarPipelineKanban,
+    renderizarTabelaLeads,
+    renderizarRoletaCorretores,
+    renderizarGestaoLocacao,
+    renderizarVistoriasDigitais,
+    renderizarTermosVisita,
+    renderizarTabelaPortaisSincronizacao,
+    carregarSofiaConfigNoPainel,
+    carregarFormularioConfig,
+    atualizarStatusPortaisNaTela,
+    renderizarAbaSeguranca,
+    atualizarBadgeLicencaHeader,
+    verificarTravaLicenca,
+    verificarAcoesUrlShortcut,
+    atualizarBadgesContadoresAbas,
+    iniciarRelogioSistemaNexo,
+    inicializarMdiJanelasFlutuantes
+  ];
+
+  rotinas.forEach(fn => {
+    try {
+      if (typeof fn === 'function') fn();
+    } catch (err) {
+      console.warn('Rotina inicial com aviso:', err);
+    }
+  });
 }
 
 function configurarEventosLogin() {
@@ -514,14 +524,22 @@ function configurarEventosLogin() {
  */
 function configurarNavegacaoAbas() {
   document.querySelectorAll('.tab-admin-nav').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const targetId = btn.dataset.tab;
+      if (!targetId) return;
 
-      if (targetId === 'aba-portais' && !DB.usuarioTemPermissao('configurarPortais')) {
+      const painelDestino = document.getElementById(targetId);
+      if (!painelDestino) {
+        console.warn('Painel de destino não encontrado:', targetId);
+        return;
+      }
+
+      if (targetId === 'aba-portais' && typeof DB !== 'undefined' && DB.usuarioTemPermissao && !DB.usuarioTemPermissao('configurarPortais')) {
         alert('🔒 Acesso Restrito pela Política de Segurança: A gestão de feeds e portais é restrita à Diretoria ou Gerência.');
         return;
       }
-      if (targetId === 'aba-backup' && !DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
+      if (targetId === 'aba-backup' && typeof DB !== 'undefined' && DB.usuarioTemPermissao && !DB.usuarioTemPermissao('exportarRelatoriosPlanilhas')) {
         alert('🔒 Acesso Restrito pela Política de Segurança: O painel de Backup e Reset de dados é restrito à Diretoria.');
         return;
       }
@@ -551,33 +569,50 @@ function configurarNavegacaoAbas() {
       if (breadcrumbEl && breadcrumbsMap[targetId]) {
         breadcrumbEl.textContent = breadcrumbsMap[targetId];
       }
-      atualizarBadgesContadoresAbas();
 
-      // Atualiza painéis
+      // Alterna exibição das seções imediatamente
       document.querySelectorAll('.painel-aba-conteudo').forEach(painel => {
         painel.classList.add('hidden');
       });
-      document.getElementById(targetId)?.classList.remove('hidden');
+      painelDestino.classList.remove('hidden');
 
-      if (targetId === 'aba-imoveis') renderizarTabelaImoveis();
-      if (targetId === 'aba-portais') renderizarTabelaPortaisSincronizacao();
-      if (targetId === 'aba-leads') {
-        renderizarPipelineKanban();
-        renderizarTabelaLeads();
-        renderizarRoletaCorretores();
+      // Garante retorno suave ao topo para evitar impressão de tela em branco
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Atualizações de dados com tolerância a falhas (try-catch isolado)
+      try {
+        if (typeof atualizarBadgesContadoresAbas === 'function') atualizarBadgesContadoresAbas();
+        if (targetId === 'aba-imoveis' && typeof renderizarTabelaImoveis === 'function') renderizarTabelaImoveis();
+        if (targetId === 'aba-portais') {
+          if (typeof renderizarTabelaPortaisSincronizacao === 'function') renderizarTabelaPortaisSincronizacao();
+          if (typeof atualizarStatusPortaisNaTela === 'function') atualizarStatusPortaisNaTela();
+        }
+        if (targetId === 'aba-leads') {
+          if (typeof renderizarPipelineKanban === 'function') renderizarPipelineKanban();
+          if (typeof renderizarTabelaLeads === 'function') renderizarTabelaLeads();
+          if (typeof renderizarRoletaCorretores === 'function') renderizarRoletaCorretores();
+        }
+        if (targetId === 'aba-locacao' && typeof renderizarGestaoLocacao === 'function') renderizarGestaoLocacao();
+        if (targetId === 'aba-vistorias') {
+          if (typeof renderizarTermosVisita === 'function') renderizarTermosVisita();
+          if (typeof renderizarVistoriasDigitais === 'function') renderizarVistoriasDigitais();
+        }
+        if (targetId === 'aba-sofia' && typeof carregarSofiaConfigNoPainel === 'function') carregarSofiaConfigNoPainel();
+        if (targetId === 'aba-dashboard' && typeof carregarMetricasDashboard === 'function') carregarMetricasDashboard();
+        if (targetId === 'aba-seguranca' && typeof renderizarAbaSeguranca === 'function') renderizarAbaSeguranca();
+        if (targetId === 'aba-config' && typeof carregarFormularioConfig === 'function') carregarFormularioConfig();
+      } catch (err) {
+        console.warn('Alerta de atualização da aba ' + targetId + ':', err);
       }
-      if (targetId === 'aba-locacao') renderizarGestaoLocacao();
-      if (targetId === 'aba-vistorias') {
-        renderizarTermosVisita();
-        renderizarVistoriasDigitais();
-      }
-      if (targetId === 'aba-sofia') carregarSofiaConfigNoPainel();
-      if (targetId === 'aba-dashboard') carregarMetricasDashboard();
-      if (targetId === 'aba-portais') atualizarStatusPortaisNaTela();
-      if (targetId === 'aba-seguranca') renderizarAbaSeguranca();
     });
   });
 }
+
+function alternarAbaAdmin(targetId) {
+  const btn = document.querySelector(`.tab-admin-nav[data-tab="${targetId}"]`);
+  if (btn) btn.click();
+}
+window.alternarAbaAdmin = alternarAbaAdmin;
 
 /**
  * 3. Métricas em Tempo Real no Dashboard
@@ -2911,9 +2946,9 @@ function configurarSofiaIA() {
                   <div class="font-bold text-white text-[11px]">${im.codigo} - ${im.titulo}</div>
                   <div class="text-[10px] text-emerald-400 font-bold">R$ ${(im.preco || im.precoAluguel || 0).toLocaleString('pt-BR')} • ${im.bairro}</div>
                 </div>
-                <a href="${resposta.waLink}" target="_blank" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] px-2 py-1 rounded-lg">
-                  Visitar
-                </a>
+                <button type="button" onclick="simularAgendamentoSofiaAdmin('${im.codigo}', '${escapeHtml(im.titulo)}', '${escapeHtml(im.bairro)}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-lg transition shadow-sm cursor-pointer">
+                  📅 Agendar Visita
+                </button>
               </div>
             `).join('')}
           </div>
@@ -2921,15 +2956,52 @@ function configurarSofiaIA() {
       }
 
       chatCorpo.innerHTML += `
-        <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed">
-          ${resposta.respostaTexto}
+        <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border-l-2 border-emerald-400">
+          <p class="whitespace-pre-line text-xs leading-relaxed">${escapeHtml(resposta.respostaTexto)}</p>
           ${cardsHtml}
         </div>
       `;
       chatCorpo.scrollTop = chatCorpo.scrollHeight;
-    }, 400);
+    }, 350);
   });
 }
+
+function simularAgendamentoSofiaAdmin(codigo, titulo, bairro) {
+  const chatCorpo = document.getElementById('simulador-chat-corpo');
+  if (!chatCorpo) return;
+
+  chatCorpo.innerHTML += `
+    <div class="bg-blue-600 text-white p-2.5 rounded-2xl rounded-tr-none ml-auto max-w-[85%] leading-relaxed text-xs">
+      Quero agendar uma visita presencial para o imóvel ${escapeHtml(codigo)} (${escapeHtml(bairro)})!
+    </div>
+  `;
+  chatCorpo.scrollTop = chatCorpo.scrollHeight;
+
+  setTimeout(() => {
+    chatCorpo.innerHTML += `
+      <div class="bg-[#1f2c34] text-slate-100 p-3.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed text-xs border-l-2 border-emerald-400 shadow-md space-y-2">
+        <p class="font-bold text-emerald-400">📅 Visita Pré-Agendada com Sucesso!</p>
+        <p class="text-slate-200">
+          Imóvel selecionado: <strong>${escapeHtml(codigo)} — ${escapeHtml(titulo)}</strong> (${escapeHtml(bairro)}).
+        </p>
+        <div class="p-2.5 bg-black/40 rounded-xl border border-white/10 text-[11px] text-slate-300 space-y-1">
+          <p class="text-emerald-300 font-bold">✨ Automação do Ecossistema NEXO CRM:</p>
+          <p>• Lead registrado automaticamente no Kanban com qualificação quente.</p>
+          <p>• Corretor escalado na roleta recebe o alerta com preferências do cliente.</p>
+          <p>• Zero taxa por conversa de IA (economia de R$ 3,50 por atendimento).</p>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between">
+          <span class="text-[10px] text-slate-400 font-mono">Demonstração Interativa</span>
+          <button type="button" onclick="abrirModalSimuladorWhatsapp()" class="text-emerald-400 hover:text-emerald-300 font-bold text-[10px] flex items-center gap-1 cursor-pointer">
+            <span>📱 Ver no Mockup WhatsApp 24h</span> →
+          </button>
+        </div>
+      </div>
+    `;
+    chatCorpo.scrollTop = chatCorpo.scrollHeight;
+  }, 350);
+}
+window.simularAgendamentoSofiaAdmin = simularAgendamentoSofiaAdmin;
 
 function carregarSofiaConfigNoPainel() {
   const config = DB.getSofiaConfig();
