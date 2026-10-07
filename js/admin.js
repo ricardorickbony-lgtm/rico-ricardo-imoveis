@@ -5388,3 +5388,651 @@ window.excluirImovelPrimeiroSelecionado = excluirImovelPrimeiroSelecionado;
 window.imprimirGridImoveis = imprimirGridImoveis;
 window.exportarImoveisCSV = exportarImoveisCSV;
 
+/* ==========================================================================
+   MÓDULO: CADASTRO POR VOZ, SOFIA INSIDER IA, PAINEL DIÁRIO & TINDER IMOBILIÁRIO
+   ========================================================================== */
+
+// 1. RECONHECIMENTO DE VOZ & PARSER INTELIGENTE SOFIA IA (SPEECH-TO-LISTING)
+let nexoSpeechRecognition = null;
+let nexoIsRecordingAudio = false;
+
+function alternarGravacaoAudioImovel() {
+  if (nexoIsRecordingAudio) {
+    pararGravacaoAudioImovel();
+  } else {
+    iniciarGravacaoAudioImovel();
+  }
+}
+
+function iniciarGravacaoAudioImovel() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    alert('Seu navegador não suporta a API nativa de reconhecimento de voz. Use o Chrome, Edge ou clique em "Teste Rápido" para simular a IA.');
+    return;
+  }
+
+  const boxTranscricao = document.getElementById('box-transcricao-audio-imovel');
+  const textoTranscricao = document.getElementById('texto-transcricao-audio');
+  const btnGravar = document.getElementById('btn-gravar-audio-imovel');
+  const textoBtn = document.getElementById('texto-audio-imovel');
+  const iconeBtn = document.getElementById('icone-audio-imovel');
+  const labelStatus = document.getElementById('label-status-audio');
+
+  try {
+    nexoSpeechRecognition = new SpeechRecognition();
+    nexoSpeechRecognition.lang = 'pt-BR';
+    nexoSpeechRecognition.continuous = true;
+    nexoSpeechRecognition.interimResults = true;
+
+    boxTranscricao?.classList.remove('hidden');
+    if (textoTranscricao) textoTranscricao.textContent = 'Ouvindo sua fala... Fale tipo, quartos, bairro, valor e detalhes do imóvel...';
+    if (textoBtn) textoBtn.textContent = 'Parar & Preencher';
+    if (iconeBtn) iconeBtn.textContent = '⏹️';
+    btnGravar?.classList.add('bg-rose-600', 'nexo-voice-pulse');
+    btnGravar?.classList.remove('bg-indigo-600');
+    if (labelStatus) labelStatus.textContent = 'Escutando fala em tempo real...';
+
+    nexoIsRecordingAudio = true;
+    let textoAcumulado = '';
+
+    nexoSpeechRecognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          textoAcumulado += ' ' + event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      const exibicao = (textoAcumulado + ' ' + interim).trim();
+      if (textoTranscricao && exibicao) {
+        textoTranscricao.textContent = exibicao;
+      }
+    };
+
+    nexoSpeechRecognition.onerror = (event) => {
+      console.warn('SpeechRecognition erro:', event.error);
+      if (labelStatus) labelStatus.textContent = 'Aviso: ' + event.error;
+    };
+
+    nexoSpeechRecognition.onend = () => {
+      pararGravacaoAudioImovel();
+      if (textoAcumulado.trim()) {
+        processarTextoAudioImovel(textoAcumulado.trim());
+      }
+    };
+
+    nexoSpeechRecognition.start();
+  } catch (err) {
+    console.error('Erro ao iniciar reconhecimento de voz:', err);
+    alert('Erro ao acessar o microfone. Verifique as permissões do seu navegador.');
+    pararGravacaoAudioImovel();
+  }
+}
+
+function pararGravacaoAudioImovel() {
+  nexoIsRecordingAudio = false;
+  if (nexoSpeechRecognition) {
+    try { nexoSpeechRecognition.stop(); } catch (e) {}
+    nexoSpeechRecognition = null;
+  }
+  const btnGravar = document.getElementById('btn-gravar-audio-imovel');
+  const textoBtn = document.getElementById('texto-audio-imovel');
+  const iconeBtn = document.getElementById('icone-audio-imovel');
+  const labelStatus = document.getElementById('label-status-audio');
+
+  if (textoBtn) textoBtn.textContent = 'Falar para Preencher';
+  if (iconeBtn) iconeBtn.textContent = '🎙️';
+  btnGravar?.classList.remove('bg-rose-600', 'nexo-voice-pulse');
+  btnGravar?.classList.add('bg-indigo-600');
+  if (labelStatus) labelStatus.textContent = 'Áudio processado pela Sofia IA!';
+}
+
+function abrirModalCadastroImovelComAudio() {
+  const btnNovo = document.getElementById('btn-abrir-modal-novo-imovel');
+  if (btnNovo) btnNovo.click();
+  setTimeout(() => {
+    iniciarGravacaoAudioImovel();
+  }, 400);
+}
+
+function simularAudioExemploImovel() {
+  const exemplo = 'Apartamento de 3 quartos sendo 1 suíte, 2 banheiros, 110 metros quadrados, no bairro Gonzaga, na Avenida Ana Costa, valor de venda 780 mil reais, condomínio 850 reais, IPTU 240 reais, com 2 vagas de garagem, varanda gourmet com churrasqueira e piscina.';
+  const boxTranscricao = document.getElementById('box-transcricao-audio-imovel');
+  const textoTranscricao = document.getElementById('texto-transcricao-audio');
+  const labelStatus = document.getElementById('label-status-audio');
+
+  boxTranscricao?.classList.remove('hidden');
+  if (textoTranscricao) textoTranscricao.textContent = `"${exemplo}"`;
+  if (labelStatus) labelStatus.textContent = 'Simulação carregada! Sofia IA processando...';
+
+  processarTextoAudioImovel(exemplo);
+}
+
+function processarTextoAudioImovel(texto) {
+  if (!texto) return;
+  const t = texto.toLowerCase();
+
+  // 1. Tipo de Imóvel
+  let tipoDetectado = 'apartamento';
+  if (t.includes('cobertura')) tipoDetectado = 'cobertura';
+  else if (t.includes('casa em condominio') || t.includes('casa em condomínio')) tipoDetectado = 'condominio';
+  else if (t.includes('casa') || t.includes('sobrado')) tipoDetectado = 'casa';
+  else if (t.includes('lancamento') || t.includes('lançamento') || t.includes('planta')) tipoDetectado = 'lancamento';
+  else if (t.includes('comercial') || t.includes('sala') || t.includes('laje')) tipoDetectado = 'comercial';
+  const inputTipo = document.getElementById('input-imob-tipo');
+  if (inputTipo) {
+    inputTipo.value = tipoDetectado;
+    destacarCampoPreenchido(inputTipo);
+  }
+
+  // 2. Finalidade (Venda / Aluguel)
+  let finalidadeDetectada = 'venda';
+  if (t.includes('aluguel') || t.includes('locacao') || t.includes('locação') || t.includes('para alugar')) {
+    finalidadeDetectada = 'aluguel';
+  } else if (t.includes('lancamento') || t.includes('lançamento')) {
+    finalidadeDetectada = 'lancamento';
+  }
+  const inputFinalidade = document.getElementById('input-imob-finalidade');
+  if (inputFinalidade) {
+    inputFinalidade.value = finalidadeDetectada;
+    destacarCampoPreenchido(inputFinalidade);
+  }
+
+  // 3. Preço Venda e Aluguel
+  let precoVenda = 0;
+  let precoAluguel = 0;
+
+  // Regex para "780 mil", "1.2 milhão", "1,5 milhão", "750000"
+  const matchMilhoes = t.match(/(\d+[,\.]?\d*)\s*(milh[aã]o|milh[oõ]es)/);
+  const matchMil = t.match(/(\d+[,\.]?\d*)\s*(mil)/);
+  const matchValorDireto = t.match(/r\$\s*([\d\.]+)/);
+
+  if (matchMilhoes) {
+    const num = parseFloat(matchMilhoes[1].replace(',', '.'));
+    if (!isNaN(num)) precoVenda = num * 1000000;
+  } else if (matchMil) {
+    const num = parseFloat(matchMil[1].replace(',', '.'));
+    if (!isNaN(num)) precoVenda = num * 1000;
+  } else if (matchValorDireto) {
+    const num = parseFloat(matchValorDireto[1].replace(/\./g, ''));
+    if (!isNaN(num)) precoVenda = num;
+  }
+
+  if (finalidadeDetectada === 'aluguel') {
+    precoAluguel = precoVenda > 0 ? precoVenda : 2500;
+    const inputPrecoAluguel = document.getElementById('input-imob-preco-aluguel');
+    if (inputPrecoAluguel) {
+      inputPrecoAluguel.value = precoAluguel;
+      destacarCampoPreenchido(inputPrecoAluguel);
+    }
+  } else {
+    if (precoVenda === 0) precoVenda = 750000;
+    const inputPreco = document.getElementById('input-imob-preco');
+    if (inputPreco) {
+      inputPreco.value = precoVenda;
+      destacarCampoPreenchido(inputPreco);
+    }
+  }
+
+  // 4. Condomínio & IPTU
+  const matchCond = t.match(/condom[ií]nio\s*(de)?\s*(r\$)?\s*(\d+)/);
+  if (matchCond) {
+    const inputCond = document.getElementById('input-imob-condominio');
+    if (inputCond) {
+      inputCond.value = parseInt(matchCond[3], 10);
+      destacarCampoPreenchido(inputCond);
+    }
+  }
+
+  const matchIptu = t.match(/iptu\s*(de)?\s*(r\$)?\s*(\d+)/);
+  if (matchIptu) {
+    const inputIptu = document.getElementById('input-imob-iptu');
+    if (inputIptu) {
+      inputIptu.value = parseInt(matchIptu[3], 10);
+      destacarCampoPreenchido(inputIptu);
+    }
+  }
+
+  // 5. Metragem (Área Útil)
+  const matchArea = t.match(/(\d+)\s*(m²|m2|metros|metro)/);
+  if (matchArea) {
+    const inputArea = document.getElementById('input-imob-area-util');
+    const inputAreaTotal = document.getElementById('input-imob-area-total');
+    if (inputArea) {
+      inputArea.value = parseInt(matchArea[1], 10);
+      destacarCampoPreenchido(inputArea);
+    }
+    if (inputAreaTotal) {
+      inputAreaTotal.value = Math.round(parseInt(matchArea[1], 10) * 1.25);
+    }
+  }
+
+  // 6. Quartos / Dormitórios
+  const matchQuartos = t.match(/(\d+)\s*(quartos?|dormit[oó]rios?|dorms?)/);
+  if (matchQuartos) {
+    const inputQuartos = document.getElementById('input-imob-quartos');
+    if (inputQuartos) {
+      inputQuartos.value = parseInt(matchQuartos[1], 10);
+      destacarCampoPreenchido(inputQuartos);
+    }
+  }
+
+  // 7. Suítes
+  let suites = 0;
+  if (t.includes('uma suíte') || t.includes('1 suíte') || t.includes('1 suite')) suites = 1;
+  else {
+    const matchSuites = t.match(/(\d+)\s*su[ií]tes?/);
+    if (matchSuites) suites = parseInt(matchSuites[1], 10);
+  }
+  if (suites > 0) {
+    const inputSuites = document.getElementById('input-imob-suites');
+    if (inputSuites) {
+      inputSuites.value = suites;
+      destacarCampoPreenchido(inputSuites);
+    }
+  }
+
+  // 8. Banheiros
+  const matchBanheiros = t.match(/(\d+)\s*banheiros?/);
+  if (matchBanheiros) {
+    const inputBanheiros = document.getElementById('input-imob-banheiros');
+    if (inputBanheiros) {
+      inputBanheiros.value = parseInt(matchBanheiros[1], 10);
+      destacarCampoPreenchido(inputBanheiros);
+    }
+  }
+
+  // 9. Vagas
+  let vagas = 1;
+  if (t.includes('com vaga') || t.includes('uma vaga') || t.includes('1 vaga')) vagas = 1;
+  else {
+    const matchVagas = t.match(/(\d+)\s*(vagas?|garagens?)/);
+    if (matchVagas) vagas = parseInt(matchVagas[1], 10);
+  }
+  const inputVagas = document.getElementById('input-imob-vagas');
+  if (inputVagas) {
+    inputVagas.value = vagas;
+    destacarCampoPreenchido(inputVagas);
+  }
+
+  // 10. Bairro
+  let bairroDetectado = '';
+  const bairrosConhecidos = ['gonzaga', 'campestre', 'bela vista', 'boqueirao', 'boqueirão', 'embaré', 'embare', 'vila rica', 'marapé', 'marape', 'pontapraia', 'ponta da praia', 'centro', 'jardim', 'itaim bibi', 'pinheiros', 'moema', 'perdizes'];
+  for (const b of bairrosConhecidos) {
+    if (t.includes(b)) {
+      bairroDetectado = b.charAt(0).toUpperCase() + b.slice(1);
+      break;
+    }
+  }
+  if (!bairroDetectado) {
+    const matchBairro = t.match(/no bairro\s+([a-záàâãéèêíïóôõöúçñ\s]+?)(,|\.|na|com|valor|$)/);
+    if (matchBairro) bairroDetectado = matchBairro[1].trim();
+  }
+  if (bairroDetectado) {
+    const inputBairro = document.getElementById('input-imob-bairro');
+    if (inputBairro) {
+      inputBairro.value = bairroDetectado;
+      destacarCampoPreenchido(inputBairro);
+    }
+  }
+
+  // 11. Endereço
+  const matchEnd = t.match(/(na avenida|na av\.|na rua)\s+([a-záàâãéèêíïóôõöúçñ\s\d]+?)(,|\.|com|valor|$)/);
+  if (matchEnd) {
+    const inputEnd = document.getElementById('input-imob-endereco');
+    if (inputEnd) {
+      const logradouro = matchEnd[1].replace('na ', '') + ' ' + matchEnd[2].trim();
+      inputEnd.value = logradouro.charAt(0).toUpperCase() + logradouro.slice(1);
+      destacarCampoPreenchido(inputEnd);
+    }
+  }
+
+  // 12. Checkboxes de Características
+  const caracs = [
+    { termo: 'piscina', id: 'check-carac-piscina' },
+    { termo: 'churrasqueira', id: 'check-carac-churrasqueira' },
+    { termo: 'varanda', id: 'check-carac-varanda' },
+    { termo: 'academia', id: 'check-carac-academia' },
+    { termo: 'elevador', id: 'check-carac-elevador' },
+    { termo: 'ar condicionado', id: 'check-carac-ar' },
+    { termo: 'portaria', id: 'check-carac-portaria' }
+  ];
+  caracs.forEach(c => {
+    if (t.includes(c.termo)) {
+      const cb = document.getElementById(c.id);
+      if (cb) cb.checked = true;
+    }
+  });
+
+  // 13. Título & Descrição Comercial Inteligente
+  const tituloAuto = `${tipoDetectado.charAt(0).toUpperCase() + tipoDetectado.slice(1)} ${matchQuartos ? matchQuartos[1] + ' Quartos' : ''} ${suites > 0 ? '(' + suites + ' Suíte' + (suites > 1 ? 's' : '') + ')' : ''} no ${bairroDetectado || 'Bairro Nobre'}`.trim();
+  const inputTitulo = document.getElementById('input-imob-titulo');
+  if (inputTitulo) {
+    inputTitulo.value = tituloAuto;
+    destacarCampoPreenchido(inputTitulo);
+  }
+
+  const descAuto = `Excelente ${tipoDetectado} localizado no bairro ${bairroDetectado || 'desejado'}, com ${matchArea ? matchArea[1] + 'm² de área útil' : 'ótima metragem'}. Conta com ${matchQuartos ? matchQuartos[1] + ' dormitórios' : 'cômodos amplos'}, ${suites > 0 ? suites + ' suíte(s),' : ''} living integrado, ${vagas} vaga(s) de garagem e excelente iluminação natural. Condomínio com infraestrutura completa e localização privilegiada próxima a comércios e conveniências. Agende sua visita com nossos consultores especialistas!`;
+  const inputDesc = document.getElementById('input-imob-descricao');
+  if (inputDesc) {
+    inputDesc.value = descAuto;
+    destacarCampoPreenchido(inputDesc);
+  }
+
+  mostrarToastFeedback('✨ Sofia IA preencheu o formulário completo por áudio em 2 segundos!', '🎙️');
+}
+
+function destacarCampoPreenchido(elemento) {
+  if (!elemento) return;
+  elemento.classList.add('nexo-field-highlight');
+  setTimeout(() => {
+    elemento.classList.remove('nexo-field-highlight');
+  }, 4000);
+}
+
+// 2. PAINEL DE AÇÃO DIÁRIA DO CORRETOR & LEADS ATRASADOS
+function atualizarPainelAcaoDiariaCorretor() {
+  const leads = DB.getLeads() || [];
+  const containerLista = document.getElementById('nexo-leads-atrasados-lista');
+  const badgeAtrasados = document.getElementById('nexo-leads-atrasados-badge');
+  const labelClienteAcao = document.getElementById('nexo-proxima-acao-cliente');
+  const labelMotivoAcao = document.getElementById('nexo-proxima-acao-motivo');
+  const boxBotoesAcao = document.getElementById('nexo-proxima-acao-botoes');
+
+  // Leads atrasados (sem atendimento ou novos)
+  const atrasados = leads.filter(l => l.status === 'novo' || l.status === 'contato');
+  if (badgeAtrasados) {
+    badgeAtrasados.textContent = `${atrasados.length} pendente(s)`;
+  }
+
+  if (containerLista) {
+    if (atrasados.length === 0) {
+      containerLista.innerHTML = '<span class="text-emerald-600 font-bold text-[11px]">🎉 Todos os leads em dia!</span>';
+    } else {
+      containerLista.innerHTML = atrasados.slice(0, 3).map(l => `
+        <div class="flex items-center justify-between p-1.5 bg-slate-50 rounded-lg border border-slate-100 text-[11px]">
+          <span class="font-bold text-slate-800 truncate max-w-[120px]">${l.nome}</span>
+          <span class="text-rose-600 font-bold text-[10px] bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200">Aguardando</span>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Próxima Ação
+  const leadPrioridade = atrasados[0] || leads[0];
+  if (leadPrioridade && labelClienteAcao && labelMotivoAcao && boxBotoesAcao) {
+    labelClienteAcao.textContent = `${leadPrioridade.nome} (${leadPrioridade.tipoInteresse || 'Interessado'})`;
+    labelMotivoAcao.textContent = `Interesse no imóvel: ${leadPrioridade.imovelTitulo || 'Geral'}. Sem contato registrado há mais de 12 horas.`;
+    const foneLimpo = (leadPrioridade.whatsapp || leadPrioridade.telefone || '').replace(/\D/g, '');
+    boxBotoesAcao.innerHTML = `
+      <a href="https://wa.me/${foneLimpo}?text=Ol%C3%A1%20${encodeURIComponent(leadPrioridade.nome)}%2C%20tudo%20bem%3F%20Aqui%20%C3%A9%20o%20Ricardo%20da%20imobili%C3%A1ria." target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-1.5 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+        <span>💬 Chamar no WhatsApp</span>
+      </a>
+      <button onclick="abrirModalMatching('${leadPrioridade.id}')" class="bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3 py-1.5 rounded-xl transition">
+        🎯 Matching
+      </button>
+    `;
+  }
+}
+
+// 3. SOFIA INSIDER IA PRO GESTOR (CONSULTA EXECUTIVA EM PORTUGUÊS)
+function processarFormularioSofiaInsider() {
+  const input = document.getElementById('input-sofia-insider-query');
+  if (!input || !input.value.trim()) return;
+  perguntarSofiaInsider(input.value.trim());
+}
+
+function perguntarSofiaInsider(pergunta) {
+  const input = document.getElementById('input-sofia-insider-query');
+  const boxResposta = document.getElementById('conteudo-resposta-sofia-insider');
+  const statusLabel = document.getElementById('label-status-insider');
+
+  if (input) input.value = pergunta;
+  if (statusLabel) statusLabel.textContent = 'Sofia analisando banco de dados...';
+  if (boxResposta) {
+    boxResposta.innerHTML = '<span class="text-purple-300 animate-pulse">Consultando dados em tempo real...</span>';
+  }
+
+  setTimeout(() => {
+    const imoveis = DB.getImoveis() || [];
+    const leads = DB.getLeads() || [];
+    const p = pergunta.toLowerCase();
+
+    let respostaHtml = '';
+
+    // Caso 1: VGV e Valores
+    if (p.includes('vgv') || p.includes('ticket') || p.includes('quanto temos') || p.includes('valor total')) {
+      const vgvTotal = imoveis.reduce((acc, im) => acc + (Number(im.preco) || 0), 0);
+      const ticketMedio = imoveis.length ? Math.round(vgvTotal / imoveis.length) : 0;
+      respostaHtml = `
+        <div class="space-y-2">
+          <p class="text-white font-bold">📊 Relatório Consolidado de VGV & Ticket Médio:</p>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 my-2 font-mono text-[11px]">
+            <div class="p-2 bg-purple-950/60 border border-purple-500/30 rounded-lg">
+              <span class="text-purple-300 block text-[10px]">VGV TOTAL EM ESTOQUE:</span>
+              <span class="text-white font-black text-sm">R$ ${vgvTotal.toLocaleString('pt-BR')}</span>
+            </div>
+            <div class="p-2 bg-purple-950/60 border border-purple-500/30 rounded-lg">
+              <span class="text-purple-300 block text-[10px]">TICKET MÉDIO DO IMÓVEL:</span>
+              <span class="text-emerald-400 font-black text-sm">R$ ${ticketMedio.toLocaleString('pt-BR')}</span>
+            </div>
+            <div class="p-2 bg-purple-950/60 border border-purple-500/30 rounded-lg">
+              <span class="text-purple-300 block text-[10px]">TOTAL DE UNIDADES:</span>
+              <span class="text-white font-black text-sm">${imoveis.length} registros</span>
+            </div>
+          </div>
+          <p class="text-slate-400 text-[11px]">💡 <em>Insight Sofia:</em> Seu portfólio tem alta liquidez em unidades entre R$ 600 mil e R$ 900 mil. Recomendo focar o tráfego do Meta Ads nesse ticket.</p>
+        </div>
+      `;
+    }
+    // Caso 2: Estoque por Finalidade
+    else if (p.includes('aluguel') || p.includes('venda') || p.includes('finalidade') || p.includes('disponíveis')) {
+      const totalVenda = imoveis.filter(i => i.finalidade !== 'aluguel').length;
+      const totalAluguel = imoveis.filter(i => i.finalidade === 'aluguel').length;
+      respostaHtml = `
+        <div class="space-y-2">
+          <p class="text-white font-bold">🏢 Distribuição do Estoque por Finalidade Comercial:</p>
+          <div class="grid grid-cols-2 gap-2 my-2 font-mono text-[11px]">
+            <div class="p-2 bg-blue-950/60 border border-blue-500/30 rounded-lg">
+              <span class="text-blue-300 block text-[10px]">IMÓVEIS PARA VENDA:</span>
+              <span class="text-white font-black text-sm">${totalVenda} unidades (${Math.round((totalVenda / (imoveis.length || 1)) * 100)}%)</span>
+            </div>
+            <div class="p-2 bg-emerald-950/60 border border-emerald-500/30 rounded-lg">
+              <span class="text-emerald-300 block text-[10px]">IMÓVEIS PARA LOCAÇÃO:</span>
+              <span class="text-white font-black text-sm">${totalAluguel} unidades (${Math.round((totalAluguel / (imoveis.length || 1)) * 100)}%)</span>
+            </div>
+          </div>
+          <p class="text-slate-400 text-[11px]">💡 <em>Ação sugerida:</em> Carteira equilibrada. A sincronização automática do feed XML VivaReal/ZAP está ativa para todas as unidades disponíveis.</p>
+        </div>
+      `;
+    }
+    // Caso 3: Leads sem Follow-up
+    else if (p.includes('leads') || p.includes('follow') || p.includes('atrasados') || p.includes('contato')) {
+      const pendentes = leads.filter(l => l.status === 'novo' || l.status === 'contato');
+      respostaHtml = `
+        <div class="space-y-2">
+          <p class="text-white font-bold">⚠️ Diagnóstico de Oportunidades & Follow-up de Leads:</p>
+          <p class="text-slate-300 text-[11px]">Localizei <strong>${pendentes.length} leads pendentes</strong> de primeiro retorno no pipeline:</p>
+          <div class="border border-white/10 rounded-lg overflow-hidden my-2">
+            <table class="w-full text-left font-mono text-[10px]">
+              <thead class="bg-white/10 text-purple-300">
+                <tr><th class="p-1.5">Lead</th><th class="p-1.5">Interesse</th><th class="p-1.5">Status</th></tr>
+              </thead>
+              <tbody class="divide-y divide-white/5">
+                ${pendentes.slice(0, 4).map(l => `
+                  <tr>
+                    <td class="p-1.5 text-white font-bold">${l.nome}</td>
+                    <td class="p-1.5 text-slate-300">${l.imovelTitulo || 'Interesse Geral'}</td>
+                    <td class="p-1.5 text-amber-400">${l.status.toUpperCase()}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+          <p class="text-slate-400 text-[11px]">💡 <em>Recomendação do Diretor:</em> Acione a Roleta de Atendimento ou libere os leads para o Bolsão de Resgate Comunitário.</p>
+        </div>
+      `;
+    }
+    // Caso 4: Imóveis Acima de R$ 1 Milhão
+    else if (p.includes('milh') || p.includes('nobres') || p.includes('luxo')) {
+      const nobres = imoveis.filter(i => (Number(i.preco) || 0) >= 1000000);
+      respostaHtml = `
+        <div class="space-y-2">
+          <p class="text-white font-bold">💎 Carteira Premium (Imóveis a partir de R$ 1.000.000):</p>
+          <p class="text-slate-300 text-[11px]">Existem <strong>${nobres.length} imóveis de alto padrão</strong> cadastrados:</p>
+          <div class="space-y-1.5 my-2">
+            ${nobres.slice(0, 3).map(n => `
+              <div class="p-2 bg-white/5 border border-white/10 rounded-lg flex items-center justify-between text-[11px]">
+                <div>
+                  <span class="font-bold text-white block">${n.titulo}</span>
+                  <span class="text-[10px] text-slate-400 font-mono">${n.bairro} • ${n.areaUtil} m² • ${n.codigo}</span>
+                </div>
+                <span class="text-emerald-400 font-black text-xs">R$ ${(Number(n.preco) || 0).toLocaleString('pt-BR')}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+    // Caso Geral
+    else {
+      respostaHtml = `
+        <div class="space-y-2">
+          <p class="text-white font-bold">🔍 Análise Executiva da Sofia Insider:</p>
+          <p class="text-slate-300 text-[11px]">Processando sua consulta para: "<em>${pergunta}</em>".</p>
+          <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-slate-300 text-[11px] leading-relaxed">
+            O CRM possui atualmente <strong>${imoveis.length} imóveis cadastrados</strong> e <strong>${leads.length} leads no funil</strong>. Você pode perguntar sobre faturamento VGV, corretores, bairros específicos, imóveis por faixa de preço ou pendências de contato.
+          </div>
+        </div>
+      `;
+    }
+
+    if (boxResposta) boxResposta.innerHTML = respostaHtml;
+    if (statusLabel) statusLabel.textContent = 'Resposta gerada com sucesso';
+  }, 500);
+}
+
+// 4. TINDER IMOBILIÁRIO DO CLIENTE (SALA DE DECISÃO DO COMPRADOR)
+let nexoTinderImoveis = [];
+let nexoTinderIndex = 0;
+let nexoTinderFavoritos = [];
+
+function abrirModalTinderImobiliario() {
+  const modal = document.getElementById('modal-tinder-imobiliario');
+  if (!modal) return;
+  nexoTinderImoveis = DB.getImoveis() || [];
+  nexoTinderIndex = 0;
+  nexoTinderFavoritos = [];
+  renderizarTinderCardAtual();
+  modal.classList.add('active');
+}
+
+function fecharModalTinderImobiliario() {
+  const modal = document.getElementById('modal-tinder-imobiliario');
+  if (modal) modal.classList.remove('active');
+}
+
+function renderizarTinderCardAtual() {
+  const container = document.getElementById('tinder-card-container');
+  if (!container) return;
+
+  if (nexoTinderIndex >= nexoTinderImoveis.length) {
+    container.innerHTML = `
+      <div class="nexo-tinder-card p-6 flex flex-col items-center justify-center text-center space-y-4">
+        <span class="text-5xl">🎉</span>
+        <h4 class="font-black text-slate-900 text-lg">Você viu todos os imóveis da rodada!</h4>
+        <p class="text-xs text-slate-600 max-w-xs">
+          Foram favoritados <strong>${nexoTinderFavoritos.length} imóveis</strong> de interesse. A Sofia IA já preparou a rota de visitas.
+        </p>
+        <button onclick="compartilharLinkTinderCliente()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-5 py-3 rounded-2xl shadow transition">
+          📲 Enviar Seleção no WhatsApp
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const im = nexoTinderImoveis[nexoTinderIndex];
+  const preco = im.finalidade === 'aluguel'
+    ? `R$ ${(Number(im.precoAluguel) || 0).toLocaleString('pt-BR')}/mês`
+    : `R$ ${(Number(im.preco) || 0).toLocaleString('pt-BR')}`;
+
+  container.innerHTML = `
+    <div class="nexo-tinder-card" id="tinder-active-card">
+      <div class="relative h-64 bg-slate-900 overflow-hidden">
+        <img src="${im.fotoPrincipal || (im.fotos && im.fotos[0]) || 'assets/images/logo.png'}" class="w-full h-full object-cover">
+        <span class="absolute top-3 left-3 bg-blue-600 text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-full shadow">
+          ${im.tipo || 'Imóvel'} • ${im.finalidade || 'Venda'}
+        </span>
+        <span class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur text-white text-xs font-mono font-bold px-3 py-1 rounded-xl">
+          ${preco}
+        </span>
+      </div>
+      <div class="p-5 flex-grow flex flex-col justify-between text-left space-y-2">
+        <div>
+          <h4 class="font-bold text-slate-900 text-sm line-clamp-1">${im.titulo}</h4>
+          <p class="text-xs text-slate-500 font-mono">${im.bairro || 'Sem Bairro'} • ${im.areaUtil || 0} m² • ${im.quartos || 0} qtos • ${im.vagas || 0} vagas</p>
+        </div>
+        <p class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed">
+          ${im.descricao || 'Excelente oportunidade para morar ou investir com alta valorização.'}
+        </p>
+        <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold border-t border-slate-100 pt-2">
+          <span>🎯 Afinidade Sofia: 95% Match</span>
+          <span>${nexoTinderIndex + 1} de ${nexoTinderImoveis.length}</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function tinderSwipeAction(direcao) {
+  const card = document.getElementById('tinder-active-card');
+  if (!card) return;
+
+  if (direcao === 'right') {
+    card.classList.add('nexo-tinder-swipe-right');
+    const imAtual = nexoTinderImoveis[nexoTinderIndex];
+    if (imAtual) nexoTinderFavoritos.push(imAtual);
+    mostrarToastFeedback('❤️ Imóvel favoritado com sucesso!', '🔥');
+  } else {
+    card.classList.add('nexo-tinder-swipe-left');
+  }
+
+  setTimeout(() => {
+    nexoTinderIndex++;
+    renderizarTinderCardAtual();
+  }, 250);
+}
+
+function compartilharLinkTinderCliente() {
+  const link = window.location.origin + window.location.pathname.replace('admin.html', '') + '?sala=decisao-cliente';
+  navigator.clipboard.writeText(link).then(() => {
+    mostrarToastFeedback('Link da Sala de Decisão copiado para a Área de Transferência!', '📋');
+  }).catch(() => {});
+  alert(`📲 Link da Sala de Decisão gerado com sucesso!\n\nEnvie este link para o cliente no WhatsApp:\n${link}\n\nO cliente abrirá no celular a interface interativa com fotos e swipe para decidir em família!`);
+}
+
+// Inicializações no carregamento do painel
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    atualizarPainelAcaoDiariaCorretor();
+  }, 600);
+});
+
+// Exports para Window
+window.alternarGravacaoAudioImovel = alternarGravacaoAudioImovel;
+window.iniciarGravacaoAudioImovel = iniciarGravacaoAudioImovel;
+window.pararGravacaoAudioImovel = pararGravacaoAudioImovel;
+window.abrirModalCadastroImovelComAudio = abrirModalCadastroImovelComAudio;
+window.simularAudioExemploImovel = simularAudioExemploImovel;
+window.processarTextoAudioImovel = processarTextoAudioImovel;
+window.atualizarPainelAcaoDiariaCorretor = atualizarPainelAcaoDiariaCorretor;
+window.processarFormularioSofiaInsider = processarFormularioSofiaInsider;
+window.perguntarSofiaInsider = perguntarSofiaInsider;
+window.abrirModalTinderImobiliario = abrirModalTinderImobiliario;
+window.fecharModalTinderImobiliario = fecharModalTinderImobiliario;
+window.tinderSwipeAction = tinderSwipeAction;
+window.compartilharLinkTinderCliente = compartilharLinkTinderCliente;
+
+

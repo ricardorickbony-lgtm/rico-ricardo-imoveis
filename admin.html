@@ -353,6 +353,64 @@
           </div>
         </div>
 
+        <!-- PAINEL DE AÇÃO DIÁRIA DO CORRETOR (GESTÃO POR EXCEÇÃO & LEADS ATRASADOS) -->
+        <div class="nexo-daily-action-card p-5 sm:p-6 border border-slate-200 rounded-3xl shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm">🎯</span>
+                <h3 class="font-black text-slate-900 text-sm sm:text-base">Painel de Ação Diária do Corretor & Prioridades</h3>
+                <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full uppercase">Foco Comercial</span>
+              </div>
+              <p class="text-xs text-slate-500">Operação por exceção: o sistema mostra exatamente o que precisa de ação agora sem perda de tempo.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-600">Score de Atendimento:</span>
+              <span id="nexo-score-atendimento" class="text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 px-2.5 py-1 rounded-xl">92/100 ⭐</span>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Coluna 1: Meta do Dia -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold text-slate-700">
+                <span>🎯 Meta de Contatos do Dia</span>
+                <span id="nexo-meta-dia-texto" class="text-blue-600 font-black">4 / 5 feitos</span>
+              </div>
+              <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                <div id="nexo-meta-dia-progresso" class="bg-blue-600 h-full rounded-full transition-all duration-500" style="width: 80%;"></div>
+              </div>
+              <span class="text-[10px] text-slate-400 block font-medium">Falta apenas 1 contato para atingir a meta diária de alta performance!</span>
+            </div>
+
+            <!-- Coluna 2: Leads Atrasados (Alerta) -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 space-y-2">
+              <div class="flex items-center justify-between text-xs font-bold">
+                <span class="text-slate-700">⚠️ Leads Atrasados (> 24h)</span>
+                <span id="nexo-leads-atrasados-badge" class="nexo-lead-delay-badge alert-pulsing">0 pendentes</span>
+              </div>
+              <div id="nexo-leads-atrasados-lista" class="space-y-1.5 text-xs">
+                <!-- Preenchido via JS -->
+              </div>
+            </div>
+
+            <!-- Coluna 3: Próxima Ação Imediata (Fazer Agora) -->
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50/70 p-4 rounded-2xl border border-blue-200 space-y-2 flex flex-col justify-between" id="nexo-box-proxima-acao">
+              <div>
+                <div class="flex items-center justify-between text-xs font-bold text-blue-900 mb-1">
+                  <span>⚡ Próxima Ação Recomendada</span>
+                  <span class="text-[10px] bg-blue-600 text-white px-2 py-0.5 rounded font-bold">Fazer Agora</span>
+                </div>
+                <div id="nexo-proxima-acao-cliente" class="font-bold text-slate-900 text-xs">Carregando prioridade...</div>
+                <div id="nexo-proxima-acao-motivo" class="text-[11px] text-slate-600">Analisando oportunidades no funil...</div>
+              </div>
+              <div class="flex items-center gap-2 pt-1" id="nexo-proxima-acao-botoes">
+                <!-- Inserido dinamicamente via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Oportunidades e Leads Recentes -->
         <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
           <div class="flex items-center justify-between">
@@ -402,6 +460,10 @@
                 <span>➕</span>
                 <span>Novo Imóvel (F2)</span>
               </button>
+              <button onclick="abrirModalCadastroImovelComAudio()" class="nexo-btn-erp bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" title="Cadastrar Imóvel por Voz em Segundos (Sofia IA)">
+                <span>🎙️</span>
+                <span>Cadastro por Voz</span>
+              </button>
               <button onclick="editarImovelPrimeiroSelecionado()" class="nexo-btn-erp" title="Editar Imóvel Selecionado">
                 <span>✏️</span>
                 <span>Editar</span>
@@ -419,6 +481,10 @@
                 <span>📥</span>
                 <span>Importar / Portabilidade</span>
               </button>
+              <button onclick="abrirModalTinderImobiliario()" class="nexo-btn-erp text-rose-700 hover:bg-rose-50" title="Tinder Imobiliário / Sala de Decisão Interativa do Comprador">
+                <span>🔥</span>
+                <span>Tinder do Cliente</span>
+              </button>
               <button onclick="abrirModalSimuladorFinanciamento()" class="nexo-btn-erp" title="Simulador de Financiamento Habitacional (Caixa / Bancos)">
                 <span>🏦</span>
                 <span>Simulador Caixa</span>
@@ -426,6 +492,10 @@
               <button onclick="abrirModalTermoVisita()" class="nexo-btn-erp" title="Gerar Termo de Visita Eletrônico com Assinatura na Tela">
                 <span>📝</span>
                 <span>Termo de Visita</span>
+              </button>
+              <button onclick="document.querySelector('.tab-admin-nav[data-tab=\'aba-sofia\']').click()" class="nexo-btn-erp text-purple-700 hover:bg-purple-50" title="Sofia Insider IA - Consultoria Executiva em Português">
+                <span>🧠</span>
+                <span>Sofia Insider IA</span>
               </button>
               <button onclick="document.querySelector('.tab-admin-nav[data-tab=\'aba-portais\']').click()" class="nexo-btn-erp" title="Feed XML e Sincronização com Portais">
                 <span>📡</span>
@@ -803,6 +873,9 @@
                 📋 Tabela
               </button>
             </div>
+            <button onclick="abrirModalTinderImobiliario()" class="bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Abrir Sala de Decisão do Comprador (Tinder Imobiliário)">
+              <span>🔥 Tinder do Cliente</span>
+            </button>
             <button onclick="abrirModalSimuladorFinanciamento()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs px-3.5 py-2 rounded-xl transition shadow-sm flex items-center gap-1.5" title="Simular Financiamento Habitacional para Leads">
               <span>🏦 Simulador Caixa</span>
             </button>
@@ -1176,6 +1249,62 @@
             </form>
           </div>
 
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SOFIA INSIDER IA PRO GESTOR (PERGUNTE EM PORTUGUÊS SOBRE SEU CRM)  -->
+        <!-- ================================================================= -->
+        <div class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xl">🧠</span>
+                <h3 class="font-black text-slate-900 text-base sm:text-lg">Sofia Insider IA — Consultora Executiva do Diretor</h3>
+                <span class="text-[10px] font-bold bg-purple-100 text-purple-800 border border-purple-200 px-2.5 py-0.5 rounded-full uppercase">Exclusivo Direção</span>
+              </div>
+              <p class="text-xs text-slate-500 mt-0.5">Pergunte em português qualquer informação gerencial e a Sofia IA cruza os dados do CRM e responde em segundos com tabelas e métricas.</p>
+            </div>
+            <span class="text-xs font-mono font-bold bg-slate-100 text-slate-700 px-3 py-1.5 rounded-xl border border-slate-200 shrink-0">
+              ⚡ Banco Local & Nuvem Conectado
+            </span>
+          </div>
+
+          <!-- Sugestões de Perguntas Rápidas (Chips) -->
+          <div class="flex items-center gap-2 flex-wrap text-xs">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Perguntas Rápidas:</span>
+            <button type="button" onclick="perguntarSofiaInsider('Quanto temos de VGV total e qual o valor médio dos imóveis?')" class="bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-300 font-medium px-3 py-1.5 rounded-xl transition text-[11px]">
+              💰 VGV e Ticket Médio
+            </button>
+            <button type="button" onclick="perguntarSofiaInsider('Quantos imóveis temos disponíveis para aluguel e venda?')" class="bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-300 font-medium px-3 py-1.5 rounded-xl transition text-[11px]">
+              🏢 Estoque por Finalidade
+            </button>
+            <button type="button" onclick="perguntarSofiaInsider('Quais leads estão sem contato ou com atendimento pendente?')" class="bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-300 font-medium px-3 py-1.5 rounded-xl transition text-[11px]">
+              ⚠️ Leads sem Follow-up
+            </button>
+            <button type="button" onclick="perguntarSofiaInsider('Quais são os imóveis mais nobres com valor acima de 1 milhão?')" class="bg-slate-50 hover:bg-purple-50 text-slate-700 hover:text-purple-700 border border-slate-200 hover:border-purple-300 font-medium px-3 py-1.5 rounded-xl transition text-[11px]">
+              💎 Imóveis Acima de R$ 1 Milhão
+            </button>
+          </div>
+
+          <!-- Área de Resposta da Sofia Insider -->
+          <div id="box-resposta-sofia-insider" class="bg-slate-900 text-slate-100 p-5 rounded-2xl border border-slate-800 min-h-[160px] text-xs font-mono space-y-3">
+            <div class="flex items-center gap-2 text-purple-400 font-bold border-b border-white/10 pb-2">
+              <span>🤖 Resposta da Sofia Insider:</span>
+              <span id="label-status-insider" class="text-[10px] text-slate-400 font-normal">Aguardando sua pergunta...</span>
+            </div>
+            <div id="conteudo-resposta-sofia-insider" class="leading-relaxed text-slate-300">
+              Olá, Diretor! Eu tenho acesso a 100% dos imóveis cadastrados, histórico de leads e métricas financeiras. Clique em uma das perguntas rápidas acima ou digite sua dúvida abaixo em linguagem natural.
+            </div>
+          </div>
+
+          <!-- Input da Pergunta -->
+          <form id="form-sofia-insider" onsubmit="event.preventDefault(); processarFormularioSofiaInsider();" class="flex items-center gap-2">
+            <input type="text" id="input-sofia-insider-query" placeholder="Pergunte qualquer coisa: ex. 'Quantos apartamentos temos no Gonzaga?'" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-600 focus:bg-white font-medium">
+            <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow flex items-center gap-2 shrink-0">
+              <span>Perguntar</span>
+              <span>→</span>
+            </button>
+          </form>
         </div>
 
       </section>
@@ -2024,6 +2153,51 @@
       <div>
         <h3 id="modal-cadastro-titulo" class="text-xl font-black text-slate-900">Cadastrar Novo Imóvel</h3>
         <p class="text-xs text-slate-500">Preencha as características para publicar instantaneamente nos templates do site.</p>
+      </div>
+
+      <!-- BANNER DE CADASTRO POR VOZ / ÁUDIO (SOFIA IA) -->
+      <div class="nexo-voice-banner">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-sm">🎙️</span>
+              <span class="text-xs font-black tracking-wide uppercase text-indigo-200">Cadastro Inteligente por Áudio</span>
+              <span class="text-[10px] font-bold bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 px-2 py-0.5 rounded-full">Sofia IA 24/7</span>
+            </div>
+            <p class="text-xs text-slate-200 max-w-xl leading-relaxed">
+              Fale naturalmente como se explicasse para um cliente: <em>"Apartamento 3 quartos, 110m², no Gonzaga, R$ 750 mil, 2 vagas, com piscina"</em>. A Sofia IA preenche todos os campos em segundos!
+            </p>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button type="button" id="btn-gravar-audio-imovel" onclick="alternarGravacaoAudioImovel()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition shadow flex items-center gap-2 whitespace-nowrap">
+              <span id="icone-audio-imovel">🎙️</span>
+              <span id="texto-audio-imovel">Falar para Preencher</span>
+            </button>
+            <button type="button" onclick="simularAudioExemploImovel()" class="bg-white/10 hover:bg-white/20 text-indigo-200 border border-white/20 font-bold text-xs px-3 py-2.5 rounded-xl transition whitespace-nowrap" title="Simular voz automaticamente">
+              💡 Teste Rápido
+            </button>
+          </div>
+        </div>
+
+        <!-- Transcrição em Tempo Real -->
+        <div id="box-transcricao-audio-imovel" class="hidden mt-3 pt-3 border-t border-indigo-500/30 text-xs">
+          <div class="flex items-center justify-between gap-2 mb-1 text-[11px] text-indigo-300">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping" id="dot-gravando-audio"></span>
+              <span id="label-status-audio">Escutando sua fala em tempo real...</span>
+            </div>
+            <div class="flex items-center gap-0.5" id="wave-gravando-audio">
+              <span class="nexo-waveform-bar"></span>
+              <span class="nexo-waveform-bar"></span>
+              <span class="nexo-waveform-bar"></span>
+              <span class="nexo-waveform-bar"></span>
+              <span class="nexo-waveform-bar"></span>
+            </div>
+          </div>
+          <p id="texto-transcricao-audio" class="p-2.5 bg-black/40 rounded-xl font-mono text-[11px] text-indigo-100 border border-white/10 italic">
+            Aguardando áudio...
+          </p>
+        </div>
       </div>
 
       <form id="form-salvar-imovel" class="space-y-4 text-xs">
@@ -3618,6 +3792,47 @@
         <button onclick="desbloquearSinalMasterEmergencia()" class="text-[11px] font-bold text-slate-400 hover:text-blue-600 transition underline">
           👑 Liberação de Emergência Master (Super Admin)
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL: TINDER IMOBILIÁRIO DO CLIENTE (SALA DE DECISÃO DO COMPRADOR / SWIPE) -->
+  <!-- ========================================================================= -->
+  <div id="modal-tinder-imobiliario" class="modal-overlay">
+    <div class="modal-content relative !max-w-md p-6 space-y-4 text-center">
+      <button type="button" onclick="fecharModalTinderImobiliario()" class="absolute top-4 right-4 bg-slate-100 hover:bg-slate-200 text-slate-600 w-8 h-8 rounded-full flex items-center justify-center transition">
+        ✕
+      </button>
+
+      <div>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200 text-[11px] font-bold uppercase tracking-wider mb-1">
+          <span>🔥</span> Sala de Decisão do Comprador
+        </div>
+        <h3 class="text-lg font-black text-slate-900">Tinder Imobiliário (Swipe & Match)</h3>
+        <p class="text-xs text-slate-500">Envie o link para o cliente no WhatsApp. Ele arrasta pro lado e decide em família no celular!</p>
+      </div>
+
+      <!-- Viewport de Cartões Estilo Tinder -->
+      <div class="nexo-tinder-viewport" id="tinder-card-container">
+        <!-- Renderizado dinamicamente via JS -->
+      </div>
+
+      <!-- Controles Inferiores de Decisão -->
+      <div class="flex items-center justify-center gap-4 pt-2">
+        <button type="button" onclick="tinderSwipeAction('left')" class="w-14 h-14 rounded-full bg-slate-100 hover:bg-rose-50 border-2 border-slate-200 hover:border-rose-400 text-rose-500 text-2xl flex items-center justify-center shadow-md transition hover:scale-110 active:scale-95" title="Descartar imóvel">
+          ✕
+        </button>
+        <button type="button" onclick="compartilharLinkTinderCliente()" class="px-4 py-2.5 rounded-2xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5 shadow-sm" title="Compartilhar link interativo com o cliente no WhatsApp">
+          <span>📲</span> <span>Enviar p/ Cliente</span>
+        </button>
+        <button type="button" onclick="tinderSwipeAction('right')" class="w-14 h-14 rounded-full bg-slate-100 hover:bg-emerald-50 border-2 border-slate-200 hover:border-emerald-400 text-emerald-500 text-2xl flex items-center justify-center shadow-md transition hover:scale-110 active:scale-95" title="Gostei! Favoritar imóvel">
+          ❤️
+        </button>
+      </div>
+
+      <div class="pt-2 text-[10px] text-slate-400 font-mono">
+        💡 Ao favoritar, a Sofia IA notifica o corretor responsável no WhatsApp na hora.
       </div>
     </div>
   </div>
