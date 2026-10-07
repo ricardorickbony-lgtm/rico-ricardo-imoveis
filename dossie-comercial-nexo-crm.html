@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dossiê Oficial & Relatório de Implementações — NEXO CRM Enterprise</title>
+  <link rel="icon" type="image/png" href="favicon.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #1e293b;
+      background-color: #0f172a;
+    }
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    @media print {
+      body {
+        background-color: #ffffff !important;
+        color: #0f172a !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-shadow-none {
+        box-shadow: none !important;
+      }
+      .page-break {
+        page-break-before: always;
+        break-before: page;
+      }
+      .avoid-break {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      @page {
+        size: A4;
+        margin: 12mm 15mm;
+      }
+    }
+  </style>
+</head>
+<body class="antialiased min-h-screen py-8 print:py-0">
+
+  <!-- BARRA DE AÇÃO SUPERIOR (APENAS NA TELA) -->
+  <div class="no-print fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
+    <button onclick="window.print()" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs px-4 py-2 rounded-full transition flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
+      <span>🖨️</span> <span>Salvar em PDF / Imprimir</span>
+    </button>
+    <a href="https://wa.me/5511914879393?text=Ol%C3%A1%20Ricardo,%20recebi%20o%20Dossi%C3%AA%20do%20NEXO%20CRM%20e%20gostaria%20de%20agendar%20uma%20demonstra%C3%A7%C3%A3o%20para%20minha%20imobili%C3%A1ria." target="_blank" class="bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs px-4 py-2 rounded-full transition flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
+      <span>📲</span> <span>Enviar Proposta no WhatsApp</span>
+    </a>
+    <a href="admin.html" class="bg-blue-600 hover:bg-blue-500 text-white font-black text-xs px-4 py-2 rounded-full transition flex items-center gap-2 shadow-lg hover:scale-105 active:scale-95">
+      <span>🚀</span> <span>Abrir CRM Demo</span>
+    </a>
+  </div>
+
+  <!-- CONTAINER PRINCIPAL DO DOCUMENTO -->
+  <main class="max-w-5xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden print:shadow-none print:rounded-none my-8 print:my-0 border border-slate-200/60 print:border-none">
+    
+    <!-- CABEÇALHO EXECUTIVO / CAPA -->
+    <header class="bg-gradient-to-br from-slate-950 via-[#0B132B] to-[#1C2541] text-white p-10 sm:p-14 relative overflow-hidden">
+      <div class="absolute -right-20 -top-20 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-20 -bottom-20 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-6">
+        <div class="flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-6">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-amber-300 p-0.5 shadow-lg flex items-center justify-center">
+              <div class="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center font-black text-amber-400 text-xl font-mono">
+                N
+              </div>
+            </div>
+            <div>
+              <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+                NEXO <span class="text-amber-400">CRM</span>
+                <span class="text-[10px] uppercase font-bold tracking-widest px-2.5 py-0.5 rounded-full bg-white/10 text-slate-300 border border-white/10">Enterprise v6.0</span>
+              </h1>
+              <p class="text-xs text-slate-400 font-medium">Plataforma Definitiva de Inteligência Artificial, Gestão ERP & Alta Conversão Imobiliária</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-400 block font-bold">Dossiê Técnico & Comercial</span>
+            <span class="text-xs text-slate-300 font-medium">Data de Emissão: Outubro / 2026</span>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/10 text-amber-300 text-xs font-bold border border-amber-400/20">
+            <span>✨</span> Tecnologia Exclusiva Ricardo & Severino
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-white leading-tight">
+            Relatório Consolidado de Todas as Inovações & Módulos Implementados
+          </h2>
+          <p class="text-sm text-slate-300 max-w-3xl leading-relaxed">
+            Este documento apresenta a arquitetura completa, as tecnologias proprietárias e o portfólio de armas comerciais construídas para equipar imobiliárias de alta performance. Da Inteligência Artificial por voz à blindagem jurídica e fiscal (NFS-e / DIMOB).
+          </p>
+        </div>
+
+        <!-- BADGES DE CERTIFICAÇÃO E ENGENHARIA -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 font-mono text-[11px]">
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+            <span class="text-slate-400 block text-[9px] uppercase">Motor de IA:</span>
+            <span class="font-bold text-amber-300">Sofia IA v3.5 (NLP + Voice)</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+            <span class="text-slate-400 block text-[9px] uppercase">Banco de Dados:</span>
+            <span class="font-bold text-blue-400">Supabase Cloud PostgreSQL</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+            <span class="text-slate-400 block text-[9px] uppercase">Conformidade:</span>
+            <span class="font-bold text-emerald-400">LGPD + NFS-e + DIMOB RFB</span>
+          </div>
+          <div class="bg-white/5 border border-white/10 rounded-xl p-3">
+            <span class="text-slate-400 block text-[9px] uppercase">Disponibilidade:</span>
+            <span class="font-bold text-purple-400">Mobile PWA + Offline First</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- CORPO DO DOSSIÊ -->
+    <div class="p-8 sm:p-14 space-y-12">
+
+      <!-- SEÇÃO 1: OS 4 DIFERENCIAIS MATADORES QUE VENDEM O SISTEMA -->
+      <section class="space-y-6 avoid-break">
+        <div class="border-b border-slate-200 pb-3">
+          <span class="text-xs font-bold font-mono uppercase tracking-wider text-amber-600 block">Destaques Comerciais de Alto Impacto</span>
+          <h3 class="text-2xl font-black text-slate-900">1. As 4 Armas Comerciais Inéditas do NEXO CRM</h3>
+          <p class="text-xs text-slate-500 mt-1">Inovações projetadas para encantar donos de imobiliárias no primeiro minuto de demonstração.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- CARD 1: CADASTRO POR VOZ -->
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-indigo-50/70 to-blue-50/50 border border-indigo-200/80 space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center text-xl shadow-md">🎙️</span>
+              <div>
+                <h4 class="font-black text-slate-900 text-base">Cadastro de Imóveis por Voz (Speech-to-Listing)</h4>
+                <span class="text-[10px] font-bold text-indigo-700 uppercase tracking-wider">Sofia IA Speech Engine</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              O corretor abre o cadastro, fala por 15 segundos descrevendo o imóvel naturalmente e a Sofia IA preenche tipo, finalidade, valores, metragens, quartos, suítes, vagas, bairro, comodidades e <strong>gera o título e texto comercial completo</strong> com iluminação visual em verde.
+            </p>
+            <div class="bg-white/80 p-2.5 rounded-xl border border-indigo-100 text-[11px] font-mono text-indigo-950">
+              💡 <strong>Impacto:</strong> Elimina a preguiça do corretor de cadastrar imóveis e reduz o tempo de ficha de 15 minutos para 20 segundos.
+            </div>
+          </div>
+
+          <!-- CARD 2: SOFIA INSIDER IA -->
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-purple-50/70 to-pink-50/50 border border-purple-200/80 space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-purple-700 text-white flex items-center justify-center text-xl shadow-md">🧠</span>
+              <div>
+                <h4 class="font-black text-slate-900 text-base">Sofia Insider IA — Consultora Executiva</h4>
+                <span class="text-[10px] font-bold text-purple-700 uppercase tracking-wider">Business Intelligence em Português</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              O dono da imobiliária pergunta diretamente em português: <em>"Qual é nosso VGV total e ticket médio?"</em> ou <em>"Quais leads estão parados há mais de 12 horas?"</em> e a IA gera relatórios instantâneos, gráficos e orientações táticas de vendas em tempo real.
+            </p>
+            <div class="bg-white/80 p-2.5 rounded-xl border border-purple-100 text-[11px] font-mono text-purple-950">
+              💡 <strong>Impacto:</strong> Transforma o CRM de uma simples planilha em um consultor executivo que pensa o negócio junto com a diretoria.
+            </div>
+          </div>
+
+          <!-- CARD 3: TINDER IMOBILIÁRIO -->
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-rose-50/70 to-orange-50/50 border border-rose-200/80 space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-xl shadow-md">🔥</span>
+              <div>
+                <h4 class="font-black text-slate-900 text-base">Tinder Imobiliário do Cliente (Swipe & Match)</h4>
+                <span class="text-[10px] font-bold text-rose-700 uppercase tracking-wider">Sala de Decisão Familiar</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Interface interativa no WhatsApp da família: o comprador arrasta os cartões de imóveis para o lado (descartar ou favoritar) com cálculo de afinidade percentual. Quando ele favorita, a Sofia IA notifica o corretor responsável no WhatsApp na mesma hora.
+            </p>
+            <div class="bg-white/80 p-2.5 rounded-xl border border-rose-100 text-[11px] font-mono text-rose-950">
+              💡 <strong>Impacto:</strong> Acelera o fechamento de vendas envolvendo marido, esposa e filhos em uma experiência divertida de compra.
+            </div>
+          </div>
+
+          <!-- CARD 4: PAINEL DE AÇÃO DIÁRIA -->
+          <div class="p-6 rounded-2xl bg-gradient-to-br from-amber-50/70 to-yellow-50/50 border border-amber-200/80 space-y-3">
+            <div class="flex items-center gap-3">
+              <span class="w-10 h-10 rounded-xl bg-amber-600 text-white flex items-center justify-center text-xl shadow-md">⚡</span>
+              <div>
+                <h4 class="font-black text-slate-900 text-base">Painel de Ação Diária & Alerta de Leads Atrasados</h4>
+                <span class="text-[10px] font-bold text-amber-700 uppercase tracking-wider">Zero Perda de Oportunidades</span>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Card de alta prioridade no dashboard destacando leads sem primeiro retorno há mais de 12 horas, apontando a próxima ação recomendada e botão direto de WhatsApp com mensagem personalizada pronta para envio em 1 clique.
+            </p>
+            <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100 text-[11px] font-mono text-amber-950">
+              💡 <strong>Impacto:</strong> Evita que leads caros de portais (ZAP, VivaReal, Meta) esfriem ou sejam fechados por corretores concorrentes.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO 2: GUIA COMPLETO DE MÓDULOS IMPLEMENTADOS -->
+      <section class="space-y-8 page-break">
+        <div class="border-b border-slate-200 pb-3">
+          <span class="text-xs font-bold font-mono uppercase tracking-wider text-blue-600 block">Arquitetura Completa do Ecossistema</span>
+          <h3 class="text-2xl font-black text-slate-900">2. Estrutura Modular Completa do NEXO CRM</h3>
+          <p class="text-xs text-slate-500 mt-1">Todos os 8 módulos desenvolvidos e homologados para produção.</p>
+        </div>
+
+        <div class="space-y-6">
+
+          <!-- MÓDULO 1: COMERCIAL & PIPELINE -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-blue-600 font-mono">01.</span> Gestão Comercial, Pipeline de Vendas & Resgate de Leads
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-800 font-mono">Alta Conversão</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Funil Duplo (Kanban & Tabela):</strong> Gestão visual por cartões arrastáveis ou tabela densa com filtros rápidos.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Termo de Visita Eletrônico com Assinatura na Tela:</strong> O cliente assina com o dedo no celular do corretor, garantindo a comissão juridicamente.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Simulador Habitacional Caixa / Bancos:</strong> Cálculo nativo de parcelas SAC/Price, amortização e entrada durante a visita com o lead.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Roleta & Bolsão Comunitário de Leads:</strong> Distribuição equilibrada entre corretores e resgate automático de leads negligenciados.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 2: INTERFACE ENTERPRISE ERP -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-indigo-600 font-mono">02.</span> Arquitetura Visual Enterprise ERP (Desktop MDI & Mobile Híbrido)
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-indigo-100 text-indigo-800 font-mono">Padrão Corporativo</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Interface Multi-Documentos MDI:</strong> Janelas flutuantes, arrastáveis e redimensionáveis sem travar a navegação ao fundo.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Command Ribbon Executivo:</strong> Barra superior de ferramentas com botões de acesso instantâneo a todas as operações críticas.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>DataGrid Técnico Delphi:</strong> Visualização densa de inventário com seleção múltipla, paginação rápida e filtros combinados.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Barra de Status em Tempo Real:</strong> Horário de precisão, status de conectividade na nuvem e métricas ativas no rodapé.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 3: LOCAÇÃO & FISCAL -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-emerald-600 font-mono">03.</span> Gestão de Locação, Financeiro & Compliance Fiscal
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-mono">NFS-e & DIMOB</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Gestão de Contratos de Aluguel:</strong> Vencimentos, adimplência, valor bruto, taxa de administração e repasse líquido calculados.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Recibo do Inquilino & Extrato do Locador:</strong> Emissão de recibos com autenticação digital e extrato com chave PIX para repasse rápido.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Emissão Oficial de NFS-e Municipal:</strong> Geração do DANFSE da taxa de administração com QR Code ICP-Brasil e alíquota de ISS configurável.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Exportação da DIMOB Anual (Receita Federal):</strong> Criação automática do arquivo texto oficial para envio à Receita Federal sem contabilidade manual.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 4: CIBERSEGURANÇA & LGPD -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-rose-600 font-mono">04.</span> Cibersegurança, Blindagem LGPD & Governança (RBAC)
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-100 text-rose-800 font-mono">Segurança Máxima</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Matriz de Permissões Granulares:</strong> Controle estrito sobre quem vê telefones de proprietários, dados bancários e relatórios financeiros.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Mascaramento de Dados Sensíveis:</strong> CPFs, chaves PIX e telefones aparecem truncados para perfis de corretores, cumprindo a LGPD.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Trilha de Auditoria em Tempo Real (Audit Trail):</strong> Registro imutável de todas as ações de cada usuário no sistema para proteção contra vazamentos.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Lixeira Segura & Proteção Anti-Força Bruta:</strong> Soft-delete com recuperação de dados e lockout de 15 min após tentativas inválidas de login.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 5: PORTABILIDADE & MULTICLOUD -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-amber-600 font-mono">05.</span> Portabilidade de Dados, Nuvem Supabase & Motor SaaS
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-mono">Migração em 10 Min</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Importador XML VivaReal / ZAP em 1 Clique:</strong> Puxa a carteira inteira do cliente do CRM anterior sem digitação manual de imóveis.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Supabase Cloud PostgreSQL:</strong> Arquitetura de banco em nuvem de alta confiabilidade com sincronização instantânea.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Integração Asaas (PIX Dinâmico & Webhook):</strong> Cobrança automatizada de mensalidades e liberação instantânea de licenças.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Painel Master SaaS Standalone (`master.html`):</strong> Central executiva de controle de assinantes, status de contratos e bloqueios de sinal.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 6: MOBILE PWA -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-cyan-600 font-mono">06.</span> Progressive Web App (PWA) & Modo Offline
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-cyan-100 text-cyan-800 font-mono">App no Bolso</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Instalação em 1 Toque (Android e iOS):</strong> Cria ícone oficial na tela inicial sem passar pela lentidão de lojas de aplicativos.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Cache Inteligente v6 & Offline-First:</strong> O sistema abre instantaneamente mesmo em locais sem sinal de celular (garagens e subsolos).</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MÓDULO 7: PORTAL PÚBLICO DE LUXO -->
+          <div class="border border-slate-200 rounded-2xl p-6 bg-slate-50/50 avoid-break space-y-4">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h4 class="text-base font-black text-slate-900 flex items-center gap-2">
+                <span class="text-yellow-600 font-mono">07.</span> Portal Público de Ultra Luxo (Quiet Luxury 2026)
+              </h4>
+              <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-800 font-mono">Alta Estética</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs text-slate-600">
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Paleta Obsidian & Solar Gold:</strong> Design internacional de alto padrão visual com vídeo hero contínuo em background.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>WhatsApp com Horário em Tempo Real:</strong> Botão sincronizado que indica se a imobiliária está aberta ou no plantão Sofia IA.</span>
+              </div>
+              <div class="flex items-start gap-2">
+                <span class="text-emerald-500 font-bold">✔</span>
+                <span><strong>Lead Gate para Fotos Exclusivas:</strong> Captura o WhatsApp do interessado antes de liberar a galeria completa de alta resolução.</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- SEÇÃO 3: TABELA COMPARATIVA vs SOFTWARES LEGADOS -->
+      <section class="space-y-6 page-break">
+        <div class="border-b border-slate-200 pb-3">
+          <span class="text-xs font-bold font-mono uppercase tracking-wider text-rose-600 block">Comparativo Direto de Mercado</span>
+          <h3 class="text-2xl font-black text-slate-900">3. NEXO CRM vs. Softwares Legados do Mercado</h3>
+          <p class="text-xs text-slate-500 mt-1">Por que as imobiliárias trocam seus sistemas antigos pelo NEXO CRM.</p>
+        </div>
+
+        <div class="border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-900 text-white font-mono text-[11px]">
+              <tr>
+                <th class="p-3.5 sm:p-4">Recurso / Capacidade</th>
+                <th class="p-3.5 sm:p-4 text-center text-slate-400">Softwares Legados</th>
+                <th class="p-3.5 sm:p-4 text-center text-amber-400 bg-slate-800">NEXO CRM Enterprise</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 font-medium">
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Cadastro de Imóveis por Voz (Speech-to-Listing)</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Não possui</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Preenche em 15s)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Sofia Insider IA (Consultas Gerenciais em Português)</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Não possui</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Relatórios instantâneos)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Tinder Imobiliário (Sala de Decisão Familiar)</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Não possui</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Swipe & Match no WhatsApp)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Painel de Ação Diária com Alerta de Leads Atrasados</td>
+                <td class="p-3.5 sm:p-4 text-center text-amber-600 font-bold">⚠️ Confuso / Básico</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Alerta pulsante > 12h)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Termo de Visita com Assinatura Digital na Tela</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Exige papel</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Assinatura no celular)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Simulador de Financiamento Caixa Integrado</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Link externo</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Calcula na hora)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Módulo Fiscal Nativo (NFS-e DANFSE + DIMOB RFB)</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Exige ERP à parte</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (100% Integrado)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Bloqueio Anti-Vazamento e Blindagem LGPD</td>
+                <td class="p-3.5 sm:p-4 text-center text-amber-600 font-bold">⚠️ Frágil / Parcial</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Mascaramento & Audit)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Migração em Massa de Carteira (Feed XML)</td>
+                <td class="p-3.5 sm:p-4 text-center text-rose-600 font-bold">❌ Cobram taxas caras</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (Grátis em 10 minutos)</td>
+              </tr>
+              <tr class="hover:bg-slate-50">
+                <td class="p-3.5 sm:p-4 font-bold text-slate-800">Progressive Web App (Instalação 1 toque no celular)</td>
+                <td class="p-3.5 sm:p-4 text-center text-amber-600 font-bold">⚠️ Apps pesados de loja</td>
+                <td class="p-3.5 sm:p-4 text-center text-emerald-700 font-bold bg-amber-50/30">✅ Sim (PWA leve e offline)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- SEÇÃO 4: ROTEIRO DE FECHAMENTO COMERCIAL (PARA REUNIÕES) -->
+      <section class="space-y-6 avoid-break bg-slate-900 text-white p-8 sm:p-10 rounded-3xl relative overflow-hidden">
+        <div class="relative z-10 space-y-4">
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold uppercase tracking-wider border border-amber-500/30">
+              Guia Prático de Fechamento
+            </span>
+          </div>
+          <h3 class="text-2xl font-black text-white">4. Como Apresentar e Fechar Negócio em 15 Minutos</h3>
+          <p class="text-xs text-slate-300 leading-relaxed max-w-2xl">
+            Passo a passo objetivo para conduzir a demonstração e fazer o dono da imobiliária assinar o contrato na primeira reunião:
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
+              <span class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">1</span>
+              <h5 class="font-bold text-white text-xs">O Gancho da Perda de Leads</h5>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Pergunte quantos leads do ZAP ficam sem retorno no final de semana e mostre o <strong>Painel de Ação Diária</strong> com alertas vermelhos pulsantes.
+              </p>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
+              <span class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">2</span>
+              <h5 class="font-bold text-white text-xs">O Efeito UAU da Voz</h5>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Abra o microfone, dite um apartamento em 15 segundos e mostre a tela preenchendo todos os campos, comodidades e texto na hora.
+              </p>
+            </div>
+            <div class="bg-white/5 border border-white/10 rounded-2xl p-4 space-y-2">
+              <span class="w-7 h-7 rounded-lg bg-amber-500 text-slate-950 font-black text-xs flex items-center justify-center">3</span>
+              <h5 class="font-bold text-white text-xs">A Troca sem Fricção</h5>
+              <p class="text-[11px] text-slate-300 leading-relaxed">
+                Mostre o botão de importação XML e prove que toda a carteira dele vem para o NEXO em menos de 10 minutos sem redigitação.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO 5: CONTATO & FORMALIZAÇÃO -->
+      <footer class="pt-8 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-slate-500 avoid-break">
+        <div>
+          <h4 class="font-black text-slate-900 text-sm">Tecnologia NEXO CRM Enterprise</h4>
+          <p class="text-[11px]">Desenvolvido com excelência por <strong>Ricardo & Severino</strong></p>
+          <p class="text-[10px] text-slate-400 font-mono mt-0.5">WhatsApp Comercial: (11) 91487-9393 • Atendimento Nacional</p>
+        </div>
+        <div class="flex items-center gap-4 text-right">
+          <div class="border border-slate-200 px-4 py-2 rounded-xl bg-slate-50 text-[11px]">
+            <span class="block text-slate-400 font-mono text-[9px] uppercase">Status da Versão</span>
+            <span class="font-black text-emerald-600">✔ Produção Homologada v6.0</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  </main>
+
+</body>
+</html>
