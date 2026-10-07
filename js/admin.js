@@ -146,7 +146,7 @@ function verificarAcoesUrlShortcut() {
 /**
  * 1. Autenticação, Defesa Anti-Força Bruta e Sessão Segura
  */
-const STORAGE_BRUTE_FORCE_KEY = 'ricoricardo_brute_force_lock_v1';
+const STORAGE_BRUTE_FORCE_KEY = 'nexodemo_brute_force_lock_v1';
 const MAX_FALHAS_LOGIN = 5;
 const TEMPO_BLOQUEIO_MS = 15 * 60 * 1000; // 15 minutos de bloqueio temporário
 let intervalContadorBloqueio = null;
@@ -353,13 +353,28 @@ function atualizarHeaderUsuarioLogado() {
   const siglaEl = document.getElementById('header-avatar-sigla');
   const rbacContainer = document.getElementById('container-seletor-rbac');
 
+  // Atualização dinâmica do nome e CRECI da Imobiliária no topo
+  try {
+    const cfg = DB.getConfig ? DB.getConfig() : null;
+    const headerImobNome = document.getElementById('header-imobiliaria-nome');
+    const headerImobCreci = document.getElementById('header-imobiliaria-creci');
+    if (cfg) {
+      if (headerImobNome) {
+        headerImobNome.innerHTML = `${cfg.nome || 'IMOBILIÁRIA'} <span class="text-blue-600">MODELO</span>`;
+      }
+      if (headerImobCreci) {
+        headerImobCreci.textContent = `Showroom • ${cfg.creci || 'CRECI 00000-J'}`;
+      }
+    }
+  } catch (e) {}
+
   if (usuario) {
-    if (nomeEl) nomeEl.textContent = usuario.nome || 'Administrador';
+    if (nomeEl) nomeEl.textContent = usuario.nome || 'Diretor Modelo';
     const cargoFormatado = usuario.perfil === 'diretor' ? '👑 Diretor' : (usuario.perfil === 'gerente' ? '👔 Gerente' : '💼 Corretor');
     if (cargoEl) cargoEl.textContent = cargoFormatado;
     if (siglaEl) {
-      const parts = (usuario.nome || 'Admin').trim().split(/\s+/);
-      const s = (parts[0]?.[0] || 'A') + (parts.length > 1 ? (parts[parts.length - 1]?.[0] || '') : (parts[0]?.[1] || ''));
+      const parts = (usuario.nome || 'Diretor Modelo').trim().split(/\s+/);
+      const s = (parts[0]?.[0] || 'D') + (parts.length > 1 ? (parts[parts.length - 1]?.[0] || '') : (parts[0]?.[1] || 'M'));
       siglaEl.textContent = s.toUpperCase();
     }
     // Trava de governança: Corretores têm o seletor oculto para impedir auto-promoção
@@ -488,8 +503,8 @@ function configurarEventosLogin() {
     DB.registrarLogAuditoria('Logout de Sessão', 'Autenticação', 'Sessão administrativa encerrada pelo usuário.', DB.getPerfilAtivo());
     sessionStorage.removeItem('imob_admin_logado');
     localStorage.removeItem('imob_admin_logado');
-    sessionStorage.removeItem('ricoricardo_usuario_ativo_v1');
-    localStorage.removeItem('ricoricardo_usuario_ativo_v1');
+    sessionStorage.removeItem('nexodemo_usuario_ativo_v1');
+    localStorage.removeItem('nexodemo_usuario_ativo_v1');
     location.reload();
   });
 }
@@ -746,12 +761,8 @@ function renderizarTabelaImoveis() {
             <button onclick="abrirModalSimuladorFinanciamento('${im.id}')" class="p-1 text-slate-600 hover:text-amber-700 hover:bg-amber-100 rounded text-xs transition" title="Simulador Caixa">🏦</button>
             <button onclick="abrirModalTermoVisita('${im.id}')" class="p-1 text-slate-600 hover:text-indigo-700 hover:bg-indigo-100 rounded text-xs transition" title="Termo de Visita">📝</button>
             <button onclick="gerarCopySocialImovel('${im.id}')" class="p-1 text-slate-600 hover:text-purple-700 hover:bg-purple-100 rounded text-xs transition" title="Copy IA">✨</button>
-            ${(!DB.usuarioTemPermissao || DB.usuarioTemPermissao('editarValoresImoveis')) ? `
-              <button onclick="editarImovel('${im.id}')" class="p-1 text-slate-600 hover:text-blue-700 hover:bg-blue-100 rounded text-xs transition" title="Editar Imóvel">✏️</button>
-            ` : ''}
-            ${(!DB.usuarioTemPermissao || DB.usuarioTemPermissao('excluirImoveisLeads')) ? `
-              <button onclick="excluirImovel('${im.id}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded text-xs transition" title="Excluir Imóvel">🗑️</button>
-            ` : ''}
+            <button onclick="editarImovel('${im.id}')" class="p-1 text-slate-600 hover:text-blue-700 hover:bg-blue-100 rounded text-xs transition" title="Editar Imóvel">✏️</button>
+            <button onclick="excluirImovel('${im.id}')" class="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-100 rounded text-xs transition" title="Excluir Imóvel">🗑️</button>
           </div>
         </td>
       </tr>
@@ -794,10 +805,6 @@ function obterImoveisSelecionadosIds() {
 }
 
 function editarImovelPrimeiroSelecionado() {
-  if (DB.usuarioTemPermissao && !DB.usuarioTemPermissao('editarValoresImoveis')) {
-    alert('Acesso negado: seu perfil não possui permissão para editar imóveis.');
-    return;
-  }
   const ids = obterImoveisSelecionadosIds();
   if (ids.length === 0) {
     alert('Selecione ao menos um imóvel na grade para editar.');
@@ -807,10 +814,6 @@ function editarImovelPrimeiroSelecionado() {
 }
 
 function excluirImovelPrimeiroSelecionado() {
-  if (DB.usuarioTemPermissao && !DB.usuarioTemPermissao('excluirImoveisLeads')) {
-    alert('Acesso negado: seu perfil não possui permissão para excluir registros.');
-    return;
-  }
   const ids = obterImoveisSelecionadosIds();
   if (ids.length === 0) {
     alert('Selecione ao menos um imóvel na grade para excluir.');
@@ -858,7 +861,6 @@ function exportarImoveisCSV() {
     alert('Erro ao exportar CSV: ' + e.message);
   }
 }
-
 
 function alterarStatusImovelRapido(id, novoStatus) {
   const im = DB.atualizarImovel(id, { status: novoStatus });
@@ -916,6 +918,8 @@ function configurarFormularioImovel() {
     }
     imovelEmEdicaoId = null;
     form.reset();
+    const inputPois = document.getElementById('input-imob-pois');
+    if (inputPois) inputPois.value = '';
     document.getElementById('modal-cadastro-titulo').textContent = 'Cadastrar Novo Imóvel';
     document.getElementById('input-imob-codigo').value = 'REF-' + Math.floor(1000 + Math.random() * 9000);
     modal.classList.add('active');
@@ -925,12 +929,9 @@ function configurarFormularioImovel() {
     modal.classList.remove('active');
   });
 
-  // Upload direto de fotos do computador/celular (com compressão inteligente anti-travamento)
-  const uploadInput = document.getElementById('input-upload-fotos-arquivo');
-  uploadInput?.addEventListener('change', async (e) => {
-    const files = Array.from(e.target.files);
+  // Função compartilhada de processamento de fotos (computador ou câmera móvel com compressão anti-travamento)
+  async function processarArquivosFotos(files) {
     if (!files || files.length === 0) return;
-
     const textareaFotos = document.getElementById('input-imob-fotos');
     const inputFotoPrincipal = document.getElementById('input-imob-foto-principal');
     const statusUpload = document.getElementById('status-upload-fotos');
@@ -958,7 +959,20 @@ function configurarFormularioImovel() {
       statusUpload.textContent = `✓ ${files.length} foto(s) otimizada(s) e anexada(s) com sucesso!`;
       setTimeout(() => statusUpload.classList.add('hidden'), 3500);
     }
+  }
+
+  // Upload direto de fotos do computador/celular
+  const uploadInput = document.getElementById('input-upload-fotos-arquivo');
+  uploadInput?.addEventListener('change', async (e) => {
+    await processarArquivosFotos(Array.from(e.target.files));
     uploadInput.value = '';
+  });
+
+  // Câmera Instantânea Móvel na Vistoria (Direto pelo celular PWA)
+  const cameraInput = document.getElementById('input-upload-fotos-camera');
+  cameraInput?.addEventListener('change', async (e) => {
+    await processarArquivosFotos(Array.from(e.target.files));
+    cameraInput.value = '';
   });
 
   document.getElementById('busca-admin-imoveis')?.addEventListener('input', renderizarTabelaImoveis);
@@ -979,6 +993,34 @@ function configurarFormularioImovel() {
 
     const diferenciaisTexto = document.getElementById('input-imob-diferenciais').value.trim();
     const diferenciaisArray = diferenciaisTexto ? diferenciaisTexto.split(',').map(s => s.trim()).filter(Boolean) : [];
+
+    // Radar de Entorno & Conveniências (POIs)
+    const poisTexto = document.getElementById('input-imob-pois') ? document.getElementById('input-imob-pois').value.trim() : '';
+    let poisArray = [];
+    if (poisTexto) {
+      poisArray = poisTexto.split('\n').map(l => l.trim()).filter(Boolean).map(linha => {
+        const match = linha.match(/^([^\(]+?)(?:\s*\((.*?)\))?$/);
+        const nomeCompleto = match ? match[1].trim() : linha;
+        const detalhes = match && match[2] ? match[2].split('•').map(s => s.trim()) : ['Próximo', 'A poucos minutos'];
+        const primeiroChar = Array.from(nomeCompleto)[0] || '📍';
+        const temEmoji = /\p{Extended_Pictographic}/u.test(primeiroChar);
+        const icone = temEmoji ? primeiroChar : '📍';
+        const nome = temEmoji ? nomeCompleto.replace(primeiroChar, '').trim() : nomeCompleto;
+        return {
+          categoria: 'conveniencia',
+          icone: icone,
+          nome: nome || linha,
+          distancia: detalhes[0] || 'Próximo',
+          tempo: detalhes[1] || 'A pé'
+        };
+      });
+    } else {
+      poisArray = DB.gerarPontosDeInteressePadrao(
+        document.getElementById('input-imob-bairro').value.trim(),
+        document.getElementById('input-imob-cidade').value.trim(),
+        document.getElementById('input-imob-tipo').value
+      );
+    }
 
     const dadosImovel = {
       codigo: document.getElementById('input-imob-codigo').value.trim().toUpperCase(),
@@ -1004,6 +1046,7 @@ function configurarFormularioImovel() {
       fotos: fotosArray,
       tags: tagsArray,
       diferenciais: diferenciaisArray,
+      pontosDeInteresse: poisArray,
       descricao: document.getElementById('input-imob-descricao').value.trim()
     };
 
@@ -1069,6 +1112,13 @@ function editarImovel(id) {
   document.getElementById('input-imob-tags').value = (im.tags || []).join(', ');
   document.getElementById('input-imob-diferenciais').value = (im.diferenciais || []).join(', ');
   document.getElementById('input-imob-descricao').value = im.descricao || '';
+  const inputPois = document.getElementById('input-imob-pois');
+  if (inputPois) {
+    const pLista = im.pontosDeInteresse || [];
+    inputPois.value = pLista.length > 0
+      ? pLista.map(p => `${p.icone || '📍'} ${p.nome} (${p.distancia} • ${p.tempo})`).join('\n')
+      : '';
+  }
 
   modal.classList.add('active');
 }
@@ -1099,6 +1149,30 @@ function configurarBotoesIA() {
         btnGerarIA.textContent = '✨ Gerar Descrição com IA';
         btnGerarIA.disabled = false;
       }, 600);
+    });
+  }
+
+  const btnGerarPoisIA = document.getElementById('btn-gerar-pois-ia');
+  if (btnGerarPoisIA) {
+    btnGerarPoisIA.addEventListener('click', () => {
+      const bairro = document.getElementById('input-imob-bairro')?.value.trim() || 'Bairro Nobre';
+      const cidade = document.getElementById('input-imob-cidade')?.value.trim() || 'Santo André - SP';
+      const tipo = document.getElementById('input-imob-tipo')?.value || 'apartamento';
+
+      btnGerarPoisIA.textContent = '⏳ Analisando...';
+      btnGerarPoisIA.disabled = true;
+
+      setTimeout(() => {
+        const pois = DB.gerarPontosDeInteressePadrao(bairro, cidade, tipo);
+        const formatado = pois.map(p => `${p.icone || '📍'} ${p.nome} (${p.distancia} • ${p.tempo})`).join('\n');
+        const inputPois = document.getElementById('input-imob-pois');
+        if (inputPois) inputPois.value = formatado;
+        btnGerarPoisIA.textContent = '✓ Radar Gerado!';
+        setTimeout(() => {
+          btnGerarPoisIA.textContent = '📍 Radar IA de Bairro';
+          btnGerarPoisIA.disabled = false;
+        }, 1800);
+      }, 400);
     });
   }
 }
@@ -3386,7 +3460,7 @@ function exportarAuditLogCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `auditoria_crm_ricoricardo_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.download = `auditoria_crm_imobiliariamodelo_${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
 
   DB.registrarLogAuditoria(
@@ -3869,9 +3943,9 @@ function verTermoVisitaDetalhe(id) {
     container.innerHTML = `
       <div class="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
         <div>
-          <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">${config.nome || 'RICO RICARDO IMÓVEIS'}</h2>
-          <p class="text-xs text-slate-600 font-semibold">${config.creci || 'CRECI 038613-J'} • ${config.endereco || 'Santo André - SP'}</p>
-          <p class="text-xs text-slate-500">Telefone: ${config.telefone || '(11) 4474-5966'} • WhatsApp: ${config.whatsapp || '5511914879393'}</p>
+          <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">${config.nome || 'IMOBILIÁRIA MODELO'}</h2>
+          <p class="text-xs text-slate-600 font-semibold">${config.creci || 'CRECI 00000-J'} • ${config.endereco || 'São Paulo - SP'}</p>
+          <p class="text-xs text-slate-500">Telefone: ${config.telefone || '(11) 4004-0000'} • WhatsApp: ${config.whatsapp || '5511914879393'}</p>
         </div>
         <div class="text-right">
           <span class="inline-block bg-slate-900 text-white font-mono font-bold text-xs px-3 py-1 rounded-lg">
@@ -3941,7 +4015,7 @@ function verTermoVisitaDetalhe(id) {
         </div>
 
         <div class="text-center pt-2 text-[10px] text-slate-400 font-mono border-t border-slate-100">
-          Autenticação Digital: SHA256-${btoa(termo.codigo + termo.dataHora).substring(0, 24)} • ${config.nome || 'Rico Ricardo Imóveis'}
+          Autenticação Digital: SHA256-${btoa(termo.codigo + termo.dataHora).substring(0, 24)} • ${config.nome || 'Imobiliária Modelo'}
         </div>
       </div>
     `;
@@ -4415,10 +4489,20 @@ function atualizarBadgeLicencaHeader() {
   badgeDot.className = 'w-1.5 h-1.5 rounded-full';
 
   if (lic.status === 'trial') {
-    badgePill.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
-    badgeDot.classList.add('bg-blue-500', 'animate-pulse');
     const dias = Math.max(0, statusInfo.diasRestantes);
-    badgeTexto.textContent = `${plano.nome} • Degustação (${dias}d restantes)`;
+    if (dias > 1) {
+      badgePill.classList.add('bg-blue-50', 'text-blue-800', 'border-blue-200');
+      badgeDot.classList.add('bg-blue-500', 'animate-pulse');
+      badgeTexto.textContent = `⏱️ Degustação Pro • ${dias} Dias Restantes`;
+    } else if (dias === 1) {
+      badgePill.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-300');
+      badgeDot.classList.add('bg-amber-500', 'animate-ping');
+      badgeTexto.textContent = `⚠️ Degustação • Último Dia!`;
+    } else {
+      badgePill.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-300');
+      badgeDot.classList.add('bg-rose-500');
+      badgeTexto.textContent = `🔒 Degustação Expirada`;
+    }
   } else if (lic.status === 'active') {
     badgePill.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
     badgeDot.classList.add('bg-emerald-500');
@@ -4904,20 +4988,35 @@ function copiarPixBloqueio() {
 }
 
 function desbloquearSinalMasterEmergencia() {
-  const senha = prompt('👑 Acesso Master: Digite a senha administrativa de Ricardo & Severino para liberação de emergência:');
-  if (senha === 'admin123' || senha === 'ricardo2026') {
-    const lic = DB.getLicenca();
-    lic.status = 'active';
-    lic.bloqueioManual = false;
-    lic.desbloqueioManual = true;
-    lic.dataVencimento = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
-    DB.salvarLicenca(lic);
+  const senha = prompt('👑 Acesso Master Ricardo & Severino:\nDigite sua Chave Mestra para renovar a demonstração comercial:');
+  if (senha === 'ricardo2026' || senha === 'admin123') {
+    if (DB.reiniciarTrialDemonstracao) {
+      DB.reiniciarTrialDemonstracao(4);
+    } else {
+      const lic = DB.getLicenca();
+      lic.status = 'trial';
+      lic.dataVencimento = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
+      DB.salvarLicenca(lic);
+    }
 
     document.getElementById('tela-bloqueio-sinal')?.classList.add('hidden');
     atualizarBadgeLicencaHeader();
-    mostrarToastFeedback('Sinal desbloqueado com sucesso pelo Super Admin!', '👑');
+    mostrarToastFeedback('🎉 Modo Demonstração reiniciado com sucesso! +4 Dias liberados.', '🚀');
   } else if (senha !== null) {
     alert('Senha master incorreta.');
+  }
+}
+
+function entrarAcessoRapidoDemo() {
+  const inputEmail = document.getElementById('input-email-admin');
+  const inputSenha = document.getElementById('input-senha-admin');
+  const formLogin = document.getElementById('form-login-admin');
+
+  if (inputEmail) inputEmail.value = 'demo@nexocrm.com.br';
+  if (inputSenha) inputSenha.value = 'admin123';
+
+  if (formLogin) {
+    formLogin.dispatchEvent(new Event('submit', { cancelable: true }));
   }
 }
 
@@ -5188,6 +5287,7 @@ window.salvarPrimeiroAcessoSubmit = salvarPrimeiroAcessoSubmit;
 window.abrirModalEsqueciSenha = abrirModalEsqueciSenha;
 window.fecharModalEsqueciSenha = fecharModalEsqueciSenha;
 window.redefinirSenhaSubmit = redefinirSenhaSubmit;
+window.entrarAcessoRapidoDemo = entrarAcessoRapidoDemo;
 
 /* ============================================================================
  * PADRÃO OFICIAL NEXO ENTERPRISE ERP — SISTEMA MDI & AUDITORIA OPERACIONAL
@@ -6013,6 +6113,84 @@ function compartilharLinkTinderCliente() {
   alert(`📲 Link da Sala de Decisão gerado com sucesso!\n\nEnvie este link para o cliente no WhatsApp:\n${link}\n\nO cliente abrirá no celular a interface interativa com fotos e swipe para decidir em família!`);
 }
 
+// =============================================================================
+// SIMULADOR INTERATIVO DE WHATSAPP 24H (SOFIA IA SHOWCASE)
+// =============================================================================
+function abrirModalSimuladorWhatsapp() {
+  const modal = document.getElementById('modal-simulador-whatsapp');
+  if (modal) {
+    modal.classList.add('active');
+    setTimeout(() => {
+      const box = document.getElementById('simulador-wa-mensagens');
+      if (box) box.scrollTop = box.scrollHeight;
+    }, 150);
+  }
+}
+
+function fecharModalSimuladorWhatsapp() {
+  document.getElementById('modal-simulador-whatsapp')?.classList.remove('active');
+}
+
+function enviarMensagemSimuladorWa(texto) {
+  const input = document.getElementById('input-wa-simulador');
+  const txt = (texto || (input ? input.value : '')).trim();
+  if (!txt) return;
+  if (input) input.value = '';
+
+  const box = document.getElementById('simulador-wa-mensagens');
+  if (!box) return;
+
+  const now = new Date();
+  const hora = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+
+  // Balão do Lead (Usuário)
+  const divUser = document.createElement('div');
+  divUser.className = 'flex flex-col items-end';
+  divUser.innerHTML = `
+    <div class="bg-[#005c4b] text-slate-100 p-2.5 rounded-2xl rounded-tr-none max-w-[85%] leading-relaxed shadow-sm">
+      <p>${escapeHtml(txt)}</p>
+      <div class="text-[9px] text-emerald-200 text-right mt-1 font-mono flex items-center justify-end gap-1">
+        <span>${hora}</span>
+        <span class="text-cyan-300">✓✓</span>
+      </div>
+    </div>
+  `;
+  box.appendChild(divUser);
+  box.scrollTop = box.scrollHeight;
+
+  // Indicador de "Sofia digitando..."
+  const divTyping = document.createElement('div');
+  divTyping.id = 'wa-typing-indicator';
+  divTyping.className = 'flex flex-col items-start';
+  divTyping.innerHTML = `
+    <div class="bg-[#202c33] text-emerald-400 p-2 rounded-2xl rounded-tl-none text-[11px] font-mono flex items-center gap-1.5 shadow-sm">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.2s]"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-bounce [animation-delay:0.4s]"></span>
+      <span class="text-slate-300 ml-1">Sofia digitando...</span>
+    </div>
+  `;
+  box.appendChild(divTyping);
+  box.scrollTop = box.scrollHeight;
+
+  setTimeout(() => {
+    document.getElementById('wa-typing-indicator')?.remove();
+    const resultado = DB.processarMensagemSofiaIA(txt);
+
+    const divBot = document.createElement('div');
+    divBot.className = 'flex flex-col items-start';
+
+    divBot.innerHTML = `
+      <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed shadow-sm border-l-2 border-emerald-400">
+        <p class="whitespace-pre-line text-[11px] leading-relaxed">${escapeHtml(resultado.respostaTexto)}</p>
+        <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">${hora}</div>
+      </div>
+    `;
+    box.appendChild(divBot);
+    box.scrollTop = box.scrollHeight;
+  }, 450);
+}
+
 // Inicializações no carregamento do painel
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
@@ -6034,5 +6212,7 @@ window.abrirModalTinderImobiliario = abrirModalTinderImobiliario;
 window.fecharModalTinderImobiliario = fecharModalTinderImobiliario;
 window.tinderSwipeAction = tinderSwipeAction;
 window.compartilharLinkTinderCliente = compartilharLinkTinderCliente;
-
+window.abrirModalSimuladorWhatsapp = abrirModalSimuladorWhatsapp;
+window.fecharModalSimuladorWhatsapp = fecharModalSimuladorWhatsapp;
+window.enviarMensagemSimuladorWa = enviarMensagemSimuladorWa;
 

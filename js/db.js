@@ -1,26 +1,26 @@
 /**
  * db.js - Camada de Dados, Catálogo de Imóveis, CRM de Leads,
  * IA Imobiliária, Integração Multi-Portais e Configurações de Remarketing
- * Rico Ricardo Imóveis — CRECI 038613-J (Santo André - SP)
+ * NEXO CRM Showroom de Demonstração — Imobiliária Modelo (São Paulo - SP)
  */
 
-const STORAGE_IMOVEIS_KEY = 'ricoricardo_estoque_v1';
-const STORAGE_CONFIG_KEY = 'ricoricardo_config_v1';
-const STORAGE_LEADS_KEY = 'ricoricardo_leads_v1';
-const STORAGE_SENHA_KEY = 'ricoricardo_senha_admin';
-const STORAGE_CONTRATOS_KEY = 'ricoricardo_contratos_locacao_v1';
-const STORAGE_VISTORIAS_KEY = 'ricoricardo_vistorias_v1';
-const STORAGE_TERMOS_VISITA_KEY = 'ricoricardo_termos_visita_v1';
-const STORAGE_CORRETORES_KEY = 'ricoricardo_corretores_v1';
-const STORAGE_SOFIA_KEY = 'ricoricardo_sofia_config_v2';
-const STORAGE_LIXEIRA_KEY = 'ricoricardo_lixeira_v1';
-const STORAGE_AUDITORIA_KEY = 'ricoricardo_audit_log_v1';
-const STORAGE_PERFIL_KEY = 'ricoricardo_perfil_ativo_v1';
-const STORAGE_PERMISSOES_KEY = 'ricoricardo_permissoes_v1';
-const STORAGE_LICENCA_KEY = 'ricoricardo_licenca_v1';
-const STORAGE_MASTER_CLIENTES_KEY = 'ricoricardo_master_clientes_v1';
-const STORAGE_USUARIOS_KEY = 'ricoricardo_usuarios_v1';
-const STORAGE_USUARIO_ATIVO_KEY = 'ricoricardo_usuario_ativo_v1';
+const STORAGE_IMOVEIS_KEY = 'nexodemo_estoque_v1';
+const STORAGE_CONFIG_KEY = 'nexodemo_config_v1';
+const STORAGE_LEADS_KEY = 'nexodemo_leads_v1';
+const STORAGE_SENHA_KEY = 'nexodemo_senha_admin';
+const STORAGE_CONTRATOS_KEY = 'nexodemo_contratos_locacao_v1';
+const STORAGE_VISTORIAS_KEY = 'nexodemo_vistorias_v1';
+const STORAGE_TERMOS_VISITA_KEY = 'nexodemo_termos_visita_v1';
+const STORAGE_CORRETORES_KEY = 'nexodemo_corretores_v1';
+const STORAGE_SOFIA_KEY = 'nexodemo_sofia_config_v2';
+const STORAGE_LIXEIRA_KEY = 'nexodemo_lixeira_v1';
+const STORAGE_AUDITORIA_KEY = 'nexodemo_audit_log_v1';
+const STORAGE_PERFIL_KEY = 'nexodemo_perfil_ativo_v1';
+const STORAGE_PERMISSOES_KEY = 'nexodemo_permissoes_v1';
+const STORAGE_LICENCA_KEY = 'nexodemo_licenca_v1';
+const STORAGE_MASTER_CLIENTES_KEY = 'nexodemo_master_clientes_v1';
+const STORAGE_USUARIOS_KEY = 'nexodemo_usuarios_v1';
+const STORAGE_USUARIO_ATIVO_KEY = 'nexodemo_usuario_ativo_v1';
 
 // Matriz de Permissões Granulares & Governança Corporativa (RBAC Enterprise)
 const PERMISSOES_PADRAO_ENTERPRISE = {
@@ -126,26 +126,27 @@ const PLANOS_NEXO = {
   }
 };
 
-// Licença do Tenant Ativo (Padrão Oficial)
+// Licença da Instância de Demonstração (Degustação de 4 Dias de Prospecção)
 const LICENCA_PADRAO = {
   planoId: 'pro',
-  status: 'active', // 'trial' | 'active' | 'grace_period' | 'blocked'
+  status: 'trial', // Demonstração inicia em modo Degustação Trial (4 Dias)
   dataInicio: new Date().toISOString(),
-  dataVencimento: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+  dataVencimento: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString(),
   diasTesteTotal: 4,
   valorMensal: 250.00,
   taxaAdesaoSetup: 600.00,
-  adesaoPaga: true,
+  adesaoPaga: false,
   chavePixCobranca: 'ricardo.nexo@pix.com.br',
   titularPix: 'Ricardo — NEXO CRM',
-  cidadePix: 'Santo André - SP'
+  cidadePix: 'Santo André - SP',
+  isDemoEnvironment: true
 };
 
 // Carteira de Clientes do Painel Master da NEXO (Super Admin de Ricardo & Severino)
 const CLIENTES_MASTER_INICIAIS = [
   {
     id: 'cli-01',
-    nomeImobiliaria: 'Imobiliária Rico Ricardo',
+    nomeImobiliaria: 'Alpha Prime Imóveis',
     responsavel: 'Ricardo Oliveira',
     whatsapp: '11914879393',
     cidade: 'Santo André - SP',
@@ -205,17 +206,18 @@ const CLIENTES_MASTER_INICIAIS = [
   }
 ];
 
-// Configurações Oficiais da Rico Ricardo Imóveis
+// Configurações Oficiais da Imobiliária Modelo (Showroom de Demonstração NEXO)
 const CONFIG_IMOB_PADRAO = {
-  nome: 'Rico Ricardo Imóveis',
-  slogan: 'A sua imobiliária em Santo André — Os melhores imóveis para compra e locação',
-  creci: 'CRECI 038613-J',
-  telefone: '(11) 4474-5966',
-  whatsapp: '5511914879393', // WhatsApp oficial da Rico Ricardo Imóveis
-  email: 'contato@ricoricardoimoveis.com.br',
-  endereco: 'Rua Rogério Giorgi, 166 - Parque Marajoara, Santo André - SP',
-  cidade: 'Santo André - SP',
-  googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3654.4925827725734!2d-46.502844823901615!3d-23.658249878732158!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce42d9dfd7b7db%3A0xbcf4a54823812d1b!2sR.%20Rog%C3%A9rio%20Giorgi%2C%20166%20-%20Parque%20Marajoara%2C%20Santo%20Andr%C3%A9%20-%20SP%2C%2009112-130!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr',
+  nome: 'Imobiliária Modelo',
+  nomeFantasia: 'Imobiliária Modelo Showroom',
+  slogan: 'Plataforma Inteligente de Demonstração — O padrão dos melhores portais imobiliários',
+  creci: 'CRECI 00000-J',
+  telefone: '(11) 4004-0000',
+  whatsapp: '5511914879393', // WhatsApp comercial do Ricardo para atendimento de leads da demo
+  email: 'contato@imobiliariamodelo.com.br',
+  endereco: 'Av. Paulista, 1000 - Bela Vista, São Paulo - SP',
+  cidade: 'São Paulo - SP',
+  googleMapsUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3657.1975850259837!2d-46.6543160239046!3d-23.56134907879953!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94ce59c8da0aa315%3A0xd59f9431f2c9776a!2sAv.%20Paulista%2C%20S%C3%A3o%20Paulo%20-%20SP!5e0!3m2!1spt-BR!2sbr!4v1700000000000!5m2!1spt-BR!2sbr',
   horarioSemana: 'Segunda a Sexta: 08:30 às 18:30',
   horarioSabado: 'Sábados: 09:00 às 14:00',
   horarioDomingo: 'Plantão de Atendimento WhatsApp',
@@ -224,27 +226,27 @@ const CONFIG_IMOB_PADRAO = {
   horaInicioSabado: 9,
   horaFimSabado: 14,
   videoHero: 'https://www.youtube.com/watch?v=9JfFt3t7OfE',
-  instagram: 'https://www.instagram.com/ricoricardoimoveis/',
-  facebook: 'https://www.facebook.com/ricoricardoimoveis/',
+  instagram: 'https://www.instagram.com/nexocrm/',
+  facebook: 'https://www.facebook.com/nexocrm/',
   youtube: 'https://youtube.com',
   tiktok: 'https://tiktok.com',
   webhookLeads: '',
 
-  // Remarketing e Rastreamento Oficial da Rico Ricardo Imóveis
+  // Remarketing e Rastreamento de Demonstração
   pixelMetaId: '123456789012345',
-  googleAdsId: 'AW-18443399185', // Google Ads real da Rico Ricardo Imóveis
-  googleAnalyticsId: 'G-ABCD1234EF',
+  googleAdsId: 'AW-00000000000',
+  googleAnalyticsId: 'G-DEMO123456',
 
-  // Configuração Fiscal e Emissão de NFS-e (Prefeitura / Receita)
-  cnpj: '38.613.000/0001-99',
-  razaoSocial: 'Rico Ricardo Empreendimentos Imobiliários Ltda',
-  inscricaoMunicipal: '184920-5',
+  // Configuração Fiscal e Emissão de NFS-e (Prefeitura / Receita - Modelo)
+  cnpj: '00.000.000/0001-00',
+  razaoSocial: 'Imobiliária Modelo Ltda (Showroom)',
+  inscricaoMunicipal: '000000-0',
   regimeTributario: 'simples', // simples | lucro_presumido | lucro_real
   cnae: '6821-8/02 - Gestão e administração da propriedade imobiliária',
   itemLc116: '10.05 - Agenciamento, corretagem ou intermediação de bens móveis ou imóveis',
   aliquotaIss: 2.0,
   provedorFiscal: 'Focus NFe (Padrão Municipal)',
-  certificadoDigitalStatus: 'Certificado A1 Válido (e-CNPJ Ativo até 12/2027)',
+  certificadoDigitalStatus: 'Certificado Digital A1 Demonstrativo',
 
   // Configuração Multi-Portais Ativos
   portaisAtivos: {
@@ -258,6 +260,97 @@ const CONFIG_IMOB_PADRAO = {
     properstar: true
   }
 };
+
+// =============================================================================
+// RADAR DE ENTORNO & INTELIGÊNCIA GEOGRÁFICA DO BAIRRO (POIs) — SOFIA IA
+// =============================================================================
+function gerarPontosDeInteresseBairro(bairro, cidade, tipo) {
+  const b = (bairro || '').toLowerCase();
+  const c = (cidade || '').toLowerCase();
+  const t = (tipo || '').toLowerCase();
+
+  if (b.includes('marajoara')) {
+    return [
+      { categoria: 'mercado', icone: '🛒', nome: 'Mini Extra / Supermercado Local', distancia: '220m', tempo: '3 min a pé' },
+      { categoria: 'escola', icone: '🎓', nome: 'Colégio Adventista & EMEIEF', distancia: '380m', tempo: '5 min a pé' },
+      { categoria: 'lazer', icone: '🌳', nome: 'Praça Marajoara e Pista de Caminhada', distancia: '180m', tempo: '2 min a pé' },
+      { categoria: 'saude', icone: '🏥', nome: 'UBS Marajoara & Drogaria 24h', distancia: '300m', tempo: '4 min a pé' },
+      { categoria: 'shopping', icone: '🛍️', nome: 'Shopping Atrium Santo André', distancia: '1.8km', tempo: '5 min de carro' }
+    ];
+  }
+  if (b.includes('jardim') || b.includes('figueiras')) {
+    return [
+      { categoria: 'mercado', icone: '🛒', nome: 'Supermercado Pão de Açúcar', distancia: '250m', tempo: '3 min a pé' },
+      { categoria: 'escola', icone: '🎓', nome: 'Colégio Singular / Bilíngue', distancia: '400m', tempo: '5 min a pé' },
+      { categoria: 'parque', icone: '🌳', nome: 'Parque Celso Daniel', distancia: '850m', tempo: '10 min a pé' },
+      { categoria: 'saude', icone: '🏥', nome: 'Hospital Brasil (Rede D\'Or)', distancia: '1.1km', tempo: '4 min de carro' },
+      { categoria: 'transporte', icone: '🚆', nome: 'Estação Prefeito Celso Daniel (CPTM)', distancia: '1.2km', tempo: '5 min de carro' }
+    ];
+  }
+  if (b.includes('campestre')) {
+    return [
+      { categoria: 'mercado', icone: '🛒', nome: 'Supermercado Coop Campestre', distancia: '300m', tempo: '4 min a pé' },
+      { categoria: 'padaria', icone: '🥖', nome: 'Padaria Brasileira Alameda Figueiras', distancia: '650m', tempo: '8 min a pé' },
+      { categoria: 'universidade', icone: '🎓', nome: 'Universidade São Caetano (USCS)', distancia: '1.3km', tempo: '4 min de carro' },
+      { categoria: 'parque', icone: '🌳', nome: 'Parque Regional da Criança', distancia: '750m', tempo: '9 min a pé' },
+      { categoria: 'acesso', icone: '🚗', nome: 'Acesso Rápido à Av. dos Estados', distancia: '500m', tempo: '2 min de carro' }
+    ];
+  }
+  if (b.includes('assunção') || b.includes('assuncao') || b.includes('parque central') || b.includes('gilda')) {
+    return [
+      { categoria: 'parque', icone: '🌳', nome: 'Parque Central Santo André', distancia: '280m', tempo: '3 min a pé' },
+      { categoria: 'shopping', icone: '🛍️', nome: 'Shopping ABC & Carrefour', distancia: '900m', tempo: '3 min de carro' },
+      { categoria: 'saude', icone: '🏥', nome: 'Hospital e Maternidade Brasil', distancia: '1.2km', tempo: '4 min de carro' },
+      { categoria: 'escola', icone: '🎓', nome: 'Colégio Arbos Santo André', distancia: '850m', tempo: '10 min a pé' },
+      { categoria: 'transporte', icone: '🚌', nome: 'Corredor ABD de Trólebus', distancia: '200m', tempo: '3 min a pé' }
+    ];
+  }
+  if (b.includes('valparaíso') || b.includes('valparaiso')) {
+    return [
+      { categoria: 'lazer', icone: '🏃', nome: 'Praça e Pista Valparaíso', distancia: '250m', tempo: '3 min a pé' },
+      { categoria: 'escola', icone: '🎓', nome: 'Colégio Pentágono', distancia: '450m', tempo: '5 min a pé' },
+      { categoria: 'padaria', icone: '🥖', nome: 'Padaria Bela Valparaíso', distancia: '300m', tempo: '4 min a pé' },
+      { categoria: 'saude', icone: '🏥', nome: 'Hospital Municipal e UPA', distancia: '950m', tempo: '4 min de carro' },
+      { categoria: 'rodovia', icone: '🛣️', nome: 'Acesso à Rodovia Anchieta (SP/Litoral)', distancia: '1.8km', tempo: '5 min de carro' }
+    ];
+  }
+  if (b.includes('bastos') || b.includes('centro')) {
+    return [
+      { categoria: 'parque', icone: '🌳', nome: 'Parque Celso Daniel', distancia: '650m', tempo: '8 min a pé' },
+      { categoria: 'escola', icone: '🎓', nome: 'Colégio Américo Brasiliense', distancia: '350m', tempo: '4 min a pé' },
+      { categoria: 'farmacia', icone: '💊', nome: 'Drogaria São Paulo 24h', distancia: '180m', tempo: '2 min a pé' },
+      { categoria: 'mercado', icone: '🛒', nome: 'Supermercado Nagumo', distancia: '450m', tempo: '5 min a pé' },
+      { categoria: 'civico', icone: '🏛️', nome: 'Prefeitura e Fórum de Santo André', distancia: '550m', tempo: '7 min a pé' }
+    ];
+  }
+  if (b.includes('praia') || b.includes('mar') || b.includes('orla') || c.includes('santos') || c.includes('praia')) {
+    return [
+      { categoria: 'praia', icone: '🏖️', nome: 'Praia e Calçadão da Orla', distancia: '250m', tempo: '3 min a pé' },
+      { categoria: 'mercado', icone: '🛒', nome: 'Supermercado e Empório Gourmet', distancia: '380m', tempo: '5 min a pé' },
+      { categoria: 'gastronomia', icone: '🍽️', nome: 'Restaurantes e Quiosques da Praia', distancia: '300m', tempo: '4 min a pé' },
+      { categoria: 'saude', icone: '💊', nome: 'Farmácia 24h & Pronto Atendimento', distancia: '450m', tempo: '6 min a pé' },
+      { categoria: 'lazer', icone: '🚴', nome: 'Ciclovia da Praia e Quiosques', distancia: '200m', tempo: '2 min a pé' }
+    ];
+  }
+  if (t === 'comercial') {
+    return [
+      { categoria: 'transporte', icone: '🚆', nome: 'Estação de Trem/Metrô e Terminais', distancia: '350m', tempo: '4 min a pé' },
+      { categoria: 'justica', icone: '⚖️', nome: 'Fórum Central e Cartórios', distancia: '500m', tempo: '6 min a pé' },
+      { categoria: 'banco', icone: '🏦', nome: 'Agências Bancárias e Casas de Câmbio', distancia: '150m', tempo: '2 min a pé' },
+      { categoria: 'gastronomia', icone: '🍽️', nome: 'Restaurantes Executivos e Cafés', distancia: '200m', tempo: '3 min a pé' },
+      { categoria: 'estacionamento', icone: '🅿️', nome: 'Estacionamentos Rotativos no Entorno', distancia: '50m', tempo: '1 min a pé' }
+    ];
+  }
+
+  // Padrão Inteligente Adaptativo
+  return [
+    { categoria: 'mercado', icone: '🛒', nome: 'Supermercado e Padaria Local', distancia: '280m', tempo: '3 min a pé' },
+    { categoria: 'escola', icone: '🎓', nome: 'Colégio e Centro Educacional', distancia: '420m', tempo: '5 min a pé' },
+    { categoria: 'lazer', icone: '🌳', nome: 'Praça Arborizada e Área de Caminhada', distancia: '650m', tempo: '8 min a pé' },
+    { categoria: 'saude', icone: '🏥', nome: 'Farmácia 24h e Atendimento Médico', distancia: '350m', tempo: '4 min a pé' },
+    { categoria: 'transporte', icone: '🚗', nome: 'Acesso Rápido às Vias Principais', distancia: '800m', tempo: '3 min de carro' }
+  ];
+}
 
 // Catálogo Realista de Imóveis de Alta Performance
 const IMOVEIS_INICIAIS = [
@@ -300,9 +393,9 @@ const IMOVEIS_INICIAIS = [
     ],
     portaisSincronizados: ['zap', 'vivareal', 'olx', 'imovelweb', 'chavesnamao', 'mercadolivre'],
     corretorResponsavel: {
-      nome: 'Rico Ricardo Imóveis',
-      creci: '038613-J',
-      telefone: '(11) 91487-9393'
+      nome: 'Imobiliária Modelo Showroom',
+      creci: '00000-J',
+      telefone: '(11) 4004-0000'
     }
   },
   {
@@ -666,18 +759,25 @@ const IMOVEIS_INICIAIS = [
   }
 ];
 
+// Preenche automaticamente o Radar de Conveniências & Entorno para os imóveis iniciais
+IMOVEIS_INICIAIS.forEach(im => {
+  if (!im.pontosDeInteresse || !Array.isArray(im.pontosDeInteresse) || im.pontosDeInteresse.length === 0) {
+    im.pontosDeInteresse = gerarPontosDeInteresseBairro(im.bairro, im.cidade, im.tipo);
+  }
+});
+
 // Equipe de Corretores da Imobiliária (Roleta de Leads / Round-Robin com RBAC)
 const CORRETORES_INICIAIS = [
   {
     id: 'corretor-1',
-    nome: 'Rico Ricardo',
-    creci: '038613-J',
+    nome: 'Roberto Albuquerque',
+    creci: '102.340-F',
     whatsapp: '5511914879393',
     telefone: '5511914879393',
-    email: 'contato@ricoricardoimoveis.com.br',
+    email: 'diretoria@imobiliariamodelo.com.br',
     perfil: 'diretor',
     senha: 'admin',
-    especialidade: 'Direção Geral & Vendas',
+    especialidade: 'Direção Geral & Showroom',
     leadsAtendidos: 18,
     ativo: true,
     foto: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=256&q=80'
@@ -688,10 +788,10 @@ const CORRETORES_INICIAIS = [
     creci: '215.890-F',
     whatsapp: '5511970558412',
     telefone: '5511970558412',
-    email: 'carlos@ricoricardoimoveis.com.br',
+    email: 'carlos@imobiliariamodelo.com.br',
     perfil: 'corretor',
     senha: '123456',
-    especialidade: 'Casas, Sobrados & Apartamentos em Santo André',
+    especialidade: 'Casas, Sobrados & Apartamentos',
     leadsAtendidos: 14,
     ativo: true,
     foto: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80'
@@ -702,7 +802,7 @@ const CORRETORES_INICIAIS = [
     creci: '189.442-F',
     whatsapp: '5511988443322',
     telefone: '5511988443322',
-    email: 'mariana@ricoricardoimoveis.com.br',
+    email: 'mariana@imobiliariamodelo.com.br',
     perfil: 'gerente',
     senha: '123456',
     especialidade: 'Supervisão de Vendas & Locações',
@@ -916,7 +1016,7 @@ const CONFIG_SOFIA_PADRAO = {
   nome: 'Sofia IA',
   cargo: 'Consultora Imobiliária Virtual 24h',
   tomVoz: 'Sofisticado, acolhedor e focado em qualificação rápida',
-  mensagemBoasVindas: 'Olá! Sou a Sofia, consultora inteligente da Rico Ricardo Imóveis. Conte comigo para encontrar a cobertura, apartamento ou casa dos seus sonhos em Santo André e região. O que você procura hoje: Comprar ou Alugar?',
+  mensagemBoasVindas: 'Olá! Sou a Sofia, consultora inteligente da Imobiliária Modelo. Conte comigo para encontrar a cobertura, apartamento ou casa dos seus sonhos. O que você procura hoje: Comprar ou Alugar?',
   whatsappDestino: '5511914879393'
 };
 
@@ -929,7 +1029,7 @@ const AUDIT_LOG_INICIAIS = [
     acao: 'Login de Sessão',
     detalhe: 'Sessão administrativa iniciada com sucesso via navegador seguro.',
     autor: 'Diretoria Master',
-    ip: '189.120.45.10 (Santo André - SP)',
+    ip: '189.120.45.10 (São Paulo - SP)',
     status: 'Sucesso'
   },
   {
@@ -949,7 +1049,7 @@ const AUDIT_LOG_INICIAIS = [
     acao: 'Sincronização de Portais',
     detalhe: 'Catálogo de 8 imóveis verificado e sincronizado com ZAP, VivaReal e OLX.',
     autor: 'Diretoria Master',
-    ip: '189.120.45.10 (Santo André - SP)',
+    ip: '189.120.45.10 (São Paulo - SP)',
     status: 'Concluído'
   },
   {
@@ -959,7 +1059,7 @@ const AUDIT_LOG_INICIAIS = [
     acao: 'Auditoria de Termos',
     detalhe: 'Política de privacidade e consentimento de leads atualizada conforme Lei 13.709/2018.',
     autor: 'DPO / Compliance',
-    ip: '189.120.45.10 (Santo André - SP)',
+    ip: '189.120.45.10 (São Paulo - SP)',
     status: 'Conforme'
   }
 ];
@@ -1087,13 +1187,30 @@ const DB = {
       const data = localStorage.getItem(STORAGE_IMOVEIS_KEY);
       if (data) {
         const parsed = JSON.parse(data);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          let houveAjuste = false;
+          const normalizados = parsed.map(im => {
+            if (!im.pontosDeInteresse || !Array.isArray(im.pontosDeInteresse) || im.pontosDeInteresse.length === 0) {
+              im.pontosDeInteresse = gerarPontosDeInteresseBairro(im.bairro, im.cidade, im.tipo);
+              houveAjuste = true;
+            }
+            return im;
+          });
+          if (houveAjuste) {
+            try { localStorage.setItem(STORAGE_IMOVEIS_KEY, JSON.stringify(normalizados)); } catch(e) {}
+          }
+          return normalizados;
+        }
       }
     } catch (e) {
       console.warn('Erro ao carregar do localStorage:', e);
     }
     this.salvarImoveis(IMOVEIS_INICIAIS);
     return IMOVEIS_INICIAIS;
+  },
+
+  gerarPontosDeInteressePadrao(bairro, cidade, tipo) {
+    return gerarPontosDeInteresseBairro(bairro, cidade, tipo);
   },
 
   salvarImoveis(imoveis) {
@@ -1981,12 +2098,115 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } catch (e) {}
   },
 
-  processarMensagemSofiaIA(mensagemUsuario) {
+  processarMensagemSofiaIA(mensagemUsuario, imovelContexto = null) {
     const texto = (mensagemUsuario || '').toLowerCase().trim();
     const config = this.getConfig();
     const imoveis = this.getImoveis().filter(im => im.status === 'disponivel');
 
-    // Identifica intenção de locação ou compra
+    // 1. Detecta perguntas sobre entorno / conveniências / o que tem perto
+    const querSaberEntorno = texto.includes('o que tem perto') ||
+      texto.includes('tem perto') ||
+      texto.includes('perto de') ||
+      texto.includes('distancia') ||
+      texto.includes('distância') ||
+      texto.includes('escola') ||
+      texto.includes('colégio') ||
+      texto.includes('colegio') ||
+      texto.includes('mercado') ||
+      texto.includes('supermercado') ||
+      texto.includes('padaria') ||
+      texto.includes('praia') ||
+      texto.includes('parque') ||
+      texto.includes('hospital') ||
+      texto.includes('farmacia') ||
+      texto.includes('farmácia') ||
+      texto.includes('metro') ||
+      texto.includes('metrô') ||
+      texto.includes('cptm') ||
+      texto.includes('comércio') ||
+      texto.includes('comercio') ||
+      texto.includes('região') ||
+      texto.includes('regiao') ||
+      texto.includes('conveniencia') ||
+      texto.includes('conveniência') ||
+      texto.includes('bairro é bom') ||
+      texto.includes('bom pra família') ||
+      texto.includes('bom para familia');
+
+    // 2. Detecta intenção de agendamento de visita ou escolha de horário
+    const querAgendarVisita = texto.includes('agendar') ||
+      texto.includes('visita') ||
+      texto.includes('visitar') ||
+      texto.includes('marcar') ||
+      texto.includes('conhecer o imóvel') ||
+      texto.includes('conhecer o imovel') ||
+      texto.includes('amanhã') ||
+      texto.includes('amanha') ||
+      texto.includes('horário') ||
+      texto.includes('horario') ||
+      texto.includes('sábado') ||
+      texto.includes('sabado') ||
+      texto.includes('às 14') ||
+      texto.includes('as 14') ||
+      texto.includes('às 15') ||
+      texto.includes('as 15') ||
+      texto.includes('às 16') ||
+      texto.includes('as 16') ||
+      texto.includes('às 10') ||
+      texto.includes('as 10');
+
+    // Procura se citou algum código de imóvel específico (ex: CS-5520, CB-9021, etc.)
+    let imovelFoco = imovelContexto;
+    if (!imovelFoco) {
+      for (const im of imoveis) {
+        if (texto.includes(im.codigo.toLowerCase())) {
+          imovelFoco = im;
+          break;
+        }
+      }
+    }
+    if (!imovelFoco && imoveis.length > 0) {
+      for (const im of imoveis) {
+        if (texto.includes(im.bairro.toLowerCase())) {
+          imovelFoco = im;
+          break;
+        }
+      }
+    }
+    if (!imovelFoco) {
+      imovelFoco = imoveis[0];
+    }
+
+    // Fluxo A: Resposta de Entorno / Conveniências (Radar de Bairro)
+    if (querSaberEntorno && imovelFoco) {
+      const pontos = (imovelFoco.pontosDeInteresse && imovelFoco.pontosDeInteresse.length > 0)
+        ? imovelFoco.pontosDeInteresse
+        : this.gerarPontosDeInteressePadrao(imovelFoco.bairro, imovelFoco.cidade, imovelFoco.tipo);
+
+      const listaFormatada = pontos.map(p => `• ${p.icone || '📍'} ${p.nome} (${p.distancia} • ${p.tempo})`).join('\n');
+      const respostaTexto = `Com certeza! A localização do imóvel ${imovelFoco.codigo} (${imovelFoco.bairro}) conta com uma infraestrutura completa a pé e em poucos minutos de deslocamento:\n\n${listaFormatada}\n\nÉ uma região muito valorizada, segura e com excelente qualidade de vida para toda a família! Gostaria de agendar uma visita presencial para conhecer o imóvel e o bairro?`;
+      const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(`Olá! Estive conversando com a Sofia IA sobre a localização e conveniências do imóvel ${imovelFoco.codigo} - ${imovelFoco.titulo} (${imovelFoco.bairro}). Gostaria de agendar uma visita presencial.`)}`;
+
+      return {
+        respostaTexto,
+        recomendacoes: [imovelFoco],
+        waLink
+      };
+    }
+
+    // Fluxo B: Confirmação de Pré-Agendamento de Visita
+    if (querAgendarVisita) {
+      const respostaTexto = `Perfeito! Sua visita foi pré-agendada com sucesso! 📅✨\n\nJá notifiquei o corretor especialista responsável com a sua preferência de horário e registrei a oportunidade no nosso funil de atendimento. Para receber a confirmação com o link de localização exato no seu GPS, clique no botão abaixo para falar diretamente no WhatsApp do corretor!`;
+      const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(`Olá! Estive falando com a Sofia IA no site e gostaria de confirmar o agendamento da visita para o imóvel ${imovelFoco ? imovelFoco.codigo + ' - ' + imovelFoco.titulo : 'que consultei'}. Qual o melhor horário?`)}`;
+
+      return {
+        respostaTexto,
+        recomendacoes: imovelFoco ? [imovelFoco] : [],
+        waLink
+      };
+    }
+
+    // Fluxo C: Identifica intenção de locação ou compra
     const querAlugar = texto.includes('alug') || texto.includes('locaç') || texto.includes('locar');
     const querComprar = texto.includes('compr') || texto.includes('venda') || texto.includes('adquirir');
     
@@ -2027,7 +2247,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     let respostaTexto = '';
     if (recomendacoes.length > 0) {
       const nomes = recomendacoes.map(im => `• ${im.codigo} - ${im.titulo} (${im.bairro})`).join('\n');
-      respostaTexto = `Com certeza! Encontrei opções incríveis no nosso acervo que combinam com você:\n\n${nomes}\n\nVocê gostaria de ver as fotos e agendar uma visita comigo ou com nosso corretor de plantão no WhatsApp?`;
+      respostaTexto = `Com certeza! Encontrei opções incríveis no nosso acervo que combinam com você:\n\n${nomes}\n\nVocê gostaria de ver as fotos, saber o que tem por perto na região ou já agendar uma visita com nosso corretor de plantão no WhatsApp?`;
     } else {
       respostaTexto = `Entendi perfeitamente sua busca! Temos novas oportunidades exclusivas entrando em carteira esta semana. Posso conectá-lo(a) agora mesmo com nosso especialista no WhatsApp para apresentar opções sob medida para você?`;
     }
@@ -2063,10 +2283,37 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       };
       this.salvarUsuarioAtivo(uMaster);
       this.salvarPerfilAtivo('diretor');
+
+      // Se a demonstração estiver bloqueada, a chave mestra reinicia o trial por mais 4 dias
+      const lic = this.getLicenca();
+      if (lic.status === 'blocked') {
+        this.reiniciarTrialDemonstracao(4);
+      }
       return { valido: true, usuario: uMaster };
     }
 
-    // 2. Verifica se é um membro da equipe (Corretor, Gerente ou Diretor na Roleta)
+    // 2. Trava de Licença Expirada (se a degustação de 4 dias já acabou)
+    const statusLicenca = this.verificarStatusLicenca();
+    if (statusLicenca.isBloqueado) {
+      return { 
+        valido: false, 
+        motivo: '🔒 O período de degustação gratuita de 4 dias expirou. Para ativar a licença oficial da sua imobiliária, entre em contato com o Ricardo via WhatsApp.' 
+      };
+    }
+
+    // 3. Acesso Rápido de Demonstração / Genérico (demo123 ou admin123 com e-mail demo/modelo)
+    if (senhaLimpa === 'demo123' || (senhaLimpa === 'admin123' && (emailLimpo.includes('demo') || emailLimpo.includes('modelo') || emailLimpo.includes('diretor')))) {
+      const uDemo = {
+        nome: 'Diretor Modelo (Degustação 4 Dias)',
+        email: emailLimpo || 'diretoria@imobiliariamodelo.com.br',
+        perfil: 'diretor'
+      };
+      this.salvarUsuarioAtivo(uDemo);
+      this.salvarPerfilAtivo('diretor');
+      return { valido: true, usuario: uDemo };
+    }
+
+    // 4. Verifica se é um membro da equipe (Corretor, Gerente ou Diretor na Roleta)
     const corretores = this.getCorretores();
     const corretorAchado = corretores.find(c => 
       (c.email && c.email.toLowerCase() === emailLimpo) || 
@@ -2093,14 +2340,14 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       }
     }
 
-    // 3. Senha do Administrador / Diretor Principal
+    // 5. Senha do Administrador / Diretor Principal
     const senhaSalva = (localStorage.getItem(STORAGE_SENHA_KEY) || '').trim() || 'admin123';
     const uPrincipal = this.getUsuarioPrincipal();
 
     if (senhaLimpa === senhaSalva) {
       const uLogado = {
-        nome: uPrincipal.nome || 'Diretor Responsável',
-        email: emailLimpo || uPrincipal.email || 'admin@nexocrm.com.br',
+        nome: uPrincipal.nome || 'Diretor Modelo',
+        email: emailLimpo || uPrincipal.email || 'diretoria@imobiliariamodelo.com.br',
         perfil: 'diretor'
       };
       this.salvarUsuarioAtivo(uLogado);
@@ -2108,7 +2355,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       return { valido: true, usuario: uLogado };
     }
 
-    return { valido: false, motivo: 'E-mail ou senha incorretos. Verifique suas credenciais ou clique em "Primeiro Acesso".' };
+    return { valido: false, motivo: 'E-mail ou senha incorretos. Verifique suas credenciais ou clique em "Entrar na Demonstração".' };
   },
 
   alterarSenhaAdmin(novaSenha) {
@@ -2129,9 +2376,9 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } catch (e) {}
     const cfg = this.getConfig();
     return {
-      nome: 'Diretor Responsável',
-      empresa: cfg.nomeFantasia || 'Imobiliária Parceira',
-      email: cfg.email || 'admin@nexocrm.com.br',
+      nome: 'Diretor Roberto Albuquerque',
+      empresa: cfg.nomeFantasia || 'Imobiliária Modelo Showroom',
+      email: cfg.email || 'diretoria@imobiliariamodelo.com.br',
       whatsapp: cfg.whatsapp || '11914879393',
       perfil: 'diretor'
     };
@@ -2725,6 +2972,15 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       const data = localStorage.getItem(STORAGE_LICENCA_KEY);
       if (data) {
         const parsed = JSON.parse(data);
+        // Garante que o ambiente de demonstração inicie sempre com a regra de degustação de 4 dias
+        if (!parsed.isDemoEnvironment) {
+          parsed.isDemoEnvironment = true;
+          parsed.status = 'trial';
+          parsed.diasTesteTotal = 4;
+          parsed.dataInicio = new Date().toISOString();
+          parsed.dataVencimento = new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toISOString();
+          this.salvarLicenca(parsed);
+        }
         return { ...LICENCA_PADRAO, ...parsed };
       }
     } catch (e) {}
@@ -2739,11 +2995,31 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } catch (e) {}
   },
 
+  reiniciarTrialDemonstracao(dias = 4) {
+    const lic = this.getLicenca();
+    lic.status = 'trial';
+    lic.diasTesteTotal = dias;
+    lic.bloqueioManual = false;
+    lic.desbloqueioManual = false;
+    lic.dataInicio = new Date().toISOString();
+    lic.dataVencimento = new Date(Date.now() + dias * 24 * 60 * 60 * 1000).toISOString();
+    this.salvarLicenca(lic);
+    this.registrarLogAuditoria(
+      'Reset de Demonstração (4 Dias)',
+      'Licença & SaaS',
+      `Degustação de demonstração reiniciada por mais ${dias} dias pelo Super Admin Ricardo.`,
+      'Super Admin'
+    );
+    return lic;
+  },
+
   verificarStatusLicenca() {
     const lic = this.getLicenca();
     const agora = new Date().getTime();
     const vencimento = new Date(lic.dataVencimento).getTime();
-    const diffDias = Math.ceil((vencimento - agora) / (1000 * 60 * 60 * 24));
+    const diffMs = vencimento - agora;
+    const diffDias = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    const diffHoras = Math.ceil(diffMs / (1000 * 60 * 60));
 
     let statusCalculado = lic.status;
 
@@ -2752,7 +3028,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } else if (lic.desbloqueioManual) {
       statusCalculado = 'active';
     } else if (lic.status === 'trial') {
-      if (diffDias < 0) {
+      if (diffMs <= 0) {
         statusCalculado = 'blocked';
       }
     } else if (lic.status === 'active' || lic.status === 'grace_period') {
@@ -2774,6 +3050,7 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
       licenca: lic,
       plano: PLANOS_NEXO[lic.planoId] || PLANOS_NEXO.pro,
       diasRestantes: diffDias,
+      horasRestantes: Math.max(0, diffHoras),
       isTrial: lic.status === 'trial',
       isBloqueado: lic.status === 'blocked',
       isCarencia: lic.status === 'grace_period',

@@ -57,14 +57,37 @@
         <p class="text-xs text-slate-500 mt-1">Plataforma Inteligente de Gestão Imobiliária, Portais & Leads</p>
       </div>
 
-      <div id="login-info-box" class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-left text-xs text-blue-900 space-y-1">
-        <span class="font-bold flex items-center gap-1.5 text-blue-700">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
-          Autenticação Segura &amp; Primeiro Acesso
-        </span>
+      <!-- Card Informativo de Degustação Comercial (4 Dias Grátis) -->
+      <div id="login-info-box" class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-3.5 text-left text-xs text-blue-950 space-y-1.5 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="font-bold flex items-center gap-1.5 text-blue-700">
+            <span>⏱️</span>
+            <span>Degustação Comercial (4 Dias Grátis)</span>
+          </span>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+            Showroom Pro
+          </span>
+        </div>
         <p class="text-[11px] text-blue-800 leading-relaxed" id="login-instrucao-texto">
-          Digite seu <strong>e-mail corporativo</strong> e <strong>senha</strong>. Se você é um cliente novo, clique no botão <strong>Primeiro Acesso</strong> abaixo para criar sua senha.
+          Ambiente liberado para prospecção com <strong>Sofia IA</strong>, <strong>Roleta de Leads</strong> e <strong>Simulador Caixa</strong>. Válido por <strong>4 dias</strong> a partir do primeiro acesso.
         </p>
+      </div>
+
+      <!-- Botão de Acesso Rápido de 1 Clique para Demonstração -->
+      <button 
+        type="button" 
+        onclick="entrarAcessoRapidoDemo()" 
+        class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs py-3 px-4 rounded-xl transition shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 group"
+      >
+        <span>🚀</span>
+        <span>Entrar na Demonstração (1 Clique)</span>
+        <span class="group-hover:translate-x-1 transition-transform">→</span>
+      </button>
+
+      <div class="flex items-center gap-2 my-1 text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+        <div class="h-px bg-slate-200 flex-1"></div>
+        <span>ou acesse com login e senha</span>
+        <div class="h-px bg-slate-200 flex-1"></div>
       </div>
 
       <form id="form-login-admin" class="space-y-3.5 text-left">
@@ -74,9 +97,9 @@
             <input 
               type="email" 
               id="input-email-admin" 
-              placeholder="seu-email@imobiliaria.com.br" 
+              placeholder="demo@nexocrm.com.br ou seu e-mail" 
               required 
-              value="admin@nexocrm.com.br"
+              value="demo@nexocrm.com.br"
               class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-10 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white text-slate-900 font-medium"
             >
             <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">✉️</span>
@@ -94,8 +117,9 @@
             <input 
               type="password" 
               id="input-senha-admin" 
-              placeholder="Digite sua senha..." 
+              placeholder="Senha demo: admin123" 
               required 
+              value="admin123"
               class="w-full bg-slate-50 border border-slate-300 rounded-xl pl-4 pr-11 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white font-medium text-slate-900"
             >
             <button 
@@ -115,7 +139,7 @@
             <input type="checkbox" id="check-lembrar-acesso" checked class="w-3.5 h-3.5 text-blue-600 rounded">
             <span>Lembrar meu acesso</span>
           </label>
-          <span class="text-[10px] text-slate-400 font-mono">Padrão demo: admin123</span>
+          <span class="text-[10px] text-slate-400 font-mono">Padrão: admin123</span>
         </div>
 
         <div id="login-erro" class="hidden text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200 text-center space-y-0.5">
@@ -179,8 +203,8 @@
         <div class="h-7 w-px bg-slate-200 hidden sm:block"></div>
         <div>
           <div class="flex items-center gap-2">
-            <span class="font-black text-slate-900 text-sm sm:text-base leading-none block">
-              RICO RICARDO <span class="text-blue-600">IMÓVEIS</span>
+            <span class="font-black text-slate-900 text-sm sm:text-base leading-none block" id="header-imobiliaria-nome">
+              IMOBILIÁRIA <span class="text-blue-600">MODELO</span>
             </span>
             <div id="header-badge-licenca" class="inline-flex items-center cursor-pointer" onclick="abrirModalStatusLicenca()" title="Clique para ver o status da licença e plano">
               <span id="header-badge-licenca-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full border inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border-emerald-200 shadow-xs">
@@ -189,7 +213,7 @@
               </span>
             </div>
           </div>
-          <span class="text-[11px] text-slate-500 font-medium">Painel de Gestão • CRECI 038613-J</span>
+          <span class="text-[11px] text-slate-500 font-medium" id="header-imobiliaria-creci">Showroom • CRECI 00000-J</span>
         </div>
       </div>
 
@@ -198,9 +222,9 @@
         
         <!-- Identificação do Usuário Ativo Logado -->
         <div id="usuario-logado-badge" class="flex items-center gap-2 bg-slate-50 border border-slate-200/90 px-2.5 py-1 rounded-xl text-xs shadow-xs">
-          <div class="w-6 h-6 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px]" id="header-avatar-sigla">RR</div>
+          <div class="w-6 h-6 rounded-full bg-blue-600 text-white font-black flex items-center justify-center text-[10px]" id="header-avatar-sigla">DM</div>
           <div class="leading-tight text-left">
-            <span class="font-bold text-slate-800 block text-[11px] truncate max-w-[120px] sm:max-w-[160px]" id="header-usuario-nome">Rico Ricardo</span>
+            <span class="font-bold text-slate-800 block text-[11px] truncate max-w-[120px] sm:max-w-[160px]" id="header-usuario-nome">Diretor Modelo</span>
             <span class="text-[9px] text-blue-700 font-bold block" id="header-usuario-cargo">👑 Diretor</span>
           </div>
         </div>
@@ -646,7 +670,7 @@
               type="text" 
               id="input-url-feed-xml" 
               readonly 
-              value="https://ricardorickbony-lgtm.github.io/rico-ricardo-imoveis/feed-portais.xml" 
+              value="https://ricardorickbony-lgtm.github.io/nexo-crm-demo/feed-portais.xml" 
               class="w-full bg-slate-800/90 border border-slate-700 text-slate-200 text-xs font-mono rounded-xl px-4 py-3 focus:outline-none select-all"
             >
             <div class="flex items-center gap-2 w-full sm:w-auto">
@@ -1150,7 +1174,7 @@
               <div>
                 <h4 class="text-xs font-bold text-indigo-950">Blindagem de Comissão Imobiliária (Artigos 722 a 729 do Código Civil):</h4>
                 <p class="text-[11px] text-indigo-900/80 mt-0.5 leading-relaxed">
-                  O Termo de Visita assinado eletronicamente pelo comprador ou locatário comprova a intermediação útil da Rico Ricardo Imóveis. Caso o cliente tente negociar diretamente com o proprietário por fora, o documento garante judicialmente o recebimento integral dos <strong>6% de honorários de corretagem</strong>.
+                  O Termo de Visita assinado eletronicamente pelo comprador ou locatário comprova a intermediação útil da Imobiliária Modelo. Caso o cliente tente negociar diretamente com o proprietário por fora, o documento garante judicialmente o recebimento integral dos <strong>6% de honorários de corretagem</strong>.
                 </p>
               </div>
             </div>
@@ -1186,8 +1210,12 @@
                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online no Site e WhatsApp
               </span>
             </h2>
-            <p class="text-xs text-slate-500">Inteligência artificial treinada para qualificar leads, sugerir imóveis e agendar visitas no WhatsApp</p>
+            <p class="text-xs text-slate-500">Inteligência artificial treinada para qualificar leads, sugerir imóveis, analisar entorno e agendar visitas no WhatsApp</p>
           </div>
+          <button type="button" onclick="abrirModalSimuladorWhatsapp()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs px-4 py-2.5 rounded-2xl transition shadow flex items-center gap-2 shrink-0 cursor-pointer">
+            <span>📱 Abrir Simulador WhatsApp 24h</span>
+            <span class="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded-full font-mono">Sem Taxa p/ Conversa</span>
+          </button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1236,7 +1264,7 @@
             <!-- Corpo de Mensagens do Chat -->
             <div id="simulador-chat-corpo" class="flex-grow overflow-y-auto space-y-3 pr-2 text-xs">
               <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed">
-                Olá! Sou a Sofia da Rico Ricardo Imóveis. O que você procura hoje: Comprar ou Alugar? Pode me dizer o bairro ou cidade da sua preferência!
+                Olá! Sou a Sofia da Imobiliária Modelo. O que você procura hoje: Comprar ou Alugar? Pode me dizer o bairro ou cidade da sua preferência!
               </div>
             </div>
 
@@ -2314,12 +2342,18 @@
         </div>
 
         <div>
-          <div class="flex items-center justify-between mb-1">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-1">
             <label class="block font-bold text-slate-700 uppercase">Fotos da Galeria (Fotos Ilimitadas)</label>
-            <label class="cursor-pointer text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition flex items-center gap-1 shadow-sm">
-              <span>📁 Carregar do Computador / Celular</span>
-              <input type="file" id="input-upload-fotos-arquivo" multiple accept="image/*" class="hidden">
-            </label>
+            <div class="flex items-center gap-2">
+              <label class="cursor-pointer text-[11px] font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-2.5 py-1 rounded-lg border border-emerald-200 transition flex items-center gap-1 shadow-sm" title="Abrir câmera do celular diretamente para tirar fotos na vistoria">
+                <span>📸 Tirar Foto na Vistoria (Câmera)</span>
+                <input type="file" id="input-upload-fotos-camera" multiple accept="image/*" capture="environment" class="hidden">
+              </label>
+              <label class="cursor-pointer text-[11px] font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200 transition flex items-center gap-1 shadow-sm">
+                <span>📁 Carregar do Computador / Celular</span>
+                <input type="file" id="input-upload-fotos-arquivo" multiple accept="image/*" class="hidden">
+              </label>
+            </div>
           </div>
           <textarea id="input-imob-fotos" rows="3" placeholder="Cole links de fotos (1 por linha) ou clique em 'Carregar do Computador' para adicionar quantas fotos quiser (10, 20, 30+ fotos)..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono text-[11px]"></textarea>
           <div id="status-upload-fotos" class="hidden text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-200 mt-1.5 flex items-center gap-2"></div>
@@ -2336,6 +2370,18 @@
             <label class="block font-bold text-slate-700 uppercase mb-1">Diferenciais e Lazer (separados por vírgula)</label>
             <input type="text" id="input-imob-diferenciais" placeholder="Ex: Piscina Aquecida, Academia, Spa, Portaria 24h" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2">
           </div>
+        </div>
+
+        <!-- Radar de Entorno & Conveniências (POIs do Bairro com IA) -->
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block font-bold text-slate-700 uppercase">Radar de Entorno &amp; Conveniências (POIs do Bairro)</label>
+            <button type="button" id="btn-gerar-pois-ia" class="bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold px-2.5 py-1 rounded-lg text-[10px] transition flex items-center gap-1 shadow-sm">
+              <span>📍 Radar IA de Bairro</span>
+            </button>
+          </div>
+          <textarea id="input-imob-pois" rows="3" placeholder="Cole pontos de conveniência ou clique em 'Radar IA de Bairro' para preencher automaticamente com distâncias reais..." class="w-full bg-slate-50 border border-slate-300 rounded-lg p-2.5 font-mono text-[11px]"></textarea>
+          <span class="text-[10px] text-slate-400 block mt-1">📍 <strong>Inteligência Geográfica:</strong> A Sofia IA consulta estas informações quando o cliente pergunta <em>"O que tem perto?"</em> ou <em>"Tem escola ou parque perto?"</em> no WhatsApp e no site.</span>
         </div>
 
         <!-- Descrição -->
@@ -3033,7 +3079,7 @@
         <div class="p-3 bg-amber-50/80 border border-amber-200 rounded-2xl text-[11px] text-amber-900 leading-relaxed">
           <p class="font-bold mb-1">⚖️ DECLARAÇÃO DE RECONHECIMENTO DE INTERMEDIAÇÃO:</p>
           <p>
-            O(A) VISITANTE acima qualificado(a) declara que visitou o imóvel indicado sob assessoria exclusiva da imobiliária <strong>RICO RICARDO IMÓVEIS (CRECI 038613-J)</strong>. O(A) visitante compromete-se a não negociar diretamente com o proprietário sem a interveniência desta imobiliária, reconhecendo o direito à comissão devida nos termos dos <strong>artigos 722 a 729 da Lei Federal 10.406/2002 (Código Civil Brasileiro)</strong>.
+            O(A) VISITANTE acima qualificado(a) declara que visitou o imóvel indicado sob assessoria exclusiva da imobiliária <strong>IMOBILIÁRIA MODELO (CRECI 00000-J)</strong>. O(A) visitante compromete-se a não negociar diretamente com o proprietário sem a interveniência desta imobiliária, reconhecendo o direito à comissão devida nos termos dos <strong>artigos 722 a 729 da Lei Federal 10.406/2002 (Código Civil Brasileiro)</strong>.
           </p>
         </div>
 
@@ -3747,51 +3793,57 @@
   </div>
 
   <!-- ========================================================================= -->
-  <!-- TELA DE BLOQUEIO DE SINAL DE ACESSO (QUANDO LICENÇA ESTÁ CORTADA)         -->
+  <!-- TELA DE BLOQUEIO DE SINAL DE ACESSO (QUANDO A DEGUSTAÇÃO DE 4 DIAS EXPIRA) -->
   <!-- ========================================================================= -->
   <div id="tela-bloqueio-sinal" class="hidden fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 text-center space-y-5 shadow-2xl border border-rose-200">
       <div>
-        <div class="w-16 h-16 rounded-3xl bg-rose-50 text-rose-600 inline-flex items-center justify-center text-3xl font-black mb-3 shadow-sm border border-rose-100">
-          🔒
+        <div class="w-16 h-16 rounded-3xl bg-amber-50 text-amber-600 inline-flex items-center justify-center text-3xl font-black mb-3 shadow-sm border border-amber-200">
+          ⏱️
         </div>
-        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Sinal Temporariamente Suspenso</h3>
-        <p class="text-xs text-slate-500 mt-1 leading-relaxed">
-          O período de carência da licença do seu CRM expirou. Para reestabelecer o acesso imediato de toda a equipe e corretores, realize a quitação da mensalidade.
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight">Degustação de 4 Dias Concluída!</h3>
+        <p class="text-xs text-slate-600 mt-1 leading-relaxed">
+          O período de demonstração gratuita de <strong>4 dias</strong> do NEXO CRM expirou. Gostou do desempenho da Sofia IA, da roleta de corretores e do simulador?
         </p>
       </div>
 
-      <!-- Resumo da Pendência -->
-      <div class="bg-rose-50 rounded-2xl p-4 border border-rose-200 text-left space-y-1.5 text-xs text-rose-950">
-        <div class="flex items-center justify-between">
-          <span class="font-semibold text-rose-700">Chave PIX:</span>
-          <span class="font-mono font-bold">ricardo.nexo@pix.com.br</span>
+      <!-- Proposta de Contratação & Ativação Definitiva -->
+      <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200 text-left space-y-2 text-xs text-blue-950">
+        <div class="font-bold text-blue-900 flex items-center gap-1.5 text-xs">
+          <span>🏢</span> <span>Ative o NEXO CRM Oficial da sua Imobiliária:</span>
         </div>
-        <div class="flex items-center justify-between">
-          <span class="font-semibold text-rose-700">Beneficiário:</span>
-          <span class="font-bold">Ricardo — NEXO CRM</span>
+        <ul class="text-[11px] text-blue-800 space-y-1 list-disc list-inside">
+          <li>Domínio próprio (www.suaimobiliaria.com.br)</li>
+          <li>Corretores ilimitados e carteiras blindadas</li>
+          <li>Sofia IA no WhatsApp oficial da sua equipe</li>
+          <li>Migração e portabilidade completa de imóveis</li>
+        </ul>
+        <div class="pt-2 border-t border-blue-200/80 flex items-center justify-between text-xs">
+          <span class="font-semibold text-slate-700">Adesão &amp; Setup:</span>
+          <span class="font-black text-blue-900">R$ 600,00</span>
         </div>
-        <div class="flex items-center justify-between pt-1 border-t border-rose-200">
-          <span class="font-semibold text-rose-700">Valor para Desbloqueio:</span>
-          <span class="font-black text-sm text-rose-900" id="tela-bloqueio-valor">R$ 150,00</span>
+        <div class="flex items-center justify-between text-xs">
+          <span class="font-semibold text-slate-700">Mensalidade:</span>
+          <span class="font-black text-blue-900">A partir de R$ 150,00/mês</span>
         </div>
       </div>
 
-      <!-- Botões de Ação para Regularização -->
-      <div class="space-y-2 pt-2">
-        <button onclick="copiarPixBloqueio()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 shadow">
-          <span>📋</span> <span id="btn-copiar-pix-bloqueio-texto">Copiar Código PIX</span>
-        </button>
-        <a id="link-whatsapp-desbloqueio" href="https://wa.me/5511914879393?text=Ol%C3%A1%20Ricardo,%20fiz%20o%20pagamento%20do%20PIX%20do%20CRM%20e%20gostaria%20da%20libera%C3%A7%C3%A3o%20do%20sinal" target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 rounded-xl transition flex items-center justify-center gap-2 shadow">
-          <span>📲</span> <span>Enviar Comprovante no WhatsApp</span>
+      <!-- Botões de Ação para Contratação -->
+      <div class="space-y-2 pt-1">
+        <a id="link-whatsapp-desbloqueio" href="https://wa.me/5511914879393?text=Ol%C3%A1%20Ricardo!%20Meu%20teste%20de%204%20dias%20do%20NEXO%20CRM%20expirou%20e%20gostaria%20de%20contratar%20a%20implanta%C3%A7%C3%A3o%20oficial%20para%20minha%20imobili%C3%A1ria." target="_blank" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30">
+          <span>📲</span> <span>Contratar Licença Oficial via WhatsApp</span>
         </a>
+        <button onclick="copiarPixBloqueio()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2.5 rounded-xl transition flex items-center justify-center gap-2 shadow">
+          <span>📋</span> <span id="btn-copiar-pix-bloqueio-texto">Copiar Chave PIX (ricardo.nexo@pix.com.br)</span>
+        </button>
       </div>
 
-      <!-- Acesso de Emergência do Super Admin (Ricardo & Severino) -->
-      <div class="pt-3 border-t border-slate-100">
-        <button onclick="desbloquearSinalMasterEmergencia()" class="text-[11px] font-bold text-slate-400 hover:text-blue-600 transition underline">
-          👑 Liberação de Emergência Master (Super Admin)
+      <!-- Acesso de Emergência / Reset do Super Admin Ricardo -->
+      <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px]">
+        <button onclick="desbloquearSinalMasterEmergencia()" class="font-bold text-slate-400 hover:text-blue-600 transition underline">
+          👑 Modo Apresentação (Ricardo Super Admin)
         </button>
+        <span class="text-slate-400 text-[10px]">v2.6 Demonstração</span>
       </div>
     </div>
   </div>
@@ -3834,6 +3886,151 @@
       <div class="pt-2 text-[10px] text-slate-400 font-mono">
         💡 Ao favoritar, a Sofia IA notifica o corretor responsável no WhatsApp na hora.
       </div>
+  <!-- ===================================================================== -->
+  <!-- MODAL: SIMULADOR DE WHATSAPP 24H DA SOFIA IA (SHOWCASE SMARTPHONE)    -->
+  <!-- ===================================================================== -->
+  <div id="modal-simulador-whatsapp" class="modal-overlay">
+    <div class="modal-content bg-slate-950 text-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl my-6 border border-slate-800 p-0 relative">
+      
+      <!-- Topo com Botão Fechar -->
+      <div class="p-3.5 bg-slate-900/90 border-b border-white/10 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-base">📱</span>
+          <span class="text-xs font-bold text-white uppercase tracking-wider">Simulador de WhatsApp em Tempo Real</span>
+          <span class="text-[9px] font-mono font-bold bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">Nativo 24/7</span>
+        </div>
+        <button type="button" onclick="fecharModalSimuladorWhatsapp()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 text-xs cursor-pointer">
+          ✕
+        </button>
+      </div>
+
+      <!-- Mockup do Smartphone / WhatsApp -->
+      <div class="p-4 sm:p-5 bg-gradient-to-b from-slate-950 to-slate-900">
+        
+        <!-- Aparelho Smartphone -->
+        <div class="max-w-[360px] mx-auto bg-[#0b141a] rounded-[36px] border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col h-[560px] relative">
+          
+          <!-- Notch / Dynamic Island -->
+          <div class="bg-black text-[11px] text-slate-400 pt-2 pb-1.5 px-6 flex items-center justify-between select-none font-mono">
+            <span>01:45</span>
+            <div class="w-20 h-4 bg-slate-950 rounded-full border border-slate-800 flex items-center justify-center">
+              <span class="w-2 h-2 rounded-full bg-slate-800"></span>
+            </div>
+            <div class="flex items-center gap-1">
+              <span>5G</span>
+              <span class="text-emerald-400">100%</span>
+            </div>
+          </div>
+
+          <!-- Topo do WhatsApp -->
+          <div class="bg-[#1f2c34] p-2.5 flex items-center justify-between border-b border-white/5 select-none">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 text-white font-bold flex items-center justify-center text-xs shadow">
+                S
+              </div>
+              <div class="leading-tight">
+                <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                  <span>Sofia IA</span>
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                </h4>
+                <p class="text-[10px] text-emerald-400 font-medium">online agora • 01:45</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-slate-300 text-xs">
+              <span title="Vídeo">📹</span>
+              <span title="Ligação">📞</span>
+            </div>
+          </div>
+
+          <!-- Corpo de Mensagens (Wallpaper WhatsApp) -->
+          <div id="simulador-wa-mensagens" class="flex-1 overflow-y-auto p-3 space-y-2.5 text-xs bg-[#0b141a] font-sans" style="background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 0); background-size: 16px 16px;">
+            
+            <div class="text-center my-1">
+              <span class="text-[9px] font-mono text-slate-400 bg-[#182229] px-2.5 py-1 rounded-md">Hoje • Madrugada</span>
+            </div>
+
+            <!-- Msg 1: Lead -->
+            <div class="flex flex-col items-end">
+              <div class="bg-[#005c4b] text-slate-100 p-2.5 rounded-2xl rounded-tr-none max-w-[85%] leading-relaxed shadow-sm">
+                <p>Olá! Vi o anúncio da cobertura duplex no Bairro Jardim (CB-9021). Ela ainda está disponível?</p>
+                <div class="text-[9px] text-emerald-200 text-right mt-1 font-mono flex items-center justify-end gap-1">
+                  <span>01:45</span>
+                  <span class="text-cyan-300">✓✓</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Msg 2: Sofia IA -->
+            <div class="flex flex-col items-start">
+              <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed shadow-sm">
+                <p>Olá! Sim, está disponível! Sou a <strong>Sofia</strong>, consultora inteligente da Imobiliária Modelo 🏠✨</p>
+                <p class="mt-1">É uma cobertura com 360m², piscina privativa aquecida, 4 suítes e 5 vagas. Você gostaria de comprar ou alugar?</p>
+                <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">01:45</div>
+              </div>
+            </div>
+
+            <!-- Msg 3: Lead -->
+            <div class="flex flex-col items-end">
+              <div class="bg-[#005c4b] text-slate-100 p-2.5 rounded-2xl rounded-tr-none max-w-[85%] leading-relaxed shadow-sm">
+                <p>Quero comprar. Sabe me dizer o que tem perto de conveniência lá?</p>
+                <div class="text-[9px] text-emerald-200 text-right mt-1 font-mono flex items-center justify-end gap-1">
+                  <span>01:46</span>
+                  <span class="text-cyan-300">✓✓</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Msg 4: Sofia IA (Com Radar de Entorno!) -->
+            <div class="flex flex-col items-start">
+              <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed shadow-sm border-l-2 border-emerald-400">
+                <p class="font-bold text-emerald-400 text-[11px] mb-1">📍 Radar do Bairro Jardim:</p>
+                <p class="text-[11px] leading-relaxed">A localização conta com excelente infraestrutura a pé:</p>
+                <ul class="mt-1.5 space-y-1 text-[11px]">
+                  <li>🛒 <strong>Pão de Açúcar</strong> a 250m (3 min a pé)</li>
+                  <li>🎓 <strong>Colégio Singular</strong> a 400m (5 min a pé)</li>
+                  <li>🌳 <strong>Parque Celso Daniel</strong> a 850m</li>
+                  <li>🏥 <strong>Hospital Brasil</strong> a 1.1km (4 min)</li>
+                </ul>
+                <p class="mt-1.5 text-[11px]">É uma rua super nobre e arborizada! Que tal agendarmos uma visita esta semana? Temos horários livres amanhã às 14h ou 16h30.</p>
+                <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">01:46</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Sugestões de Respostas Rápidas Interativas -->
+          <div class="p-2 bg-[#1f2c34] border-t border-white/5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button type="button" onclick="enviarMensagemSimuladorWa('Quero agendar amanhã às 14h!')" class="px-2.5 py-1 rounded-full bg-[#111b21] hover:bg-[#2a3942] text-emerald-300 text-[10px] font-semibold whitespace-nowrap border border-emerald-500/30 transition cursor-pointer">
+              📅 Agendar amanhã às 14h
+            </button>
+            <button type="button" onclick="enviarMensagemSimuladorWa('Qual o valor do condomínio e IPTU?')" class="px-2.5 py-1 rounded-full bg-[#111b21] hover:bg-[#2a3942] text-slate-300 text-[10px] font-semibold whitespace-nowrap border border-white/10 transition cursor-pointer">
+              💰 Valor do condomínio
+            </button>
+            <button type="button" onclick="enviarMensagemSimuladorWa('Aceita financiamento bancário Caixa?')" class="px-2.5 py-1 rounded-full bg-[#111b21] hover:bg-[#2a3942] text-slate-300 text-[10px] font-semibold whitespace-nowrap border border-white/10 transition cursor-pointer">
+              🏦 Aceita financiamento?
+            </button>
+          </div>
+
+          <!-- Input Inferior do WhatsApp -->
+          <div class="p-2 bg-[#1f2c34] flex items-center gap-2">
+            <input type="text" id="input-wa-simulador" placeholder="Mensagem..." class="flex-1 bg-[#2a3942] text-white text-xs rounded-full px-3.5 py-2 focus:outline-none placeholder-slate-400" onkeydown="if(event.key==='Enter'){event.preventDefault();enviarMensagemSimuladorWa(this.value);}">
+            <button type="button" onclick="enviarMensagemSimuladorWa(document.getElementById('input-wa-simulador').value)" class="w-8 h-8 rounded-full bg-[#00a884] hover:bg-[#008f72] text-white flex items-center justify-center text-xs shadow transition shrink-0 cursor-pointer">
+              ➤
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Banner Comparativo de Custo Comercial -->
+        <div class="mt-4 p-3 bg-emerald-950/60 border border-emerald-500/40 rounded-2xl text-center">
+          <p class="text-xs text-emerald-300 font-bold mb-0.5">💰 Vantagem Competitiva Exclusiva NEXO:</p>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Enquanto outros sistemas cobram <strong>R$ 3,50 por conversa de IA</strong> no WhatsApp, o NEXO CRM opera em arquitetura própria via n8n e IA sem cobrança abusiva por atendimento!
+          </p>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
