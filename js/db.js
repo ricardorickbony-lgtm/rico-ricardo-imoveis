@@ -2119,201 +2119,251 @@ ${(imovel.tags || []).map(t => `#${t.replace(/\s+/g, '')}`).join(' ')}
     } catch (e) {}
   },
 
+  registrarConversaSofia(pergunta, resposta) {
+    try {
+      const STORAGE_CONVERSAS_KEY = 'nexo_sofia_conversas_log_v1';
+      const raw = localStorage.getItem(STORAGE_CONVERSAS_KEY);
+      const lista = raw ? JSON.parse(raw) : [];
+      const item = {
+        id: 'msg-' + Date.now(),
+        dataHora: new Date().toLocaleString('pt-BR'),
+        pergunta: String(pergunta || '').slice(0, 500),
+        resposta: typeof resposta === 'string' ? resposta.slice(0, 500) : '',
+        origem: 'Simulador / App'
+      };
+      lista.unshift(item);
+      localStorage.setItem(STORAGE_CONVERSAS_KEY, JSON.stringify(lista.slice(0, 50)));
+    } catch (e) {}
+  },
+
+  getConversasSofiaLog() {
+    try {
+      const raw = localStorage.getItem('nexo_sofia_conversas_log_v1');
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
   processarMensagemSofiaIA(mensagemUsuario, imovelContexto = null) {
-    const texto = (mensagemUsuario || '').toLowerCase().trim();
-    const config = this.getConfig();
-    const imoveis = this.getImoveis().filter(im => im.status === 'disponivel');
-
-    // 1. Detecta perguntas sobre entorno / conveniências / o que tem perto
-    const querSaberEntorno = texto.includes('o que tem perto') ||
-      texto.includes('tem perto') ||
-      texto.includes('perto de') ||
-      texto.includes('distancia') ||
-      texto.includes('distância') ||
-      texto.includes('escola') ||
-      texto.includes('colégio') ||
-      texto.includes('colegio') ||
-      texto.includes('mercado') ||
-      texto.includes('supermercado') ||
-      texto.includes('padaria') ||
-      texto.includes('praia') ||
-      texto.includes('parque') ||
-      texto.includes('hospital') ||
-      texto.includes('farmacia') ||
-      texto.includes('farmácia') ||
-      texto.includes('metro') ||
-      texto.includes('metrô') ||
-      texto.includes('cptm') ||
-      texto.includes('comércio') ||
-      texto.includes('comercio') ||
-      texto.includes('região') ||
-      texto.includes('regiao') ||
-      texto.includes('conveniencia') ||
-      texto.includes('conveniência') ||
-      texto.includes('bairro é bom') ||
-      texto.includes('bom pra família') ||
-      texto.includes('bom para familia');
-
-    // 2. Detecta intenção de agendamento de visita ou escolha de horário
-    const querAgendarVisita = texto.includes('agendar') ||
-      texto.includes('visita') ||
-      texto.includes('visitar') ||
-      texto.includes('marcar') ||
-      texto.includes('conhecer o imóvel') ||
-      texto.includes('conhecer o imovel') ||
-      texto.includes('amanhã') ||
-      texto.includes('amanha') ||
-      texto.includes('horário') ||
-      texto.includes('horario') ||
-      texto.includes('sábado') ||
-      texto.includes('sabado') ||
-      texto.includes('às 14') ||
-      texto.includes('as 14') ||
-      texto.includes('às 15') ||
-      texto.includes('as 15') ||
-      texto.includes('às 16') ||
-      texto.includes('as 16') ||
-      texto.includes('às 10') ||
-      texto.includes('as 10');
-
-    // Procura se citou algum código de imóvel específico (ex: CS-5520, CB-9021, etc.)
-    let imovelFoco = imovelContexto;
-    if (!imovelFoco) {
-      for (const im of imoveis) {
-        if (texto.includes(im.codigo.toLowerCase())) {
-          imovelFoco = im;
-          break;
-        }
-      }
-    }
-    if (!imovelFoco && imoveis.length > 0) {
-      for (const im of imoveis) {
-        if (texto.includes(im.bairro.toLowerCase())) {
-          imovelFoco = im;
-          break;
-        }
-      }
-    }
-    if (!imovelFoco) {
-      imovelFoco = imoveis[0];
-    }
-
-    // Fluxo A: Resposta de Entorno / Conveniências (Radar de Bairro)
-    if (querSaberEntorno && imovelFoco) {
-      const pontos = (imovelFoco.pontosDeInteresse && imovelFoco.pontosDeInteresse.length > 0)
-        ? imovelFoco.pontosDeInteresse
-        : this.gerarPontosDeInteressePadrao(imovelFoco.bairro, imovelFoco.cidade, imovelFoco.tipo);
-
-      const listaFormatada = pontos.map(p => `• ${p.icone || '📍'} ${p.nome} (${p.distancia} • ${p.tempo})`).join('\n');
-      const respostaTexto = `Com certeza! A localização do imóvel ${imovelFoco.codigo} (${imovelFoco.bairro}) conta com uma infraestrutura completa a pé e em poucos minutos de deslocamento:\n\n${listaFormatada}\n\nÉ uma região muito valorizada, segura e com excelente qualidade de vida para toda a família! Gostaria de agendar uma visita presencial para conhecer o imóvel e o bairro?`;
-      const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(`Olá! Estive conversando com a Sofia IA sobre a localização e conveniências do imóvel ${imovelFoco.codigo} - ${imovelFoco.titulo} (${imovelFoco.bairro}). Gostaria de agendar uma visita presencial.`)}`;
-
-      return {
-        respostaTexto,
-        recomendacoes: [imovelFoco],
-        waLink
-      };
-    }
-
-    // Fluxo B: Confirmação de Pré-Agendamento de Visita
-    if (querAgendarVisita) {
-      const respostaTexto = `Perfeito! Sua visita foi pré-agendada com sucesso! 📅✨\n\nJá notifiquei o corretor especialista responsável com a sua preferência de horário e registrei a oportunidade no nosso funil de atendimento. Para receber a confirmação com o link de localização exato no seu GPS, clique no botão abaixo para falar diretamente no WhatsApp do corretor!`;
-      const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(`Olá! Estive falando com a Sofia IA no site e gostaria de confirmar o agendamento da visita para o imóvel ${imovelFoco ? imovelFoco.codigo + ' - ' + imovelFoco.titulo : 'que consultei'}. Qual o melhor horário?`)}`;
-
-      return {
-        respostaTexto,
-        recomendacoes: imovelFoco ? [imovelFoco] : [],
-        waLink
-      };
-    }
-
-    // Fluxo C: Identifica intenção de locação ou compra
-    const querAlugar = texto.includes('alug') || texto.includes('locaç') || texto.includes('locar');
-    const querComprar = texto.includes('compr') || texto.includes('venda') || texto.includes('adquirir');
-    
-    // Identifica tipologia
-    let tipoIdentificado = '';
-    if (texto.includes('cobertura')) tipoIdentificado = 'cobertura';
-    else if (texto.includes('apartamento') || texto.includes('apto')) tipoIdentificado = 'apartamento';
-    else if (texto.includes('casa') || texto.includes('sobrado')) tipoIdentificado = 'casa';
-    else if (texto.includes('condominio')) tipoIdentificado = 'condominio';
-    else if (texto.includes('planta') || texto.includes('lançamento')) tipoIdentificado = 'lancamento';
-    else if (texto.includes('comercial') || texto.includes('laje') || texto.includes('sala')) tipoIdentificado = 'comercial';
-
-    // Identifica bairro dinamicamente com suporte a sinônimos e radicais (ex: "Marajó" para "Parque Marajoara")
-    const normalizar = (s) => (s || '')
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^a-z0-9\s]/g, '')
-      .trim();
-
-    const textoNorm = normalizar(texto);
-    let bairroIdentificado = '';
-
-    const todosBairros = [...new Set(imoveis.map(im => im.bairro).filter(Boolean))];
-    for (const b of todosBairros) {
-      const bNorm = normalizar(b);
-      if (textoNorm.includes(bNorm)) {
-        bairroIdentificado = b;
-        break;
-      }
-      const tokens = bNorm.split(/\s+/).filter(w => w.length >= 4 && !['bairro', 'vila', 'parque', 'jardim', 'santo', 'andre'].includes(w));
-      const matchToken = tokens.some(tok => {
-        return textoNorm.includes(tok) || 
-               (tok.length >= 6 && textoNorm.includes(tok.slice(0, 5))) ||
-               (textoNorm.includes('marajo') && tok.includes('marajo'));
+    try {
+      const texto = (mensagemUsuario || '').toLowerCase().trim();
+      const config = this.getConfig() || {};
+      const todosImoveis = this.getImoveis() || [];
+      const imoveis = todosImoveis.filter(im => {
+        const st = (im.status || 'disponivel').toLowerCase();
+        return st.includes('disponiv') || st === 'ativo';
       });
-      if (matchToken) {
-        bairroIdentificado = b;
-        break;
+
+      // 0. Detecção de Saudações e Quem é Você
+      const ehSaudacao = /^(oi|ol[aá]|bom dia|boa tarde|boa noite|tudo bem|opa|e a[ií]|fala|hey|hello)\b/i.test(texto) ||
+                         texto === 'oi' || texto === 'olá' || texto === 'ola' || texto === 'bom dia' || texto === 'boa tarde' || texto === 'boa noite';
+      const ehQuemEVoce = texto.includes('quem e voce') || texto.includes('quem é você') || texto.includes('como funciona') || texto.includes('o que você faz') || texto.includes('o que voce faz');
+
+      if (ehSaudacao || ehQuemEVoce) {
+        const respostaTexto = `Olá! Sou a Sofia, consultora virtual inteligente da ${config.nome || 'Imobiliária Modelo'}. ✨\n\nEstou disponível 24 horas por dia para:\n• Apresentar os melhores imóveis para compra ou locação;\n• Analisar o que tem por perto nos bairros (escolas, metrô, comércios);\n• Agendar visitas presenciais diretamente com nossos corretores.\n\nComo posso te ajudar hoje? Você procura imóveis para Comprar ou Alugar?`;
+        const waLink = `https://wa.me/${config.whatsapp || '5511970558412'}?text=${encodeURIComponent(`Olá Sofia! Estive conversando com você na demonstração e gostaria de falar com um corretor humano.`)}`;
+        
+        this.registrarConversaSofia(mensagemUsuario, respostaTexto);
+        return { respostaTexto, recomendacoes: imoveis.slice(0, 2), waLink };
       }
-    }
 
-    // Filtra imóveis compatíveis
-    let sugestoes = imoveis;
-    if (querAlugar) sugestoes = sugestoes.filter(im => im.finalidade === 'aluguel');
-    else if (querComprar) sugestoes = sugestoes.filter(im => im.finalidade === 'venda');
+      // 1. Detecta perguntas sobre entorno / conveniências / o que tem perto
+      const querSaberEntorno = texto.includes('o que tem perto') ||
+        texto.includes('tem perto') ||
+        texto.includes('perto de') ||
+        texto.includes('distancia') ||
+        texto.includes('distância') ||
+        texto.includes('escola') ||
+        texto.includes('colégio') ||
+        texto.includes('colegio') ||
+        texto.includes('mercado') ||
+        texto.includes('supermercado') ||
+        texto.includes('padaria') ||
+        texto.includes('praia') ||
+        texto.includes('parque') ||
+        texto.includes('hospital') ||
+        texto.includes('farmacia') ||
+        texto.includes('farmácia') ||
+        texto.includes('metro') ||
+        texto.includes('metrô') ||
+        texto.includes('cptm') ||
+        texto.includes('comércio') ||
+        texto.includes('comercio') ||
+        texto.includes('região') ||
+        texto.includes('regiao') ||
+        texto.includes('conveniencia') ||
+        texto.includes('conveniência') ||
+        texto.includes('bairro é bom') ||
+        texto.includes('bom pra família') ||
+        texto.includes('bom para familia');
 
-    if (tipoIdentificado) {
-      const filtradosPorTipo = sugestoes.filter(im => im.tipo.toLowerCase().includes(tipoIdentificado));
-      if (filtradosPorTipo.length > 0) sugestoes = filtradosPorTipo;
-    }
+      // 2. Detecta intenção de agendamento de visita ou escolha de horário
+      const querAgendarVisita = texto.includes('agendar') ||
+        texto.includes('visita') ||
+        texto.includes('visitar') ||
+        texto.includes('marcar') ||
+        texto.includes('conhecer o imóvel') ||
+        texto.includes('conhecer o imovel') ||
+        texto.includes('amanhã') ||
+        texto.includes('amanha') ||
+        texto.includes('horário') ||
+        texto.includes('horario') ||
+        texto.includes('sábado') ||
+        texto.includes('sabado') ||
+        texto.includes('às 14') ||
+        texto.includes('as 14') ||
+        texto.includes('às 15') ||
+        texto.includes('as 15') ||
+        texto.includes('às 16') ||
+        texto.includes('as 16') ||
+        texto.includes('às 10') ||
+        texto.includes('as 10');
 
-    if (bairroIdentificado) {
-      const filtradosPorBairro = sugestoes.filter(im => im.bairro.toLowerCase().includes(bairroIdentificado.toLowerCase()));
-      if (filtradosPorBairro.length > 0) {
-        sugestoes = filtradosPorBairro;
-      } else {
-        const doBairro = imoveis.filter(im => im.bairro.toLowerCase().includes(bairroIdentificado.toLowerCase()));
-        if (doBairro.length > 0) {
-          sugestoes = doBairro;
+      // Procura se citou algum código de imóvel específico (ex: CS-5520, CB-9021, etc.)
+      let imovelFoco = imovelContexto;
+      if (!imovelFoco) {
+        for (const im of imoveis) {
+          if (im.codigo && texto.includes(im.codigo.toLowerCase())) {
+            imovelFoco = im;
+            break;
+          }
         }
       }
-    }
-
-    // Pega as melhores 2 ou 3 opções
-    const recomendacoes = sugestoes.slice(0, 3);
-
-    let respostaTexto = '';
-    if (recomendacoes.length > 0) {
-      const nomes = recomendacoes.map(im => `• ${im.codigo} - ${im.titulo} (${im.bairro})`).join('\n');
-      if (bairroIdentificado && recomendacoes.some(im => im.bairro.toLowerCase().includes(bairroIdentificado.toLowerCase()))) {
-        respostaTexto = `Com certeza! Encontrei no nosso acervo oportunidades incríveis com excelente localização na região de ${bairroIdentificado}:\n\n${nomes}\n\nVocê gostaria de ver as fotos, saber o que tem por perto no bairro ou já agendar uma visita presencial?`;
-      } else {
-        respostaTexto = `Com certeza! Encontrei opções incríveis no nosso acervo que combinam com você:\n\n${nomes}\n\nVocê gostaria de ver as fotos, saber o que tem por perto na região ou já agendar uma visita com nosso corretor de plantão no WhatsApp?`;
+      if (!imovelFoco && imoveis.length > 0) {
+        for (const im of imoveis) {
+          if (im.bairro && texto.includes(im.bairro.toLowerCase())) {
+            imovelFoco = im;
+            break;
+          }
+        }
       }
-    } else {
-      respostaTexto = `Entendi perfeitamente sua busca! Temos novas oportunidades exclusivas entrando em carteira esta semana. Posso conectá-lo(a) agora mesmo com nosso especialista no WhatsApp para apresentar opções sob medida para você?`;
+      if (!imovelFoco && imoveis.length > 0) {
+        imovelFoco = imoveis[0];
+      }
+
+      // Fluxo A: Resposta de Entorno / Conveniências (Radar de Bairro)
+      if (querSaberEntorno && imovelFoco) {
+        const pontos = (imovelFoco.pontosDeInteresse && imovelFoco.pontosDeInteresse.length > 0)
+          ? imovelFoco.pontosDeInteresse
+          : this.gerarPontosDeInteressePadrao(imovelFoco.bairro || 'Região Central', imovelFoco.cidade || 'Santo André', imovelFoco.tipo || 'apartamento');
+
+        const listaFormatada = pontos.map(p => `• ${p.icone || '📍'} ${p.nome} (${p.distancia} • ${p.tempo})`).join('\n');
+        const respostaTexto = `Com certeza! A localização do imóvel ${imovelFoco.codigo || 'selecionado'} (${imovelFoco.bairro || 'excelente bairro'}) conta com uma infraestrutura completa a pé e em poucos minutos de deslocamento:\n\n${listaFormatada}\n\nÉ uma região muito valorizada, segura e com excelente qualidade de vida para toda a família! Gostaria de agendar uma visita presencial para conhecer o imóvel e a vizinhança?`;
+        const waLink = `https://wa.me/${config.whatsapp || '5511970558412'}?text=${encodeURIComponent(`Olá! Estive conversando com a Sofia IA sobre a localização e conveniências do imóvel ${imovelFoco.codigo || ''} - ${imovelFoco.titulo || ''} (${imovelFoco.bairro || ''}). Gostaria de agendar uma visita presencial.`)}`;
+
+        this.registrarConversaSofia(mensagemUsuario, respostaTexto);
+        return { respostaTexto, recomendacoes: [imovelFoco], waLink };
+      }
+
+      // Fluxo B: Confirmação de Pré-Agendamento de Visita
+      if (querAgendarVisita) {
+        const respostaTexto = `Perfeito! Sua visita foi pré-agendada com sucesso! 📅✨\n\nJá notifiquei o corretor especialista responsável com a sua preferência de horário e registrei a oportunidade no nosso funil de atendimento. Para receber a confirmação com o link de localização exato no seu GPS, clique no botão abaixo para falar diretamente no WhatsApp do corretor!`;
+        const waLink = `https://wa.me/${config.whatsapp || '5511970558412'}?text=${encodeURIComponent(`Olá! Estive falando com a Sofia IA no site e gostaria de confirmar o agendamento da visita para o imóvel ${imovelFoco ? (imovelFoco.codigo + ' - ' + imovelFoco.titulo) : 'que consultei'}. Qual o melhor horário?`)}`;
+
+        this.registrarConversaSofia(mensagemUsuario, respostaTexto);
+        return { respostaTexto, recomendacoes: imovelFoco ? [imovelFoco] : [], waLink };
+      }
+
+      // Fluxo C: Identifica intenção de locação ou compra
+      const querAlugar = texto.includes('alug') || texto.includes('locaç') || texto.includes('locar');
+      const querComprar = texto.includes('compr') || texto.includes('venda') || texto.includes('adquirir');
+      
+      // Identifica tipologia
+      let tipoIdentificado = '';
+      if (texto.includes('cobertura')) tipoIdentificado = 'cobertura';
+      else if (texto.includes('apartamento') || texto.includes('apto')) tipoIdentificado = 'apartamento';
+      else if (texto.includes('casa') || texto.includes('sobrado')) tipoIdentificado = 'casa';
+      else if (texto.includes('condominio')) tipoIdentificado = 'condominio';
+      else if (texto.includes('planta') || texto.includes('lançamento') || texto.includes('lancamento')) tipoIdentificado = 'lancamento';
+      else if (texto.includes('comercial') || texto.includes('laje') || texto.includes('sala')) tipoIdentificado = 'comercial';
+
+      // Identifica bairro dinamicamente com suporte a sinônimos e radicais (ex: "Marajó" para "Parque Marajoara")
+      const normalizar = (s) => (s || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s]/g, '')
+        .trim();
+
+      const textoNorm = normalizar(texto);
+      let bairroIdentificado = '';
+
+      const todosBairros = [...new Set(imoveis.map(im => im.bairro).filter(Boolean))];
+      for (const b of todosBairros) {
+        const bNorm = normalizar(b);
+        if (textoNorm.includes(bNorm)) {
+          bairroIdentificado = b;
+          break;
+        }
+        const tokens = bNorm.split(/\s+/).filter(w => w.length >= 4 && !['bairro', 'vila', 'parque', 'jardim', 'santo', 'andre'].includes(w));
+        const matchToken = tokens.some(tok => {
+          return textoNorm.includes(tok) || 
+                 (tok.length >= 6 && textoNorm.includes(tok.slice(0, 5))) ||
+                 (textoNorm.includes('marajo') && tok.includes('marajo'));
+        });
+        if (matchToken) {
+          bairroIdentificado = b;
+          break;
+        }
+      }
+
+      // Filtra imóveis compatíveis
+      let sugestoes = [...imoveis];
+      if (querAlugar) sugestoes = sugestoes.filter(im => im.finalidade === 'aluguel');
+      else if (querComprar) sugestoes = sugestoes.filter(im => im.finalidade === 'venda');
+
+      if (tipoIdentificado) {
+        const filtradosPorTipo = sugestoes.filter(im => (im.tipo || '').toLowerCase().includes(tipoIdentificado));
+        if (filtradosPorTipo.length > 0) sugestoes = filtradosPorTipo;
+      }
+
+      if (bairroIdentificado) {
+        const filtradosPorBairro = sugestoes.filter(im => (im.bairro || '').toLowerCase().includes(bairroIdentificado.toLowerCase()));
+        if (filtradosPorBairro.length > 0) {
+          sugestoes = filtradosPorBairro;
+        } else {
+          // Se pediu um tipo que não tem no bairro exato, prioriza imóveis do bairro
+          const doBairro = imoveis.filter(im => (im.bairro || '').toLowerCase().includes(bairroIdentificado.toLowerCase()));
+          if (doBairro.length > 0) {
+            sugestoes = doBairro;
+          }
+        }
+      }
+
+      // Pega as melhores 2 ou 3 opções
+      const recomendacoes = sugestoes.slice(0, 3);
+
+      let respostaTexto = '';
+      if (recomendacoes.length > 0) {
+        const nomes = recomendacoes.map(im => `• ${im.codigo || 'IMO'} - ${im.titulo || 'Imóvel'} (${im.bairro || 'Excelente Região'})`).join('\n');
+        if (bairroIdentificado && recomendacoes.some(im => (im.bairro || '').toLowerCase().includes(bairroIdentificado.toLowerCase()))) {
+          respostaTexto = `Com certeza! Encontrei no nosso acervo oportunidades incríveis com excelente localização na região de ${bairroIdentificado}:\n\n${nomes}\n\nVocê gostaria de ver as fotos, saber o que tem por perto no bairro ou já agendar uma visita com nosso especialista?`;
+        } else {
+          respostaTexto = `Com certeza! Encontrei opções incríveis no nosso acervo que combinam com o que você procura:\n\n${nomes}\n\nVocê gostaria de ver as fotos, saber sobre opções de financiamento ou já agendar uma visita com nosso corretor de plantão no WhatsApp?`;
+        }
+      } else {
+        respostaTexto = `Entendi perfeitamente sua busca por "${mensagemUsuario}"! Temos novas oportunidades exclusivas entrando em carteira esta semana. Posso conectá-lo(a) agora mesmo com nosso especialista no WhatsApp para apresentar opções sob medida para você?`;
+      }
+
+      const waLink = `https://wa.me/${config.whatsapp || '5511970558412'}?text=${encodeURIComponent(`Olá! Estive conversando com a Sofia IA sobre: "${mensagemUsuario}". Gostaria de saber mais informações e agendar uma apresentação.`)}`;
+
+      this.registrarConversaSofia(mensagemUsuario, respostaTexto);
+      return {
+        respostaTexto,
+        recomendacoes,
+        waLink
+      };
+    } catch (errFatal) {
+      console.warn('[Sofia IA] Recuperação defensiva de erro:', errFatal);
+      const cfg = this.getConfig() || {};
+      const fallbackTexto = `Olá! Entendi perfeitamente sua busca. Estou à disposição para te apresentar as melhores oportunidades da ${cfg.nome || 'nossa imobiliária'} ou agendar uma visita com um de nossos corretores de plantão. Como posso te ajudar agora?`;
+      return {
+        respostaTexto: fallbackTexto,
+        recomendacoes: (this.getImoveis() || []).slice(0, 2),
+        waLink: `https://wa.me/${cfg.whatsapp || '5511970558412'}?text=${encodeURIComponent('Olá! Gostaria de falar com um corretor.')}`
+      };
     }
-
-    const waLink = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(`Olá! Estive conversando com a Sofia IA no site sobre: "${mensagemUsuario}". Gostaria de agendar uma visita presencial para conhecer os imóveis.`)}`;
-
-    return {
-      respostaTexto,
-      recomendacoes,
-      waLink
-    };
   },
 
   // Autenticação Profissional do SaaS (Email + Senha + Primeiro Acesso)

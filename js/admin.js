@@ -23,6 +23,20 @@ let sessaoAutenticada = false;
 let imovelEmEdicaoId = null;
 
 /**
+ * Utilitário: Escapa HTML para prevenir XSS e garantir integridade na renderização
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+window.escapeHtml = escapeHtml;
+
+/**
  * Utilitário: Sanitiza strings ou números monetários (trata '1.500.000', '2500,50', 'R$ 3.000')
  */
 function sanitizarNumero(valor) {
@@ -2959,34 +2973,44 @@ function configurarSofiaIA() {
 
     // Processa com Sofia IA
     setTimeout(() => {
-      const resposta = DB.processarMensagemSofiaIA(msg);
-      
-      let cardsHtml = '';
-      if (resposta.recomendacoes && resposta.recomendacoes.length > 0) {
-        cardsHtml = `
-          <div class="mt-2 space-y-1.5">
-            ${resposta.recomendacoes.map(im => `
-              <div class="p-2 bg-black/30 border border-white/10 rounded-xl flex items-center justify-between gap-2">
-                <div>
-                  <div class="font-bold text-white text-[11px]">${im.codigo} - ${im.titulo}</div>
-                  <div class="text-[10px] text-emerald-400 font-bold">R$ ${(im.preco || im.precoAluguel || 0).toLocaleString('pt-BR')} • ${im.bairro}</div>
+      try {
+        const resposta = DB.processarMensagemSofiaIA(msg);
+        
+        let cardsHtml = '';
+        if (resposta && resposta.recomendacoes && resposta.recomendacoes.length > 0) {
+          cardsHtml = `
+            <div class="mt-2 space-y-1.5">
+              ${resposta.recomendacoes.map(im => `
+                <div class="p-2 bg-black/30 border border-white/10 rounded-xl flex items-center justify-between gap-2">
+                  <div>
+                    <div class="font-bold text-white text-[11px]">${escapeHtml(im.codigo || 'IMO')} - ${escapeHtml(im.titulo || 'Imóvel')}</div>
+                    <div class="text-[10px] text-emerald-400 font-bold">R$ ${(im.preco || im.precoAluguel || 0).toLocaleString('pt-BR')} • ${escapeHtml(im.bairro || '')}</div>
+                  </div>
+                  <button type="button" onclick="simularAgendamentoSofiaAdmin('${escapeHtml(im.codigo || '')}', '${escapeHtml(im.titulo || '')}', '${escapeHtml(im.bairro || '')}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-lg transition shadow-sm cursor-pointer">
+                    📅 Agendar Visita
+                  </button>
                 </div>
-                <button type="button" onclick="simularAgendamentoSofiaAdmin('${im.codigo}', '${escapeHtml(im.titulo)}', '${escapeHtml(im.bairro)}')" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-lg transition shadow-sm cursor-pointer">
-                  📅 Agendar Visita
-                </button>
-              </div>
-            `).join('')}
+              `).join('')}
+            </div>
+          `;
+        }
+
+        chatCorpo.innerHTML += `
+          <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border-l-2 border-emerald-400">
+            <p class="whitespace-pre-line text-xs leading-relaxed">${escapeHtml(resposta ? resposta.respostaTexto : 'Olá! Estou à disposição.')}</p>
+            ${cardsHtml}
           </div>
         `;
+        chatCorpo.scrollTop = chatCorpo.scrollHeight;
+      } catch (errChat) {
+        console.warn('Alerta no chat simulador da Sofia:', errChat);
+        chatCorpo.innerHTML += `
+          <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border-l-2 border-emerald-400">
+            <p class="whitespace-pre-line text-xs leading-relaxed">Olá! Entendi perfeitamente sua pergunta. Como posso te auxiliar com os imóveis da nossa carteira ou agendamento de visita?</p>
+          </div>
+        `;
+        chatCorpo.scrollTop = chatCorpo.scrollHeight;
       }
-
-      chatCorpo.innerHTML += `
-        <div class="bg-white/10 text-slate-200 p-3 rounded-2xl rounded-tl-none max-w-[85%] leading-relaxed border-l-2 border-emerald-400">
-          <p class="whitespace-pre-line text-xs leading-relaxed">${escapeHtml(resposta.respostaTexto)}</p>
-          ${cardsHtml}
-        </div>
-      `;
-      chatCorpo.scrollTop = chatCorpo.scrollHeight;
     }, 350);
   });
 }
@@ -6271,20 +6295,35 @@ function enviarMensagemSimuladorWa(texto) {
   box.scrollTop = box.scrollHeight;
 
   setTimeout(() => {
-    document.getElementById('wa-typing-indicator')?.remove();
-    const resultado = DB.processarMensagemSofiaIA(txt);
+    try {
+      document.getElementById('wa-typing-indicator')?.remove();
+      const resultado = DB.processarMensagemSofiaIA(txt);
 
-    const divBot = document.createElement('div');
-    divBot.className = 'flex flex-col items-start';
+      const divBot = document.createElement('div');
+      divBot.className = 'flex flex-col items-start';
 
-    divBot.innerHTML = `
-      <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed shadow-sm border-l-2 border-emerald-400">
-        <p class="whitespace-pre-line text-[11px] leading-relaxed">${escapeHtml(resultado.respostaTexto)}</p>
-        <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">${hora}</div>
-      </div>
-    `;
-    box.appendChild(divBot);
-    box.scrollTop = box.scrollHeight;
+      divBot.innerHTML = `
+        <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed shadow-sm border-l-2 border-emerald-400">
+          <p class="whitespace-pre-line text-[11px] leading-relaxed">${escapeHtml(resultado ? resultado.respostaTexto : 'Olá! Estou à disposição para ajudar.')}</p>
+          <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">${hora}</div>
+        </div>
+      `;
+      box.appendChild(divBot);
+      box.scrollTop = box.scrollHeight;
+    } catch (errWa) {
+      console.warn('Erro simulador WA:', errWa);
+      document.getElementById('wa-typing-indicator')?.remove();
+      const divBot = document.createElement('div');
+      divBot.className = 'flex flex-col items-start';
+      divBot.innerHTML = `
+        <div class="bg-[#202c33] text-slate-100 p-2.5 rounded-2xl rounded-tl-none max-w-[88%] leading-relaxed shadow-sm border-l-2 border-emerald-400">
+          <p class="whitespace-pre-line text-[11px] leading-relaxed">Olá! Entendi perfeitamente sua busca. Gostaria de agendar uma visita presencial para conhecer as opções disponíveis?</p>
+          <div class="text-[9px] text-slate-400 text-right mt-1 font-mono">${hora}</div>
+        </div>
+      `;
+      box.appendChild(divBot);
+      box.scrollTop = box.scrollHeight;
+    }
   }, 450);
 }
 
