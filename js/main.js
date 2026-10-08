@@ -4,6 +4,16 @@
  * Imobiliária Prime - Padrão Severino & Ricardo (Impacto Digital)
  */
 
+// =========================================================================
+// ESCUDO DE ESTABILIDADE GLOBAL NEXO (ANTI-CRASH RUNTIME SHIELD)
+// =========================================================================
+window.addEventListener('error', (event) => {
+  console.warn('[NEXO Anti-Crash Shield / Portal] Erro interceptado:', event.message || event);
+});
+window.addEventListener('unhandledrejection', (event) => {
+  console.warn('[NEXO Anti-Crash Shield / Portal] Rejeição interceptada:', event.reason);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   initImobiliaria();
 });

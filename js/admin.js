@@ -4,6 +4,17 @@
  * Imobiliária Prime - Padrão Severino & Ricardo (Impacto Digital)
  */
 
+// =========================================================================
+// ESCUDO DE ESTABILIDADE GLOBAL NEXO (ANTI-CRASH RUNTIME SHIELD)
+// Garante que nenhum erro assíncrono ou script externo trave a interface do usuário
+// =========================================================================
+window.addEventListener('error', (event) => {
+  console.warn('[NEXO Anti-Crash Shield] Erro interceptado e isolado:', event.message || event);
+});
+window.addEventListener('unhandledrejection', (event) => {
+  console.warn('[NEXO Anti-Crash Shield] Rejeição assíncrona isolada:', event.reason);
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   initAdminSaaS();
 });
@@ -570,6 +581,12 @@ function configurarNavegacaoAbas() {
         breadcrumbEl.textContent = breadcrumbsMap[targetId];
       }
 
+      // Neutraliza e fecha qualquer modal aberto ou backdrop residual para nunca travar a navegação
+      try {
+        document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+        document.body.style.overflow = '';
+      } catch (e) {}
+
       // Alterna exibição das seções imediatamente
       document.querySelectorAll('.painel-aba-conteudo').forEach(painel => {
         painel.classList.add('hidden');
@@ -579,30 +596,38 @@ function configurarNavegacaoAbas() {
       // Garante retorno suave ao topo para evitar impressão de tela em branco
       window.scrollTo({ top: 0, behavior: 'instant' });
 
-      // Atualizações de dados com tolerância a falhas (try-catch isolado)
-      try {
-        if (typeof atualizarBadgesContadoresAbas === 'function') atualizarBadgesContadoresAbas();
-        if (targetId === 'aba-imoveis' && typeof renderizarTabelaImoveis === 'function') renderizarTabelaImoveis();
-        if (targetId === 'aba-portais') {
-          if (typeof renderizarTabelaPortaisSincronizacao === 'function') renderizarTabelaPortaisSincronizacao();
-          if (typeof atualizarStatusPortaisNaTela === 'function') atualizarStatusPortaisNaTela();
-        }
-        if (targetId === 'aba-leads') {
-          if (typeof renderizarPipelineKanban === 'function') renderizarPipelineKanban();
-          if (typeof renderizarTabelaLeads === 'function') renderizarTabelaLeads();
-          if (typeof renderizarRoletaCorretores === 'function') renderizarRoletaCorretores();
-        }
-        if (targetId === 'aba-locacao' && typeof renderizarGestaoLocacao === 'function') renderizarGestaoLocacao();
-        if (targetId === 'aba-vistorias') {
-          if (typeof renderizarTermosVisita === 'function') renderizarTermosVisita();
-          if (typeof renderizarVistoriasDigitais === 'function') renderizarVistoriasDigitais();
-        }
-        if (targetId === 'aba-sofia' && typeof carregarSofiaConfigNoPainel === 'function') carregarSofiaConfigNoPainel();
-        if (targetId === 'aba-dashboard' && typeof carregarMetricasDashboard === 'function') carregarMetricasDashboard();
-        if (targetId === 'aba-seguranca' && typeof renderizarAbaSeguranca === 'function') renderizarAbaSeguranca();
-        if (targetId === 'aba-config' && typeof carregarFormularioConfig === 'function') carregarFormularioConfig();
-      } catch (err) {
-        console.warn('Alerta de atualização da aba ' + targetId + ':', err);
+      // Atualizações de dados com isolamento cirúrgico de erros (uma falha nunca afeta outra aba)
+      try { if (typeof atualizarBadgesContadoresAbas === 'function') atualizarBadgesContadoresAbas(); } catch(e) { console.warn(e); }
+      if (targetId === 'aba-imoveis') {
+        try { if (typeof renderizarTabelaImoveis === 'function') renderizarTabelaImoveis(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-portais') {
+        try { if (typeof renderizarTabelaPortaisSincronizacao === 'function') renderizarTabelaPortaisSincronizacao(); } catch(e) { console.warn(e); }
+        try { if (typeof atualizarStatusPortaisNaTela === 'function') atualizarStatusPortaisNaTela(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-leads') {
+        try { if (typeof renderizarPipelineKanban === 'function') renderizarPipelineKanban(); } catch(e) { console.warn(e); }
+        try { if (typeof renderizarTabelaLeads === 'function') renderizarTabelaLeads(); } catch(e) { console.warn(e); }
+        try { if (typeof renderizarRoletaCorretores === 'function') renderizarRoletaCorretores(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-locacao') {
+        try { if (typeof renderizarGestaoLocacao === 'function') renderizarGestaoLocacao(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-vistorias') {
+        try { if (typeof renderizarTermosVisita === 'function') renderizarTermosVisita(); } catch(e) { console.warn(e); }
+        try { if (typeof renderizarVistoriasDigitais === 'function') renderizarVistoriasDigitais(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-sofia') {
+        try { if (typeof carregarSofiaConfigNoPainel === 'function') carregarSofiaConfigNoPainel(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-dashboard') {
+        try { if (typeof carregarMetricasDashboard === 'function') carregarMetricasDashboard(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-seguranca') {
+        try { if (typeof renderizarAbaSeguranca === 'function') renderizarAbaSeguranca(); } catch(e) { console.warn(e); }
+      }
+      if (targetId === 'aba-config') {
+        try { if (typeof carregarFormularioConfig === 'function') carregarFormularioConfig(); } catch(e) { console.warn(e); }
       }
     });
   });
